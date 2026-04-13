@@ -1,0 +1,163 @@
+<!-- <link rel="stylesheet" href="https://stopsopa.github.io/pages/js/popper/html-vanilla/popover.css" /> -->
+
+<textarea></textarea>
+
+<center-resizer>
+  <form>
+    <!-- Field 2 -->
+    <div class="gcp-css input-wrapper" id="email-wrapper">
+      <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+      <label for="email">User Email</label>
+      <div class="error">Enter a valid user email</div>
+      <div class="helper-text">Enter a valid GCP admin email</div>
+    </div>
+
+      <!-- options='[
+      {"key": null, "label" : "--empty--", "selected": false},
+      {"key": "1", "label": "Label 1", "selected": true}, 
+      {"key": "2", "label": "Label 2", "selected": false}
+      ]' -->
+    <select-component
+      options='[
+      {"key": "4", "label" : "Label 4", "selected": false},
+      {"key": "1", "label": "Label 1", "selected": true}, 
+      {"key": "2", "label": "Label 2", "selected": false}
+      ]'
+      selected="1,2"
+      onchange="console.log('Inline onchange attribute fired!', event); window.lastInlineEvent = event;"
+    ></select-component>
+  </form>
+</center-resizer>
+
+<hr />
+<div class="test-controls" style="display: flex; gap: 20px; padding: 20px; flex-wrap: wrap;">
+  <div>
+    <h4>Method: setOptions</h4>
+    <button id="m-opt-1">setOptions([])</button><br>
+    <button id="m-opt-2">setOptions([x, y])</button><br>
+    <button id="m-opt-3">setOptions([a, b, c, null])</button><br>
+    <button id="m-opt-4">setOptions([x, a, null])</button><br>
+    <button id="m-opt-5">setOptions([z])</button>
+  </div>
+  <div>
+    <h4>Method: setSelected</h4>
+    <button id="m-sel-1">setSelected([])</button><br>
+    <button id="m-sel-2">setSelected(["1", "4"])</button><br>
+    <button id="m-sel-3">setSelected(["a", "b"])</button><br>
+    <button id="m-sel-4">setSelected(["x", "y"])</button><br>
+    <button id="m-sel-5">setSelected(["null", "z"])</button>
+  </div>
+  <div>
+    <h4>Attribute: options</h4>
+    <button id="a-opt-1">setAttribute options = []</button><br>
+    <button id="a-opt-2">setAttribute options = [{P}]</button><br>
+    <button id="a-opt-3">setAttribute options = [{Q}, {R}]</button><br>
+    <button id="a-opt-4">setAttribute options = [{1}, {2}, {Q}]</button><br>
+    <button id="a-opt-5">setAttribute options = [{4}, {a}]</button>
+  </div>
+  <div>
+    <h4>Attribute: selected</h4>
+    <button id="a-sel-1">setAttribute selected = ""</button><br>
+    <button id="a-sel-2">setAttribute selected = "p,q"</button><br>
+    <button id="a-sel-3">setAttribute selected = "1,a"</button><br>
+    <button id="a-sel-4">setAttribute selected = "2,4,q"</button><br>
+    <button id="a-sel-5">setAttribute selected = "null,r"</button>
+  </div>
+</div>
+
+<hr />
+<button id="btn-dump" style="margin: 20px;">Force Dump getValues / getKeys</button>
+<pre id="dump" style="background:#f4f4f4; padding:10px; margin: 20px; border:1px solid #ccc;"></pre>
+
+<!-- <alert-box> value and label provided in one object -> label shown, value returned as a value </alert-box> -->
+
+<script type="module">
+  import "../../js/CenterResizer.js";
+  import "../select.js";
+
+  const selectComponent = document.querySelector("select-component");
+  const form = document.querySelector("form");
+  const dumpEl = document.getElementById("dump");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
+
+  function dumpState(source) {
+    const data = {
+      source: source || 'manual_dump',
+      timestamp: new Date().toISOString(),
+      keys: selectComponent.getKeys(),
+      values: selectComponent.getValues(),
+    };
+    dumpEl.textContent = JSON.stringify(data, null, 2);
+  }
+
+  // Hook up onChange standard event listener
+  selectComponent.addEventListener("change", (e) => {
+    setTimeout(() => {
+      dumpState("change_event_fired");
+    }, 1000);
+  });
+
+  // Test onLoad event for hydration readiness
+  selectComponent.addEventListener("onLoad", (e) => {
+    console.log("Component onLoad fired!", e);
+    // You could do initial setup here if not using attributes
+    // e.g., selectComponent.setOptions(...)
+  });
+  
+  document.getElementById("btn-dump").addEventListener("click", () => dumpState("manual"));
+
+  // Method testing
+  document.getElementById("m-opt-1").addEventListener("click", () => { selectComponent.setOptions([]); dumpState("setOptions"); });
+  document.getElementById("m-opt-2").addEventListener("click", () => {
+    selectComponent.setOptions([
+      {key:"x", label:"Label X", selected:false}, 
+      {key:"y", label:"Label Y", selected:false}
+    ]);
+    dumpState("setOptions");
+  });
+  document.getElementById("m-opt-3").addEventListener("click", () => { 
+    selectComponent.setOptions([
+      {key:"a", label:"Label A", selected:true}, 
+      {key:"b", label:"Label B", selected:false}, 
+      {key:"c", label:"Label C", selected:false}, 
+      {key:null, label:"--Null Option--", selected:false}
+    ]);
+    dumpState("setOptions");
+  });
+  document.getElementById("m-opt-4").addEventListener("click", () => { 
+    selectComponent.setOptions([
+      {key:"x", label:"Label X", selected:false}, 
+      {key:"a", label:"Label A", selected:true}, 
+      {key:null, label:"--Null Option--", selected:false}
+    ]);
+    dumpState("setOptions");
+  });
+  document.getElementById("m-opt-5").addEventListener("click", () => { 
+    selectComponent.setOptions([
+      {key:"z", label:"Label Z", selected:true}
+    ]);
+    dumpState("setOptions");
+  });
+
+  document.getElementById("m-sel-1").addEventListener("click", () => { selectComponent.setSelected([]); dumpState("setSelected"); });
+  document.getElementById("m-sel-2").addEventListener("click", () => { selectComponent.setSelected(["1", "4"]); dumpState("setSelected"); });
+  document.getElementById("m-sel-3").addEventListener("click", () => { selectComponent.setSelected(["a", "b"]); dumpState("setSelected"); });
+  document.getElementById("m-sel-4").addEventListener("click", () => { selectComponent.setSelected(["x", "y"]); dumpState("setSelected"); });
+  document.getElementById("m-sel-5").addEventListener("click", () => { selectComponent.setSelected(["null", "z"]); dumpState("setSelected"); });
+
+  // Attribute testing
+  document.getElementById("a-opt-1").addEventListener("click", () => { selectComponent.setAttribute("options", "[]"); dumpState("attribute_options"); });
+  document.getElementById("a-opt-2").addEventListener("click", () => { selectComponent.setAttribute("options", '[{"key":"p","label":"Label P","selected":false}]'); dumpState("attribute_options"); });
+  document.getElementById("a-opt-3").addEventListener("click", () => { selectComponent.setAttribute("options", '[{"key":"q","label":"Label Q","selected":false},{"key":"r","label":"Label R","selected":true}]'); dumpState("attribute_options"); });
+  document.getElementById("a-opt-4").addEventListener("click", () => { selectComponent.setAttribute("options", '[{"key":"1","label":"Label 1","selected":false},{"key":"2","label":"Label 2","selected":true},{"key":"q","label":"Label Q","selected":false}]'); dumpState("attribute_options"); });
+  document.getElementById("a-opt-5").addEventListener("click", () => { selectComponent.setAttribute("options", '[{"key":"4","label":"Label 4","selected":false},{"key":"a","label":"Label A","selected":true}]'); dumpState("attribute_options"); });
+
+  document.getElementById("a-sel-1").addEventListener("click", () => { selectComponent.setAttribute("selected", ""); dumpState("attribute_selected"); });
+  document.getElementById("a-sel-2").addEventListener("click", () => { selectComponent.setAttribute("selected", "p,q"); dumpState("attribute_selected"); });
+  document.getElementById("a-sel-3").addEventListener("click", () => { selectComponent.setAttribute("selected", "1,a"); dumpState("attribute_selected"); });
+  document.getElementById("a-sel-4").addEventListener("click", () => { selectComponent.setAttribute("selected", "2,4,q"); dumpState("attribute_selected"); });
+  document.getElementById("a-sel-5").addEventListener("click", () => { selectComponent.setAttribute("selected", "null,r"); dumpState("attribute_selected"); });
+</script>

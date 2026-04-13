@@ -1,0 +1,62 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown">Multiple - one disabled, select only from list </label>
+<select class="form-control" data-trigger name="dropdown" id="dropdown" placeholder="This is a placeholder" multiple>
+  <option value="Choice 1" selected>Choice 1</option>
+  <option value="Choice 2">Choice 2</option>
+  <option value="Choice 3">Choice 3</option>
+  <option value="Choice 4" disabled>Choice 4</option>
+</select>
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+<!-- <alert-box> value and label provided in one object -> label shown, value returned as a value </alert-box> -->
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const dropdown = document.getElementById("dropdown");
+  const display = document.getElementById("values-display");
+
+  const textPresetVal = new Choices(dropdown, {
+    allowHTML: true,
+    placeholderValue: "This is a placeholder set in the config",
+    searchPlaceholderValue: "This is a search placeholder",
+  });
+
+  const updateDisplay = () => {
+    // Collect all values
+    const values = textPresetVal.getValue(true);
+
+    display.textContent = JSON.stringify(values, null, 2);
+  };
+
+  // Listen for changes
+  dropdown.addEventListener("change", updateDisplay);
+
+  // Trigger on start
+  updateDisplay();
+</script>

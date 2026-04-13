@@ -1,0 +1,82 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="countries">Countries</label>
+<select class="form-control gcp-css" name="countries" id="countries" multiple></select>
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+<alert-box>
+  Dropdown pulling from /filtered-options
+  <br />
+  typing searches via API debounced at 500ms
+</alert-box>
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const display = document.getElementById("values-display");
+  const selectElem = document.getElementById("countries");
+
+  const countriesChoices = new Choices(selectElem, {
+    allowHTML: true,
+    searchEnabled: true,
+    searchChoices: false, // server-side sort/filter
+    removeItemButton: true,
+  });
+
+  const fetchOptions = async (q = "") => {
+    const res = await fetch(`/filtered-options?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    // Get currently selected values and ensure it's an array
+    const selected = countriesChoices.getValue(true) || [];
+    const selectedVals = Array.isArray(selected) ? selected : [selected];
+
+    const options = data.filter((val) => !selectedVals.includes(val)).map((val) => ({ value: val, label: val }));
+
+    countriesChoices.setChoices(options, "value", "label", true);
+  };
+
+  // pull all start
+
+  await fetchOptions();
+
+  let timer;
+  selectElem.addEventListener("search", (e) => {
+    const q = e.detail.value;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fetchOptions(q);
+    }, 500);
+  });
+
+  const updateDisplay = () => {
+    display.textContent = JSON.stringify({ country: countriesChoices.getValue(true) }, null, 2);
+  };
+
+  selectElem.addEventListener("change", updateDisplay);
+  updateDisplay();
+</script>

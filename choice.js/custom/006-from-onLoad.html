@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>onLoad Sandbox</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 15px;
+        border: 1px solid #ccc;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .log-entry {
+        margin-bottom: 5px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+      }
+      .timestamp {
+        color: #888;
+        font-size: 0.8em;
+        margin-right: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>onLoad Readiness Sandbox</h1>
+
+    <center-resizer>
+      <select-component
+        options='[
+                {"key": "1", "label": "Initial Option 1", "selected": true},
+                {"key": "2", "label": "Initial Option 2", "selected": false}
+            ]'
+        selected="1"
+      ></select-component>
+    </center-resizer>
+
+    <div class="controls">
+      <button id="btn-bind-late">Bind new onLoad (Late)</button>
+      <button id="btn-clear-log">Clear Log</button>
+    </div>
+
+    <h3>Logs:</h3>
+    <pre id="log-output"></pre>
+
+    <script type="module">
+      import "../../js/CenterResizer.js";
+      import "../select.js";
+
+      const logEl = document.getElementById("log-output");
+      const select = document.querySelector("select-component");
+
+      function log(message) {
+        const time = new Date().toLocaleTimeString() + "." + String(new Date().getMilliseconds()).padStart(3, "0");
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        entry.innerHTML = `<span class="timestamp">[${time}]</span> ${message}`;
+        logEl.prepend(entry);
+      }
+
+      log(`Early onLoad listener 1 (Standard) fired!`);
+      // 1. Initial onLoad (might fire before this script runs depending on timing,
+      // but our override handles it)
+      select.addEventListener("onLoad", (e) => {
+        log("Yep, it works: onLoad listener 1 (Standard) fired!");
+      });
+
+      // 2. Button to bind late
+      let listenerCount = 2;
+      document.getElementById("btn-bind-late").addEventListener("click", () => {
+        const id = listenerCount++;
+        log(`Binding new late onLoad listener (#${id})...`);
+
+        select.addEventListener("onLoad", (e) => {
+          log(`Yep, it works: onLoad listener #${id} fired immediately!`);
+        });
+      });
+
+      document.getElementById("btn-clear-log").addEventListener("click", () => {
+        logEl.innerHTML = "";
+      });
+
+      log("Sandbox ready. Scripts initialized.");
+    </script>
+  </body>
+</html>

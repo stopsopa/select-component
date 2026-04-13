@@ -1,0 +1,56 @@
+// to install go to: https://stopsopa.github.io//pages/bash/index.html#xx
+
+// https://stopsopa.github.io/viewer.html?file=%2Fpages%2Fbash%2Fxx%2Fxx-template.cjs
+// edit: https://github.com/stopsopa/stopsopa.github.io/blob/master/pages/bash/xx/xx-template.cjs
+
+// 🚀 -
+// ✅ -
+// ⚙️  -
+// 🗑️  -
+// 🛑 -
+// to call other xx commands from inside any xx command use:
+//    shopt -s expand_aliases && source ~/.bashrc
+// after that just do:
+//   xx <command_name>
+
+module.exports = (setup) => {
+  return {
+    help: {
+      command: `
+set -e  
+export NODE_OPTIONS=""
+        
+cat <<EEE
+
+  🐙 GitHub: $(git ls-remote --get-url origin | awk '{\$1=\$1};1' | tr -d '\\n' | sed -E 's/git@github\\.com:([^/]+)\\/(.+)\\.git/https:\\/\\/github.com\\/\\1\\/\\2/g')
+
+  to explore 3 ways of morph DOM content
+    http://0.0.0.0:5678/examples/012-form/
+
+EEE
+
+      `,
+      description: "Status of all things",
+      source: false,
+      confirm: false,
+    },
+    [`server`]: {
+      command: `
+/bin/bash bash/proc/watchServer.sh server.js -- node --env-file .env --watch server.js
+      `,
+      description: "Start server",
+      source: false,
+      confirm: false,
+    },
+    [`transpile`]: {
+      command: `
+/bin/bash transpile.sh choice.js/select.ts
+      `,
+      description: "Transpile choice.js/select.ts to choice.js/select.js",
+      source: false,
+      confirm: false,
+    },
+
+    ...setup,
+  };
+};

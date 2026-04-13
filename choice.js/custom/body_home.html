@@ -1,0 +1,24 @@
+<ul class="gcp-css">
+  <%   
+    const fs = d.fs;
+    const path = d.path;
+    const files = fs.readdirSync(d.template.dir)
+      .filter(file => {
+        const fullPath = path.join(d.template.dir, file);
+        if (!fullPath.endsWith('.html')) {
+          return false;
+        }
+        return fs.statSync(fullPath).isFile() && file !== 'body_home.html' && file !== 'index.html';
+      })
+      .sort();
+  %>
+  <% for (const file of files) { %>
+    <li>
+      <a href="?body=<%= file %>"><%= file %></a>
+    </li>
+  <% } %>
+</ul>
+<hr />
+<pre>
+<%= JSON.stringify(d.template, null, 2) %>
+</pre>

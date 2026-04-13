@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/node_modules/normalize.css/normalize.css" />
+    <link rel="stylesheet" href="../floating-label-pattern.css" />
+
+    <% if (typeof d.noCss === 'undefined') { %>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <% } %>
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
+
+      :root {
+        font-family: "Google Sans", sans-serif;
+        font-optical-sizing: auto;
+        /* font-weight: 400; */
+        font-style: normal;
+        font-variation-settings: "GRAD" 0;
+        /* font-family: "Inter", sans-serif; */
+      }
+
+      body {
+        margin: 10px;
+      }
+      li {
+        line-height: 1.5em;
+      }
+    </style>
+    <script src="../import-map.js"></script>
+    <script src="https://stopsopa.github.io/alert-webcomponent/alert-box.js"></script>
+    <link rel="stylesheet" href="../choice-custom-style.css" />
+  </head>
+
+  <body>
+    <br />
+    <a href="..">..</a>
+    <% if (typeof d.body === 'string') { %>
+
+    <a href="index.html">Home</a>
+    <hr />
+    <%= d.render(d.body, d) %>
+    <% } else { %>
+    <%= d.render("body_home.html", d) %>
+    <% } %>
+  </body>
+</html>

@@ -1,0 +1,221 @@
+
+<div>
+  <% if (d.noCss) { %>
+  <a href="?body=body_style.html" class="gcp-css" style="float: right">Bring base CSS back</a>
+  <% } else { %>
+  <a href="?body=body_style.html&noCss=true" class="gcp-css" style="float: right">Remove base css</a>
+  <% } %>
+
+  <br />
+
+  <label>
+    <% if (d.multiple) { %>
+    <input type="checkbox" id="toggle-multiple" checked />
+    <% } else { %>
+    <input type="checkbox" id="toggle-multiple" />
+    <% } %> Multiple Selection <% if (d.multiple) { %>
+    <a href="?body=body_style.html" class="gcp-css">Single</a>
+    <% } else { %>
+    <a href="?body=body_style.html&multiple=true" class="gcp-css">Multiple</a>
+    <% } %>
+  </label>
+</div>
+
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <center-resizer>
+
+      <label for="countries">Countries</label>
+      <% if (d.multiple) { %>
+      <select class="form-control gcp-css" name="countries" id="countries" multiple></select>
+      <% } else { %>
+      <select class="form-control gcp-css" name="countries" id="countries"></select>
+      <% } %>
+
+  </center-resizer>
+
+  <div style="margin-top: 20px">
+    <button type="submit">Submit</button>
+    <button type="button" id="repopulate">Repopulate</button>
+  </div>
+</form>
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+<alert-box> style </alert-box>
+
+<script type="module">
+  import "../../js/CenterResizer.js";
+  import Choices from "choices.js";
+
+  const display = document.getElementById("values-display");
+  const selectElem = document.getElementById("countries");
+  const toggleMultiple = document.getElementById("toggle-multiple");
+
+  let countriesChoices;
+  let timer;
+  let lastState = [
+    ["name", ""],
+    ["countries", "Algeria"],
+    ["countries", "Andorra"],
+    ["countries", "Angola"],
+    ["countries", "Antigua and Barbuda"],
+    ["countries", "Argentina"],
+    ["countries", "Armenia"],
+    ["countries", "Australia"],
+    ["countries", "Austria"],
+    ["countries", "Azerbaijan"],
+    ["countries", "Bahamas"],
+    ["countries", "Bahrain"],
+    ["countries", "Bangladesh"],
+    ["countries", "Barbados"],
+    ["countries", "Belarus"],
+    ["countries", "Belgium"],
+    ["countries", "Belize"],
+    ["countries", "Benin"],
+    ["countries", "Bhutan"],
+    ["countries", "Bolivia"],
+    ["countries", "Bosnia and Herzegovina"],
+    ["countries", "Botswana"],
+    ["countries", "Brazil"],
+    ["countries", "Brunei"],
+    ["countries", "Bulgaria"],
+    ["countries", "Burkina Faso"],
+  ];
+
+  const fetchOptions = async (q = "") => {
+    if (!countriesChoices) return;
+    const res = await fetch(`/filtered-options?q=${encodeURIComponent(q)}`);
+    const data = await res.json();
+
+    const selected = countriesChoices.getValue(true);
+    const selectedVals = Array.isArray(selected) ? selected : selected ? [selected] : [];
+
+    const options = data.filter((val) => !selectedVals.includes(val)).map((val) => ({ value: val, label: val }));
+
+    if (q && !data.includes(q) && !selectedVals.includes(`NEW:${q}`)) {
+      options.unshift({ value: `NEW:${q}`, label: `Add "${q}"` });
+    }
+
+    if (!toggleMultiple.checked && selectedVals.length === 0) {
+      options.unshift({
+        value: "",
+        label: "Select a country",
+        placeholder: true,
+        selected: true,
+      });
+    }
+
+    countriesChoices.setChoices(options, "value", "label", true);
+  };
+
+  const updateDisplay = () => {
+    if (!countriesChoices) return;
+    display.textContent = JSON.stringify({ country: countriesChoices.getValue(true) }, null, 2);
+  };
+
+  const initChoices = async () => {
+    if (countriesChoices) {
+      countriesChoices.destroy();
+    }
+
+    countriesChoices = new Choices(selectElem, {
+      allowHTML: true,
+      searchEnabled: true,
+      searchChoices: false, // server-side sort/filter
+      removeItemButton: true,
+      shouldSort: false,
+      placeholder: true,
+      placeholderValue: "Select a country",
+    });
+
+    countriesChoices.containerOuter.element.classList.add("gcp-css");
+
+    await fetchOptions();
+    updateDisplay();
+  };
+
+  selectElem.addEventListener("search", (e) => {
+    const q = e.detail.value;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fetchOptions(q);
+    }, 500);
+  });
+
+  selectElem.addEventListener("change", updateDisplay);
+
+  toggleMultiple.addEventListener("change", async (e) => {
+    if (e.target.checked) {
+      selectElem.setAttribute("multiple", "multiple");
+    } else {
+      selectElem.removeAttribute("multiple");
+      selectElem.value = "";
+      selectElem.innerHTML = "";
+    }
+    await initChoices();
+  });
+
+  const form = document.querySelector("form");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    // const formData = new FormData(e.target);
+    // const data = {};
+    // for (const [key, value] of formData) {
+    //   if (data[key] !== undefined) {
+    //     if (!Array.isArray(data[key])) {
+    //       data[key] = [data[key]];
+    //     }
+    //     data[key].push(value);
+    //   } else {
+    //     data[key] = value;
+    //   }
+    // }
+    // display.textContent = JSON.stringify(data, null, 2);
+    lastState = Array.from(new FormData(e.target));
+    console.log(JSON.stringify(lastState, null, 4));
+    display.textContent = JSON.stringify(lastState, null, 2);
+  });
+
+  function repopulate() {
+    if (!lastState) {
+      alert("Submit first to save state!");
+      return;
+    }
+
+    form.reset();
+    if (countriesChoices) {
+      countriesChoices.removeActiveItems();
+    }
+
+    lastState.forEach(([name, value]) => {
+      const el = form.elements[name];
+      if (!el) return;
+
+      if (name === "countries" && countriesChoices) {
+        countriesChoices.setChoiceByValue(value);
+      } else {
+        el.value = value;
+      }
+    });
+  }
+
+  await initChoices();
+
+  document.getElementById("repopulate").addEventListener("click", repopulate);
+  repopulate();
+</script>

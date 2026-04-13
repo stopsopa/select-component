@@ -1,0 +1,97 @@
+<!-- <link rel="stylesheet" href="https://stopsopa.github.io/pages/js/popper/html-vanilla/popover.css" /> -->
+
+<textarea></textarea>
+
+<center-resizer>
+  <form>
+    <!-- Field 2 -->
+    <div class="gcp-css input-wrapper" id="email-wrapper">
+      <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+      <label for="email">User Email</label>
+      <div class="error">Enter a valid user email</div>
+      <div class="helper-text">Enter a valid GCP admin email</div>
+    </div>
+
+      <!-- options='[
+      {"key": null, "label" : "--empty--", "selected": false},
+      {"key": "1", "label": "Label 1", "selected": true}, 
+      {"key": "2", "label": "Label 2", "selected": false}
+      ]' -->
+    <select-component
+      options='[
+      {"key": "4", "label" : "Label 4", "selected": false},
+      {"key": "1", "label": "Label 1", "selected": true}, 
+      {"key": "2", "label": "Label 2", "selected": false}
+      ]'
+      selected="1,2"
+    ></select-component>
+  </form>
+</center-resizer>
+
+<hr />
+<div class="test-controls" style="display: flex; gap: 20px; padding: 20px; flex-wrap: wrap;">
+  <div>
+    <h4>Method: setOptions</h4>
+    <button id="m-opt-1">setOptions([])</button><br>
+    <button id="m-opt-2">setOptions([x, y])</button><br>
+    <button id="m-opt-3">setOptions([a, b, c, null])</button>
+  </div>
+  <div>
+    <h4>Method: setSelected</h4>
+    <button id="m-sel-1">setSelected([])</button><br>
+    <button id="m-sel-2">setSelected(["1", "4"])</button><br>
+    <button id="m-sel-3">setSelected(["a", "b"])</button>
+  </div>
+  <div>
+    <h4>Attribute: options</h4>
+    <button id="a-opt-1">setAttribute options = []</button><br>
+    <button id="a-opt-2">setAttribute options = [{P}]</button><br>
+    <button id="a-opt-3">setAttribute options = [{Q}, {R}]</button>
+  </div>
+  <div>
+    <h4>Attribute: selected</h4>
+    <button id="a-sel-1">setAttribute selected = ""</button><br>
+    <button id="a-sel-2">setAttribute selected = "p,q"</button><br>
+    <button id="a-sel-3">setAttribute selected = "1,a"</button>
+  </div>
+</div>
+
+<!-- <alert-box> value and label provided in one object -> label shown, value returned as a value </alert-box> -->
+
+<script type="module">
+  import "../../js/CenterResizer.js";
+  import "../select.js";
+
+  const selectComponent = document.querySelector("select-component");
+  const form = document.querySelector("form");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
+
+  // Method testing
+  document.getElementById("m-opt-1").addEventListener("click", () => selectComponent.setOptions([]));
+  document.getElementById("m-opt-2").addEventListener("click", () => selectComponent.setOptions([
+    {key:"x", label:"Label X", selected:false}, 
+    {key:"y", label:"Label Y", selected:false}
+  ]));
+  document.getElementById("m-opt-3").addEventListener("click", () => selectComponent.setOptions([
+    {key:"a", label:"Label A", selected:true}, 
+    {key:"b", label:"Label B", selected:false}, 
+    {key:"c", label:"Label C", selected:false}, 
+    {key:null, label:"--Null Option--", selected:false}
+  ]));
+
+  document.getElementById("m-sel-1").addEventListener("click", () => selectComponent.setSelected([]));
+  document.getElementById("m-sel-2").addEventListener("click", () => selectComponent.setSelected(["1", "4"]));
+  document.getElementById("m-sel-3").addEventListener("click", () => selectComponent.setSelected(["a", "b"]));
+
+  // Attribute testing
+  document.getElementById("a-opt-1").addEventListener("click", () => selectComponent.setAttribute("options", "[]"));
+  document.getElementById("a-opt-2").addEventListener("click", () => selectComponent.setAttribute("options", '[{"key":"p","label":"Label P","selected":false}]'));
+  document.getElementById("a-opt-3").addEventListener("click", () => selectComponent.setAttribute("options", '[{"key":"q","label":"Label Q","selected":false},{"key":"r","label":"Label R","selected":true}]'));
+
+  document.getElementById("a-sel-1").addEventListener("click", () => selectComponent.setAttribute("selected", ""));
+  document.getElementById("a-sel-2").addEventListener("click", () => selectComponent.setAttribute("selected", "p,q"));
+  document.getElementById("a-sel-3").addEventListener("click", () => selectComponent.setAttribute("selected", "1,a"));
+</script>

@@ -1,0 +1,74 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown">
+  Limited to <span id="main-limit-display">5</span> values with remove button
+</label>
+<input
+  class="form-control"
+  id="dropdown"
+  type="text"
+  value="preset-1,preset-2"
+  placeholder="Enter something"
+/>
+<hr />
+<div id="range_parent" style="margin: 20px 0">
+  <label style="display: block; margin-bottom: 8px"> Max Items Limit: <strong id="limit-display">5</strong> </label>
+  <input type="range" min="1" max="20" style="width: 100%; max-width: 300px" />
+</div>
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const parent = document.querySelector("#range_parent");
+  const rangeEl = parent.querySelector("input[type='range']");
+  const limitDisplay = document.getElementById("limit-display");
+  const mainLimitDisplay = document.getElementById("main-limit-display");
+
+  var defaultMaxItemCount = 3;
+  rangeEl.value = defaultMaxItemCount;
+
+  function range(element, event, onLoad = true) {
+    function hc() {
+      event(parseInt(element.value, 10));
+    }
+    element.addEventListener("change", hc);
+    element.addEventListener("input", hc);
+    if (onLoad) {
+      hc();
+    }
+  }
+
+  const textRemove = new Choices(document.getElementById("dropdown"), {
+    allowHTML: true,
+    delimiter: ",",
+    editItems: true,
+    maxItemCount: defaultMaxItemCount,
+    removeItemButton: true, // works for multiple and single
+  });
+
+  range(rangeEl, (v) => {
+    if (limitDisplay) limitDisplay.textContent = v;
+    if (mainLimitDisplay) mainLimitDisplay.textContent = v;
+
+    // Update the Choices.js configuration live
+    if (textRemove && textRemove.config) {
+      textRemove.config.maxItemCount = v;
+    }
+  });
+</script>

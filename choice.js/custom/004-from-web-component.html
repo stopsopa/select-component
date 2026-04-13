@@ -1,0 +1,56 @@
+<!-- <link rel="stylesheet" href="https://stopsopa.github.io/pages/js/popper/html-vanilla/popover.css" /> -->
+
+<textarea></textarea>
+
+<center-resizer>
+  <form>
+    <!-- Field 2 -->
+    <div class="gcp-css input-wrapper" id="email-wrapper">
+      <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+      <label for="email">User Email</label>
+      <div class="error">Enter a valid user email</div>
+      <div class="helper-text">Enter a valid GCP admin email</div>
+    </div>
+
+      <!-- options='[
+      {"key": null, "label" : "--empty--", "selected": false},
+      {"key": "1", "label": "Label 1", "selected": true}, 
+      {"key": "2", "label": "Label 2", "selected": false}
+      ]' -->
+    <select-component
+      options='[
+      {"key": "4", "label" : "Label 4", "selected": false},
+      {"key": "1", "label": "Label 1", "selected": true}, 
+      {"key": "2", "label": "Label 2", "selected": false}
+      ]'
+      selected="1,2"
+    ></select-component>
+  </form>
+</center-resizer>
+
+<hr />
+
+<!-- <alert-box> value and label provided in one object -> label shown, value returned as a value </alert-box> -->
+
+<script type="module">
+  import "../../js/CenterResizer.js";
+  import "../select.js";
+
+
+  const selectComponent = document.querySelector("select-component");
+  const form = document.querySelector("form");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
+
+//   add.addEventListener("click", () => {
+//     // Uses the component's input value logic or hardcoded
+//     const shadowInput = selectComponent.shadowRoot.querySelector("input");
+//     const val = shadowInput.value.trim();
+//     if (val) {
+//       selectComponent.addValue(val);
+//       shadowInput.value = "";
+//     }
+//   });
+</script>
