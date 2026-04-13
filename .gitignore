@@ -1,3 +1,5 @@
 node_modules
 *.tar.gz
 choice.js/select.js
+/playwright-report/
+/test-results/

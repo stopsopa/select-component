@@ -36,14 +36,14 @@
   </head>
 
   <body>
-    <br />
-    <a href="..">..</a>
     <% if (typeof d.body === 'string') { %>
 
     <a href="index.html">Home</a>
     <hr />
     <%= d.render(d.body, d) %>
     <% } else { %>
+    <a href="..">..</a>
+    <br />
     <%= d.render("body_home.html", d) %>
     <% } %>
   </body>
