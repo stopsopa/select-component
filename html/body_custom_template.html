@@ -1,0 +1,103 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown">With remove button</label>
+
+<select class="form-control" name="dropdown" id="dropdown">
+  <option value="React">React</option>
+  <option value="Angular">Angular</option>
+  <option value="Ember">Ember</option>
+  <option value="Vue">Vue</option>
+</select>
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+<alert-box>
+  This one shows how we can use a template to style our elements,
+  <br />
+  when on the list and when selected
+</alert-box>
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const dropdown = document.getElementById("dropdown");
+  const display = document.getElementById("values-display");
+
+  const textPresetVal = new Choices(dropdown, {
+    allowHTML: true,
+    position: "bottom",
+    callbackOnCreateTemplates: function (strToEl, escapeForTemplate) {
+      var classNames = this.config.classNames;
+      var itemSelectText = this.config.itemSelectText;
+      var allowHTML = this.config.allowHTML;
+      return {
+        item: function ({ classNames }, data) {
+          return strToEl(`
+            <div
+              class="${classNames.item} ${data.highlighted ? classNames.highlightedState : classNames.itemSelectable}"
+              data-item
+              role="option"
+              data-id="${data.id}"
+              data-value="${escapeForTemplate(allowHTML, data.value)}"
+              ${data.active ? 'aria-selected="true"' : ""}
+              ${data.disabled ? 'aria-disabled="true"' : ""}
+            >
+              <span style="margin-right:10px;">🎉</span> ${escapeForTemplate(allowHTML, data.label)}
+            </div>
+          `);
+        },
+        choice: function ({ classNames }, data) {
+          return strToEl(`
+            <div
+              class="${classNames.item} ${classNames.itemChoice} ${data.disabled ? classNames.itemDisabled : classNames.itemSelectable}"
+              data-select-text="${itemSelectText}"
+              data-choice
+              ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : "data-choice-selectable"}
+              data-id="${data.id}"
+              data-value="${escapeForTemplate(allowHTML, data.value)}"
+              ${data.groupId > 0 ? 'role="treeitem"' : 'role="option"'}
+            >
+              <span style="margin-right:10px;">👉🏽</span> ${escapeForTemplate(allowHTML, data.label)}
+            </div>
+          `);
+        },
+      };
+    },
+  });
+
+  const updateDisplay = () => {
+    // Collect all values
+    const values = textPresetVal.getValue(true);
+
+    display.textContent = JSON.stringify(values, null, 2);
+  };
+
+  // Listen for changes
+  dropdown.addEventListener("change", updateDisplay);
+
+  // Trigger on start
+  updateDisplay();
+</script>

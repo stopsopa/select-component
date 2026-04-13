@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CompositeManager Demo</title>
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
+    <link rel="stylesheet" href="https://stopsopa.github.io/pages/js/popper/html-vanilla/popover.css" />
+    <link rel="stylesheet" href="../selected-section/SelectedSectionManager.css" />
+    <link rel="stylesheet" href="../options-section/OptionsSectionManager.css" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding: 2rem;
+        background-color: #f0f2f5;
+        color: #333;
+      }
+      h1 {
+        margin-bottom: 20px;
+        font-weight: 300;
+      }
+      #instances-area {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+      .demo-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ddd;
+        position: relative;
+      }
+      .demo-section h2 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .resizer-container {
+        padding-top: 20px;
+        border: 1px dashed #ccc;
+        margin-bottom: 15px;
+        position: relative;
+        background: #fafafa;
+        min-height: 50px;
+        padding-bottom: 16px;
+      }
+      .controls {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+        & > * {
+          margin-bottom: 0 !important;
+        }
+        padding-bottom: 16px;
+      }
+      .controls-label {
+        flex: 1 1 100%;
+        font-weight: bold;
+        font-size: 11px;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        color: #666;
+      }
+      #init-btn {
+        margin-bottom: 20px;
+      }
+      .destroy-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
+      .template-btn {
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      .template-btn:hover {
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="page-description"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        max-width: 280px;
+        backdrop-filter: blur(5px);
+      "
+    >
+      <strong>CompositeManager</strong> direct interaction demo.<br />
+      Managing state directly via manager API.
+    </div>
+    <pre
+      id="url-display"
+      style="
+        background: #eee;
+        padding: 10px;
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        border: 1px solid #ccc;
+        font-size: 12px;
+      "
+    ></pre>
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button> |
+    <a href="" id="reload-link" class="gcp-css">reload</a> | <a href="./" class="gcp-css">up ..</a> |
+    <a href="composite-select.html" class="gcp-css">composite-select.html (web component)</a> |
+    <a
+      href="/composition/composite-select/demo.html.html?l1=239px&c1=957px&h1=72px&d1=1&o1=1&a1=label&e1=0&p1=cover-bottom&f1=te&s1=1&x1=&ds1=0&do1=0&ls1=0&lo1=0&as1=Select+Fruit&ao1=Search+fruits...&es1=0&sf1=1&st1=1&v1=113~hofstadter&v1=51~chatelet&v1=52~chatterjee"
+      class="gcp-css"
+      >new search + ok</a
+    >|
+    <a
+      href="/composition/composite-select/demo.html.html?l1=239px&c1=957px&h1=72px&d1=1&o1=1&a1=label&e1=0&p1=bottom&f1=ei&s1=1&x1=ei&ds1=0&do1=0&ls1=0&lo1=0&as1=Select+Fruit&ao1=Search+fruits...&es1=0&sf1=0&st1=1&v1=3~Cherry&v1=7~Grape&v1=4~Date"
+      class="gcp-css"
+      >one search + ok</a
+    >
+    |
+    <a
+      href="/composition/composite-select/demo.html.html?l1=239px&c1=957px&h1=74px&d1=1&o1=1&a1=label&e1=0&p1=cover-bottom&f1=ei&s1=1&x1=ei&ds1=0&do1=0&ls1=0&lo1=0&as1=Select+Fruit&ao1=Search+fruits...&es1=0&sf1=1&st1=0&v1=3~Cherry&v1=2~Banana&v1=7~Grape&v1=4~Date"
+      class="gcp-css"
+      >new search + one click</a
+    >
+    |
+    <a
+      href="/composition/composite-select/demo.html.html?l1=239px&c1=957px&h1=93px&d1=1&o1=1&a1=label&e1=0&p1=bottom&f1=&s1=1&x1=&ds1=0&do1=0&ls1=0&lo1=0&as1=Select+Fruit&ao1=Search+fruits...&es1=0&sf1=0&st1=0&v1=10~agnesi&v1=15~archimedes"
+      class="gcp-css"
+      >one search + one click</a
+    >
+
+    <div id="instances-area"></div>
+
+    <script type="module" src="./demo.html.js"></script>
+  </body>
+</html>

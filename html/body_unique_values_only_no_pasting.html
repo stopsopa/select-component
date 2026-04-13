@@ -1,0 +1,32 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown"> Unique values only, no pasting </label>
+<input class="form-control" id="dropdown" type="text" value="abc,def" placeholder="Enter something" />
+<hr />
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const textUniqueVals = new Choices("#dropdown", {
+    allowHTML: true,
+    paste: false,
+    duplicateItemsAllowed: false,
+    editItems: true,
+  });
+</script>

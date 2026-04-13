@@ -1,0 +1,56 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown"> Prepends and appends a value to each items return value & get values [like onChange] </label>
+<input class="form-control" id="dropdown" type="text" value="some,initial,values" placeholder="This is a placeholder" />
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const dropdown = document.getElementById("dropdown");
+  const display = document.getElementById("values-display");
+
+  const textPrependAppendVal = new Choices(dropdown, {
+    allowHTML: true,
+    prependValue: "item-",
+    appendValue: "-" + Date.now(),
+  });
+
+  const updateDisplay = () => {
+    // Collect all values
+    const values = textPrependAppendVal.getValue(true);
+
+    display.textContent = JSON.stringify(values, null, 2);
+  };
+
+  // Listen for changes
+  dropdown.addEventListener("change", updateDisplay);
+
+  // Trigger on start
+  updateDisplay();
+</script>

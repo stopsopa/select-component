@@ -1,0 +1,84 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown">With remove button</label>
+<select class="form-control" name="dropdown" id="dropdown" multiple></select>
+<hr />
+<button>Load</button>
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+<!-- <alert-box> value and label provided in one object -> label shown, value returned as a value </alert-box> -->
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const dropdown = document.getElementById("dropdown");
+  const display = document.getElementById("values-display");
+
+  const textPresetVal = new Choices(dropdown, {
+    allowHTML: false,
+    placeholder: true,
+    removeItemButton: true, // works for multiple and single
+    placeholderValue: "Pick an Strokes record",
+    maxItemCount: 5,
+  });
+  // }).setChoices(async function () { // can be loaded right after initialisation
+
+  document.querySelector("button").addEventListener("click", () => {
+    textPresetVal.setChoices(async function () {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const res = await fetch(
+        "body_fetch.json",
+        // "https://api.discogs.com/artists/55980/releases?token=QBRmstCkwXEvCjTclCpumbtNwvVkEzGAdELXyRyW",
+      );
+
+      const json = await res.json();
+
+      const data = json;
+      // const data = json.releases.map(function (release) {
+      //   return { value: release.title, label: release.title };
+      // });
+
+      console.log(JSON.stringify(data, null, 2));
+
+      return data;
+    });
+  });
+
+  const updateDisplay = () => {
+    // Collect all values
+    const values = textPresetVal.getValue(true);
+
+    display.textContent = JSON.stringify(values, null, 2);
+  };
+
+  // Listen for changes
+  dropdown.addEventListener("change", updateDisplay);
+
+  // Trigger on start
+  updateDisplay();
+</script>

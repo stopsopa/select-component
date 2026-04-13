@@ -1,0 +1,350 @@
+import "../../../js/CenterResizer.js";
+import "./selected-section.js";
+import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
+const imgData = await fetch("../img/img.json").then((r) => r.json());
+const reloadLink = document.getElementById("reload-link");
+if (reloadLink) {
+  reloadLink.href = window.location.pathname;
+}
+let instanceCounter = 0;
+const updateUrlDisplay = (url = window.location.href) => {
+  const el = document.getElementById("url-display");
+  if (el) el.textContent = url;
+};
+const init = (initialSelected = [], states = {}) => {
+  instanceCounter++;
+  const id = instanceCounter;
+  const resizerLeft = states.left || "50px";
+  const resizerCenter = states.center || "350px";
+  const section = document.createElement("div");
+  section.className = "demo-section";
+  let templateButtonsHtml = "";
+  for (const [color, images] of Object.entries(imgData)) {
+    images.forEach((img) => {
+      templateButtonsHtml += `<button class="gcp-css white" data-role="template-btn" data-color="${color}" data-img="${img}" style="color: ${color}; padding: 2px 8px; font-size: 11px;">${img}</button>`;
+    });
+  }
+  section.innerHTML = `
+    <h2>Instance #${id} (Attributes)</h2>
+    <button class="gcp-css white destroy-btn" data-role="destroy">Destroy</button>
+
+    <div class="resizer-container">
+      <center-resizer data-role="resizer" left="${resizerLeft}" center="${resizerCenter}" style="padding: 12px;">
+        <selected-section
+          data-role="sl"
+          label="${states.label || "Select options"}"
+          ${states.error ? "error" : ""}
+          ${states.disabled ? "disabled" : ""}
+          ${states.loading ? "loading" : ""}
+          ${states.showInput !== false ? "show-input" : ""}
+          onFocus="this.handleDemoFocus(event)"
+          onClear="this.handleDemoClear(event)"
+          onInputChange="this.handleDemoInputChange(event)"
+          onDelete="this.handleDemoDelete(event)"
+          onChange="this.handleDemoChange(event)"
+        ></selected-section>
+      </center-resizer>
+    </div>
+
+    <div class="controls gcp-css" style="margin-bottom: 8px;">
+      <div class="controls-label">SelectedSectionManager (Attributes)</div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div class="gcp-css checkbox-wrapper">
+          <div class="checkbox-row">
+            <input type="checkbox" id="disabled-sel-${id}" data-role="disabled-sel" ${states.disabled ? "checked" : ""}>
+            <div class="content-cell"><label for="disabled-sel-${id}">Disabled</label></div>
+          </div>
+        </div>
+
+        <div class="gcp-css checkbox-wrapper">
+          <div class="checkbox-row">
+            <input type="checkbox" id="loading-sel-${id}" data-role="loading-sel" ${states.loading ? "checked" : ""}>
+            <div class="content-cell"><label for="loading-sel-${id}">Loading</label></div>
+          </div>
+        </div>
+
+        <div class="gcp-css checkbox-wrapper">
+          <div class="checkbox-row">
+            <input type="checkbox" id="error-sel-${id}" data-role="error-sel" ${states.error ? "checked" : ""}>
+            <div class="content-cell"><label for="error-sel-${id}">Error</label></div>
+          </div>
+        </div>
+
+        <div class="gcp-css checkbox-wrapper">
+          <div class="checkbox-row">
+            <input type="checkbox" id="show-input-sel-${id}" data-role="show-input-sel" ${states.showInput !== false ? "checked" : ""}>
+            <div class="content-cell"><label for="show-input-sel-${id}">Show Input</label></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+        <div class="gcp-css input-wrapper">
+          <input type="text" id="label-input-sel-${id}" data-role="label-input-opt" placeholder="&nbsp;" value="${states.label || ""}">
+          <label for="label-input-sel-${id}">Label</label>
+        </div>
+        <div class="gcp-css input-wrapper">
+          <input type="text" id="value-input-sel-${id}" data-role="value-input-opt" placeholder="&nbsp;" value="${states.value || ""}">
+          <label for="value-input-sel-${id}">Value</label>
+        </div>
+        <button class="gcp-css white" data-role="focus-btn">Focus</button>
+        <button class="gcp-css white" data-role="add-btn">Add Random</button>
+        <button class="gcp-css white" data-role="clear-btn">Clear All</button>
+      </div>
+
+      <div style="display: flex; gap: 5px; align-items: center; width: 100%; margin-top: 10px; flex-wrap: wrap;">
+        <span style="min-width: 120px;">🖼️ <strong>Templates</strong>:</span>
+        ${templateButtonsHtml}
+      </div>
+
+      <div style="display: flex; gap: 5px; align-items: center; width: 100%; margin-top: 10px; flex-wrap: wrap;">
+        <span style="min-width: 120px;">🎨 <strong>Render</strong>:</span>
+        <button class="gcp-css white" data-role="opt-render-btn">Set Custom Render</button>
+        <button class="gcp-css white" data-role="opt-string-render-btn">Set String Render</button>
+        <button class="gcp-css white" data-role="opt-default-render-btn">Set Default Render</button>
+      </div>
+
+      <div style="width: 100%; margin-top: 10px;">
+        (onInputChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
+        onDelete triggers: <span data-role="ondelete-count" style="font-weight: bold;">0</span>,
+        onClear triggers: <span data-role="onclear-count" style="font-weight: bold;">0</span>,
+        onChange triggers: <span data-role="onitemchange-count" style="font-weight: bold;">0</span>,
+        onFocus triggers: <span data-role="onfocus-count" style="font-weight: bold;">0</span>)
+      </div>
+    </div>
+
+    <pre data-role="dump" style="background:#f8f8f8;padding:10px;border:1px solid #eee;border-radius:4px;font-size:12px;margin:0;overflow:auto;"></pre>
+  `;
+  document.getElementById("instances-area").appendChild(section);
+  const sl = section.querySelector('[data-role="sl"]');
+  const resizer = section.querySelector('[data-role="resizer"]');
+  const destroyBtn = section.querySelector('[data-role="destroy"]');
+  const dump = section.querySelector('[data-role="dump"]');
+  const disabledSelCb = section.querySelector('[data-role="disabled-sel"]');
+  const loadingSelCb = section.querySelector('[data-role="loading-sel"]');
+  const errorSelCb = section.querySelector('[data-role="error-sel"]');
+  const showInputSelCb = section.querySelector('[data-role="show-input-sel"]');
+  const labelInputSel = section.querySelector('[data-role="label-input-opt"]');
+  const valueInputSel = section.querySelector('[data-role="value-input-opt"]');
+  const focusBtn = section.querySelector('[data-role="focus-btn"]');
+  const addBtn = section.querySelector('[data-role="add-btn"]');
+  const clearBtn = section.querySelector('[data-role="clear-btn"]');
+  const optRenderBtn = section.querySelector('[data-role="opt-render-btn"]');
+  const optStringRenderBtn = section.querySelector('[data-role="opt-string-render-btn"]');
+  const optDefaultRenderBtn = section.querySelector('[data-role="opt-default-render-btn"]');
+  const inc = (role) => {
+    const el = section.querySelector(`[data-role="${role}"]`);
+    if (el) {
+      el.textContent = String(parseInt(el.textContent || "0", 10) + 1);
+    }
+  };
+  const updateDump = (list) => {
+    dump.textContent = JSON.stringify(list, null, 2);
+  };
+  const syncUrl = () => {
+    const url = new URL(window.location.href);
+    const mgr = sl.getManager();
+    urlStateConfig.toUrl(url, id, {
+      selected: mgr ? mgr.getSelected() : [],
+      left: resizer.getAttribute("left") || "50px",
+      center: resizer.getAttribute("center") || "350px",
+      disabled: disabledSelCb.checked,
+      loading: loadingSelCb.checked,
+      label: labelInputSel.value || "",
+      value: valueInputSel.value || "",
+      error: errorSelCb.checked,
+      showInput: showInputSelCb.checked,
+    });
+    window.history.replaceState({}, "", url);
+    updateUrlDisplay(url.toString());
+  };
+  sl.setAttribute("selected", JSON.stringify(initialSelected));
+  sl.handleDemoFocus = () => {
+    inc("onfocus-count");
+  };
+  sl.handleDemoClear = () => {
+    inc("onclear-count");
+    sl.setAttribute("selected", "[]");
+    sl.setAttribute("value", "");
+    syncUrl();
+  };
+  sl.handleDemoInputChange = (e) => {
+    inc("onchange-count");
+    const val = e.detail.value;
+    valueInputSel.value = val;
+    const originalEvent = e.detail.originalEvent;
+    if (originalEvent && originalEvent.key === "Enter" && val.trim() !== "") {
+      const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+      const id = getNextId();
+      setNextId(id + 1);
+      const newItem = { id, label: val.trim() };
+      sl.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
+      sl.setAttribute("value", "");
+      syncUrl();
+    }
+    if (originalEvent && originalEvent.key === "Backspace" && val === "") {
+      const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+      if (currentSelected.length > 0) {
+        currentSelected.pop();
+        sl.setAttribute("selected", JSON.stringify(currentSelected));
+        syncUrl();
+      }
+    }
+  };
+  sl.handleDemoDelete = (e) => {
+    inc("ondelete-count");
+    const idToDelete = String(e.detail.id);
+    const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+    const nextSelected = currentSelected.filter((i) => String(i.id) !== idToDelete);
+    sl.setAttribute("selected", JSON.stringify(nextSelected));
+    syncUrl();
+  };
+  sl.handleDemoChange = (e) => {
+    inc("onitemchange-count");
+    updateDump(e.detail.selected);
+  };
+  sl.getManager()
+    ?.getSubscriber()
+    .bind("onComponentChange", (opt) => {
+      disabledSelCb.checked = !!opt.disabled;
+      loadingSelCb.checked = !!opt.loading;
+      errorSelCb.checked = !!opt.error;
+      showInputSelCb.checked = opt.showInput !== false;
+      labelInputSel.value = opt.label || "";
+      valueInputSel.value = opt.value || "";
+    });
+  updateDump(initialSelected);
+  disabledSelCb.addEventListener("change", () => {
+    if (disabledSelCb.checked) sl.setAttribute("disabled", "");
+    else sl.removeAttribute("disabled");
+    syncUrl();
+  });
+  loadingSelCb.addEventListener("change", () => {
+    if (loadingSelCb.checked) sl.setAttribute("loading", "");
+    else sl.removeAttribute("loading");
+    syncUrl();
+  });
+  errorSelCb.addEventListener("change", () => {
+    if (errorSelCb.checked) sl.setAttribute("error", "");
+    else sl.removeAttribute("error");
+    syncUrl();
+  });
+  showInputSelCb.addEventListener("change", () => {
+    if (showInputSelCb.checked) sl.setAttribute("show-input", "");
+    else sl.removeAttribute("show-input");
+    syncUrl();
+  });
+  labelInputSel.addEventListener("input", () => {
+    sl.setAttribute("label", labelInputSel.value);
+    syncUrl();
+  });
+  valueInputSel.addEventListener("input", () => {
+    sl.setAttribute("value", valueInputSel.value);
+    syncUrl();
+  });
+  focusBtn.addEventListener("click", () => sl.setFocus());
+  addBtn.addEventListener("click", () => {
+    const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+    const id = getNextId();
+    setNextId(id + 1);
+    const newItem = { id, label: `Attr Item ${id}` };
+    sl.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
+    syncUrl();
+  });
+  clearBtn.addEventListener("click", () => {
+    sl.setAttribute("selected", "[]");
+    sl.setAttribute("value", "");
+    syncUrl();
+  });
+  optRenderBtn.addEventListener("click", () => {
+    sl.getManager()?.setRenderItem((item, def) => {
+      const el = def(item);
+      if (item.color) {
+        el.style.border = `1px solid ${item.color}`;
+        el.style.background = `${item.color}11`;
+      }
+      if (item.img) {
+        const img = document.createElement("img");
+        img.src = `../img/${item.img}`;
+        img.style.width = "14px";
+        img.style.height = "14px";
+        img.style.objectFit = "contain";
+        img.style.marginRight = "5px";
+        el.insertBefore(img, el.firstChild);
+      }
+      return el;
+    });
+  });
+  section.querySelectorAll('[data-role="template-btn"]').forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const b = btn;
+      const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+      const id = getNextId();
+      setNextId(id + 1);
+      const newItem = {
+        id,
+        label: b.dataset.img ? b.dataset.img.split(".")[0] : `Template ${id}`,
+        color: b.dataset.color,
+        img: b.dataset.img,
+      };
+      sl.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
+      syncUrl();
+    });
+  });
+  optStringRenderBtn.addEventListener("click", () => {
+    sl.getManager()?.setRenderItem((item) => {
+      const el = document.createElement("div");
+      el.className = "element";
+      el.dataset.id = String(item.id);
+      el.innerHTML = `<strong>ATTR: ${item.label}</strong> <span data-remove="${item.id}" style="cursor:pointer; margin-left: 5px;">[x]</span>`;
+      return el;
+    });
+  });
+  optDefaultRenderBtn.addEventListener("click", () => {
+    sl.getManager()?.setRenderItem();
+  });
+  resizer.addEventListener("onLeft", () => syncUrl());
+  resizer.addEventListener("onCenter", () => syncUrl());
+  destroyBtn.addEventListener("click", () => {
+    sl.getManager()?.destroy();
+    section.remove();
+  });
+  return sl.getManager();
+};
+const initBtn = document.getElementById("init-btn");
+if (initBtn) {
+  initBtn.addEventListener("click", () => init());
+}
+const loadFromUrl = () => {
+  const instancesArea = document.getElementById("instances-area");
+  if (!instancesArea) return;
+  instancesArea.innerHTML = "";
+  instanceCounter = 0;
+  setNextId(1);
+  const urlParams = new URLSearchParams(window.location.search);
+  const allIds = urlStateConfig.getAllIds(urlParams);
+  if (allIds.length === 0) {
+    init(
+      [
+        { id: 1, label: "Initial 1" },
+        { id: 2, label: "Initial 2" },
+      ],
+      {},
+    );
+  } else {
+    allIds.forEach((id) => {
+      const state = urlStateConfig.fromUrl(urlParams, id);
+      if (state.selected) {
+        state.selected.forEach((item) => {
+          const numId = typeof item.id === "number" ? item.id : parseInt(String(item.id), 10);
+          if (!isNaN(numId) && numId >= getNextId()) setNextId(numId + 1);
+        });
+      }
+      init(state.selected || [], state);
+    });
+  }
+  updateUrlDisplay();
+};
+window.addEventListener("popstate", loadFromUrl);
+loadFromUrl();

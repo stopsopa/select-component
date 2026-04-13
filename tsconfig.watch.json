@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./",
+    "rootDir": "./",
+    "module": "esnext",
+    "target": "esnext",
+    "declaration": false,
+    "sourceMap": false,
+    "noEmit": false,
+    "allowJs": false
+  },
+  "include": ["composition/**/*.ts"],
+  "exclude": ["node_modules", "dist", ".github", "bash", "html", "jest.config.ts"]
+}

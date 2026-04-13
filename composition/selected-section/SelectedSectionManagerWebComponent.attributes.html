@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SelectedSectionManager WebComponent Attributes Demo</title>
+    <!-- Global CSS configuration for the SelectedSection component -->
+    <meta name="select-component" content="SelectedSectionManager.css" />
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .demo-container {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px dashed #ccc;
+        position: relative;
+      }
+      .destroy-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
+      .demo-container label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="page-description"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 21px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        max-width: 300px;
+        backdrop-filter: blur(5px);
+      "
+    >
+      Web Component version of SelectedSectionManager configured via HTML attributes.
+    </div>
+    <div style="padding: 20px">
+      <p>
+        This demo interacts with the component exclusively via <code>setAttribute</code>, <code>removeAttribute</code>,
+        and <code>getAttribute</code>.
+      </p>
+      <button id="init-btn" class="gcp-css">Initialize Component</button> |
+      <a href="" id="reload-link" class="gcp-css">reload</a> |
+      <a href="./" class="gcp-css">up ..</a>
+
+      <div id="instances-area"></div>
+
+      <script type="module" src="SelectedSectionManagerWebComponent.attributes.html.js"></script>
+    </div>
+  </body>
+</html>
