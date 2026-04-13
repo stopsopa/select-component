@@ -1,0 +1,23 @@
+/**
+ * this config is here mainly for IDE, to drive how IDE should check errors
+ * The main goal here really is to not exclude "___try" directory from checking errors
+ * and basically beyond that exclusion it should be really exactly as tsconfig.json
+ */
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "outDir": "./dist/esm",
+    "target": "esnext",
+    "module": "esnext",
+    "declaration": true,
+    "declarationDir": "./dist/types",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "allowImportingTsExtensions": true
+  },
+
+  // to typecheck everything when xx typecheck and in the IDE
+  "include": ["."],
+  "exclude": ["node_modules", "vite-project", "__alert"]
+}

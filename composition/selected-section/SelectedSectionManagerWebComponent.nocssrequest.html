@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SelectedSectionManager WebComponent Templates Demo</title>
+    <!-- Global CSS configuration for the SelectedSection component -->
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+        background: #f0f2f5;
+        color: #333;
+      }
+      h1 {
+        margin-bottom: 20px;
+        font-weight: 300;
+      }
+      .controls {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+      .demo-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ddd;
+        margin-top: 20px;
+        position: relative;
+      }
+      .destroy-btn {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
+      .demo-container label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .template-btn {
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      .template-btn:hover {
+        background: #f0f0f0;
+      }
+      pre {
+        background: #f8f8f8;
+        padding: 12px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        font-size: 12px;
+        overflow: auto;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 10px;
+      }
+      h3 {
+        margin-top: 0;
+        font-weight: 400;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body class="gcp-css">
+    <div
+      id="page-description"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 21px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        max-width: 300px;
+        backdrop-filter: blur(5px);
+      "
+    >
+      Web Component variant of SelectedSection with custom templates, optimized for minimal CSS requests.
+    </div>
+    <div style="padding: 20px">
+      <ace-editor lang="javascript">
+        <script type="ace">
+
+          import { SelectedSection } from "./selected-section.js";
+
+          // 1. If using a bundler like Vite/Webpack:
+          // SelectedSection.cssText = (await import("./SelectedSectionManager.css?raw")).default;
+
+          const css1 = await fetch("../../floating-label-pattern.css").then(r => r.text());
+          // where floating-label-pattern.css is not needed really, but is here to show how to load multiple css files
+
+          const css2 = await fetch("./SelectedSectionManager.css").then(r => r.text());
+          SelectedSection.cssText = css1 + "\n" + css2;
+        </script>
+      </ace-editor>
+      <hr />
+      <p>
+        This demo uses <code>&lt;selected-section&gt;</code> web component. Use buttons below to set custom templates
+        via JavaScript API.
+      </p>
+      <button id="init-btn">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> |
+      <a href="./">up ..</a>
+
+      <div id="instances-area"></div>
+
+      <script type="module" src="./SelectedSectionManagerWebComponent.nocssrequest.html.js"></script>
+      <script
+        type="module"
+        src="https://stopsopa.github.io/ace-editor-webcomponent/ace-web-component.js"
+        data-main-ace="https://stopsopa.github.io/ace-editor-webcomponent/noprettier/ace/ace-builds-1.43.4/src-min-noconflict/ace.js"
+      ></script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,117 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown">With remove button</label>
+<select id="dropdown"></select>
+<br />
+<label>
+  <input type="checkbox" id="toggle-search" />
+  Search Enabled
+</label>
+<hr />
+<button id="add">Load</button>
+
+<div style="margin: 20px 0">
+  <strong>Collected Values (JSON):</strong>
+  <pre
+    id="values-display"
+    style="background: #eee; padding: 12px; border-radius: 4px; font-size: 13px; margin-top: 8px"
+  ></pre>
+</div>
+
+<hr />
+<alert-box>
+  pay attention to element with 'selected: true' in loaded data. The moment list will load it will be selected
+  <br />
+  Also pay attention to last argument of setChoices(...., replaceItems). when loaded it will only add options
+  <br />
+  use the checkbox below to toggle <strong>searchEnabled</strong> dynamically (requires instance recreation)
+</alert-box>
+<alert-box type="caution">
+  Interesting thing is that to just toggle searchEnabled flag, we have to reload entire component.
+</alert-box>
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const dropdown = document.getElementById("dropdown");
+  const display = document.getElementById("values-display");
+  const toggleSearch = document.getElementById("toggle-search");
+
+  let textPresetVal;
+
+  const initChoices = () => {
+    const searchEnabled = toggleSearch.checked;
+
+    if (textPresetVal) {
+      textPresetVal.destroy();
+    }
+
+    // Note: Since we are not passing 'choices' here on re-init,
+    // Choices.js will use the options already present in the 'dropdown' select element,
+    // which were synced by the previous instance.
+    textPresetVal = new Choices(dropdown, {
+      allowHTML: true,
+      searchEnabled: searchEnabled,
+      removeItemButton: true,
+      // Only provide initial choices if the select is empty and it's the first run
+      choices:
+        dropdown.options.length === 0
+          ? [
+              { value: "One", label: "Label One", selected: true },
+              { value: "Two", label: "Label Two", disabled: true },
+              { value: "Three", label: "Label Three" },
+            ]
+          : [],
+    });
+
+    dropdown.addEventListener("change", updateDisplay);
+  };
+
+  let i = 0;
+  document.querySelector("#add").addEventListener("click", () => {
+    i += 1;
+    console.log("button click");
+    textPresetVal.setChoices(
+      [
+        { value: `foo-${i}`, label: `Foo element ${i}`, disabled: true },
+        { value: `bar-${i}`, label: `Bar element ${i}` },
+        { value: `baz-${i}`, label: `Baz element ${i}`, selected: true },
+      ],
+      "value",
+      "label",
+      false,
+    );
+    updateDisplay();
+  });
+
+  const updateDisplay = () => {
+    const values = textPresetVal.getValue(true);
+    console.log("triggered", values);
+    display.textContent = JSON.stringify(values, null, 2);
+  };
+
+  toggleSearch.addEventListener("change", () => {
+    initChoices();
+    updateDisplay();
+  });
+
+  // Initial load
+  initChoices();
+  updateDisplay();
+</script>

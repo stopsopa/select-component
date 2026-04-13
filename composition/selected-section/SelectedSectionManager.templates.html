@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SelectedSectionManager Templates Demo</title>
+    <link rel="stylesheet" href="SelectedSectionManager.css" />
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .demo-container {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px dashed #ccc;
+      }
+      .demo-container label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+      .template-btn {
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
+      }
+      .template-btn:hover {
+        background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="page-description"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 21px;
+        z-index: 1000;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        max-width: 300px;
+        backdrop-filter: blur(5px);
+      "
+    >
+      Vanilla JS demo showing custom rendering templates for selected items.
+    </div>
+    <div style="padding: 20px">
+      <button class="gcp-css" id="init-btn">Initialize Component</button> |
+      <a class="gcp-css" href="" id="reload-link">reload</a> |
+      <a class="gcp-css" href="./">up ..</a>
+
+      <div id="instances-area"></div>
+
+      <script type="module" src="./SelectedSectionManager.templates.html.js"></script>
+    </div>
+  </body>
+</html>

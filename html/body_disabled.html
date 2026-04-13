@@ -1,0 +1,58 @@
+<form autocomplete="on" class="gcp-css">
+  <!-- Field 1 -->
+  <div class="input-wrapper" id="name-wrapper">
+    <input type="text" id="name" name="name" placeholder="&nbsp;" autocomplete="name" />
+    <label for="name">Project Name *</label>
+    <div class="error">This field is required</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+
+  <!-- Field 2 -->
+  <div class="gcp-css input-wrapper" id="email-wrapper">
+    <input type="email" id="email" placeholder="&nbsp;" autocomplete="email" />
+    <label for="email">User Email</label>
+    <div class="error">Enter a valid user email</div>
+    <div class="helper-text">Enter a valid GCP admin email</div>
+  </div>
+</form>
+
+<label for="dropdown"> Disabled field example </label>
+<input class="form-control" id="dropdown" type="text" value="some,initial,values" placeholder="This is a placeholder" />
+
+<div style="margin: 20px 0">
+  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
+    <input type="checkbox" id="toggle-disabled" checked />
+    <strong>Disable component</strong>
+  </label>
+</div>
+<hr />
+
+<script type="module">
+  import Choices from "choices.js";
+
+  const toggleEl = document.getElementById("toggle-disabled");
+
+  function toggleHelper(element, event, onLoad = true) {
+    function hc() {
+      event(element.checked);
+    }
+    element.addEventListener("change", hc);
+    if (onLoad) {
+      hc();
+    }
+  }
+
+  const textDisabled = new Choices("#dropdown", {
+    allowHTML: true,
+    addItems: false,
+    removeItems: false,
+  });
+
+  toggleHelper(toggleEl, (disabled) => {
+    if (disabled) {
+      textDisabled.disable();
+    } else {
+      textDisabled.enable();
+    }
+  });
+</script>

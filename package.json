@@ -1,0 +1,28 @@
+{
+  "type": "module",
+  "version": "0.0.0",
+  "name": "composite-select",
+  "main": "./dist/esm/Module.js",
+  "types": "./dist/types/Module.d.ts",
+  "module": "./dist/esm/Module.js",
+  "exports": {
+    ".": {
+      "types": "./dist/types/Module.d.ts",
+      "import": "./dist/esm/Module.js",
+      "require": "./dist/cjs/Module.cjs"
+    },
+    "./package.json": "./package.json",
+    "./*.css": "./*.css",
+    "./*.json": "./*.json",
+    "./*.png": "./*.png",
+    "./*.jpg": "./*.jpg",
+    "./*.svg": "./*.svg",
+    "./composition/*": "./composition/*",
+    "./*": {
+      "types": "./dist/types/*.d.ts",
+      "import": "./dist/esm/*.js",
+      "require": "./dist/cjs/*.js",
+      "default": "./*"
+    }
+  }
+}
