@@ -1,9 +1,9 @@
 
+set -o pipefail
 S="\\" # will be used later
 
 # current shell name reliably
-_SHELL="$(ps -p $$ -o comm=)"; # bash || sh || zsh
-_SHELL="$(basename ${_SHELL//-/})"
+_SHELL="$(ps "${$}" | grep "${$} " | grep -v grep | sed -rn "s/.*[-\/]+(bash|z?sh) .*/\1/p")"; # bash || sh || zsh
 case ${_SHELL} in
   zsh)
     _DIR="$( cd "$( dirname "${(%):-%N}" )" && pwd -P )"
@@ -34,6 +34,13 @@ if [ -f .env.sh ]; then
   source .env.sh
 fi
 
+PACKAGE="npm"
+
+yarn --version 1> /dev/null 2> /dev/null
+if [ "${?}" = "0" ]; then
+  PACKAGE="yarn"
+fi
+
 node -v 1> /dev/null 2> /dev/null
 
 if [ "${?}" != "0" ]; then
@@ -60,51 +67,70 @@ function quote {
   echo "$1" | sed -E 's/\"/\\"/g'
 }
 
+function nodeExtractVersion() {
+  NODE_OPTIONS="" node --input-type=module --eval '
+import readline from "readline";
+
+const reg = / (@playwright\/test|playwright|playwright-core)@/;
+
+const regVer = /^.*?@(\d+\.\d+\.\d+).*$/;
+
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false,
+});
+
+let versions = [];
+rl.on("line", (line) => {
+  const l = line.match(reg)?.[1];
+
+  if (l) {
+    const v = line.match(regVer)?.[1];
+
+    versions.push({
+      l,
+      v,
+    });
+  }
+});
+
+rl.on("close", () => {
+  let ver;
+
+  versions.forEach(({ v }) => {
+    if (ver === undefined) {
+      ver = v;
+    }
+
+    if (ver !== v) {
+      console.log(`
+playwright.sh error: all playwright libraries in package.json should have the same versions:
+found: ${JSON.stringify(versions, null, 4)}
+`);
+
+      process.exit(1);
+    }
+  });
+
+  if (ver === undefined) {
+    console.log(`
+playwright.sh error: no playwright libraries found in package.json
+add yarn add @playwright/test playwright
+`);
+    process.exit(1);
+  }
+
+  process.stdout.write(ver);
+});
+'
+}
+
 function extractVersion() {
-
-# extracting dependencies.playwright from package.json
-PLAYWRIGHT_VER="$(cat <<EOF | node
-const fs = require("fs");
-
-const file = "./package.json";
-
-if (!fs.existsSync(file)) {
-  throw new Error("playwright.sh error: file " + file + " doesn't exist");
-}
-
-if (!fs.lstatSync(file).isFile()) {
-  throw new Error("playwright.sh error: path " + file + " is not a file");
-}
-
-const package = require(file);
-
-const dependencies = {
-  ...package.dependencies,
-  ...package.devDependencies,
-};
-
-const ver = dependencies.playwright || dependencies['@playwright/test'];
-
-if (typeof ver !== 'string') {
-  throw new Error("playwright.sh error: can't extract dependencies.playwright || dependencies['@playwright/test'] first install playwright and @playwright/test");
-}
-
-const parts = ver.match(/\d+\.\d+\.\d+/);
-
-if (!parts || parts.length !== 1) {
-  throw new Error("playwright.sh error: " + file + " playwright dependency is not defined");
-}
-
-process.stdout.write(parts[0]);
-
-EOF
-)";
-
-  if [ "${?}" != "0" ]; then
-
-      echo "${0} error: extracting dependencies.playwright from package.json failed";
-
-      exit 1
+  if [ "${PACKAGE}" = "npm" ]; then
+    PLAYWRIGHT_VER="$(NODE_OPTIONS="" npm ls --depth=9999 | nodeExtractVersion)";
+  else
+    PLAYWRIGHT_VER="$(NODE_OPTIONS="" yarn list | nodeExtractVersion)";
   fi
 }
 
@@ -159,11 +185,11 @@ while (( "$#" )); do
       if [ "$2" = "" ]; then
         echo "$0 error: -e|--env value can't be empty" >&2 
         exit 1;                                          
-      fi                 
-      if [ ! -f "${ENVFILE}" ]; then
-        echo "$0 error: -e|--env file '${ENVFILE}' doesn't exist" >&2 
+      fi                    
+      if [ ! -f "${2}" ]; then
+        echo "$0 error: -e|--env file '${2}' doesn't exist" >&2 
         exit 1;                                          
-      fi        
+      fi       
       ENVFILE="$2";
       shift 2;
       ;;
@@ -254,11 +280,25 @@ cat <<EEE > "${_DOCKERDEFAULTS}"
 
 S="\\\\"
 
+PLAYWRIGHT_TEST_MATCH_DEFAULT=""
+if [ "\${PLAYWRIGHT_TEST_MATCH}" != "" ]; then
+    PLAYWRIGHT_TEST_MATCH_DEFAULT="--env PLAYWRIGHT_TEST_MATCH"
+fi   
+
+NODE_API_PORT_DEFAULT=""
+if [ "\${NODE_API_PORT}" != "" ]; then
+    NODE_API_PORT_DEFAULT="--env NODE_API_PORT"
+fi  
+
 cat <<EOF
 -w "/code" \$S
+\${NODE_API_PORT_DEFAULT} \$S
+\${PLAYWRIGHT_TEST_MATCH_DEFAULT} \$S
 -v "\\\$(pwd)/tests:/code/tests" \$S
 -v "\\\$(pwd)/node_modules:/code/node_modules" \$S
--v "\\\$(pwd)/playwright.config.js:/code/playwright.config.js"
+-v "\\\$(pwd)/playwright.config.js:/code/playwright.config.js" \$S
+-v "\\\$(pwd)/playwright-async.config.js:/code/playwright-async.config.js"
+
 EOF
 
 EEE
@@ -414,6 +454,8 @@ if [ "${_TARGET}" = "local" ]; then
 
 EEE
 
+node -v
+
   node node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
   exit 0
@@ -538,8 +580,8 @@ ${DOCKER_PARAMS_NOT_QUOTED} $S
 ${_HOSTHANDLER} $S
 ${IMAGE} $S
 bash
-  echo =========== inspect =========== vv
   set -e
+  echo ===========printenv== to see PLAYWRIGHT_TEST_MATCH =========  
   printenv
   echo "pwd: >\\\$(pwd)<"
   ls -la
