@@ -34,18 +34,15 @@ if [ -f .env.sh ]; then
   source .env.sh
 fi
 
-if [ -f "pnpm-lock.yaml" ]; then
-  echo "DETECTION: pnpm-lock.yaml found, using pnpm"
+if command -v pnpm > /dev/null 2>&1 && [ -f "pnpm-lock.yaml" ]; then
+  echo "DETECTION: pnpm command and pnpm-lock.yaml found, using pnpm"
   PACKAGE="pnpm"
-elif [ -f "yarn.lock" ]; then
-  echo "DETECTION: yarn.lock found, using yarn"
+elif command -v yarn > /dev/null 2>&1 && [ -f "yarn.lock" ]; then
+  echo "DETECTION: yarn command and yarn.lock found, using yarn"
   PACKAGE="yarn"
-elif [ -f "package-lock.json" ]; then
-  echo "DETECTION: package-lock.json found, using npm"
-  PACKAGE="npm"
 else
-  echo "DETECTION: no lock file found, pnpm-lock.yaml or yarn.lock or package-lock.json is required"    
-  exit 1
+  echo "DETECTION: pnpm/yarn or their lock files not found, using npm"
+  PACKAGE="npm"
 fi
 
 node -v 1> /dev/null 2> /dev/null
@@ -57,18 +54,18 @@ if [ "${?}" != "0" ]; then
   exit 1
 fi
 
-GRAY=$(tput setaf 244)
-BLACK=$(tput setaf 0)
-RED=$(tput setaf 1)
-GREEN=$(tput setaf 2)
-YELLOW=$(tput setaf 3)
-BLUE=$(tput setaf 4)
-MAGENTA=$(tput setaf 5)
-CYAN=$(tput setaf 6)
-WHITE=$(tput setaf 7)
-BOLD=$(tput bold)
-REVERSE=$(tput rev)
-RESET=$(tput sgr0)
+GRAY=$(tput setaf 244 2>/dev/null || echo "")
+BLACK=$(tput setaf 0 2>/dev/null || echo "")
+RED=$(tput setaf 1 2>/dev/null || echo "")
+GREEN=$(tput setaf 2 2>/dev/null || echo "")
+YELLOW=$(tput setaf 3 2>/dev/null || echo "")
+BLUE=$(tput setaf 4 2>/dev/null || echo "")
+MAGENTA=$(tput setaf 5 2>/dev/null || echo "")
+CYAN=$(tput setaf 6 2>/dev/null || echo "")
+WHITE=$(tput setaf 7 2>/dev/null || echo "")
+BOLD=$(tput bold 2>/dev/null || echo "")
+REVERSE=$(tput rev 2>/dev/null || echo "")
+RESET=$(tput sgr0 2>/dev/null || echo "")
 
 function quote {
   echo "$1" | sed -E 's/\"/\\"/g'
@@ -281,7 +278,6 @@ fi
 export ENVFILE
 # export it for playwright.config.js to read for -t local mode
 
-
 if [ "${_GENDOCKERDEFAULTS}" = "1" ]; then
 
   if [ -f "${_DOCKERDEFAULTS}" ]; then
@@ -465,13 +461,13 @@ if [ "${_TARGET}" = "local" ]; then
 
   cat <<EEE
 
-  /bin/bash node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  ./node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
 EEE
 
 node -v
 
-  /bin/bash node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  ./node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
   exit 0
 fi
@@ -562,6 +558,7 @@ if [ "${_TARGET}" = "docker" ]; then
   if [ "${_TESTAGAINSTHOST}" = "0" ]; then
     PASS_NO_HOST="--nohost"
   fi
+
   DOCKERDEFAULTS="$(/bin/bash "${_DOCKERDEFAULTS}" ${PASS_NO_HOST})"
 
   if [ "${?}" != "0" ]; then
@@ -571,9 +568,9 @@ if [ "${_TARGET}" = "docker" ]; then
       exit 1
   fi
 
-
 extractVersion
 
+# HOMEPAGE FOR THE IMAGE: https://github.com/stopsopa/playwright-research/blob/master/docker/README.md
 # IMAGE="mcr.microsoft.com/playwright:v${PLAYWRIGHT_VER}-focal"
 # IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-focal-just-chromium"
 # IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-focal-just-chromium"
@@ -606,18 +603,18 @@ bash
   set -x
   echo yarn.lock and package.json are required to run yarn list playwright but lets try  
   npm ls | grep playwright
-  /bin/bash node_modules/.bin/playwright --version
+  ./node_modules/.bin/playwright --version
   node playwright.config.js
   cat <<OOO
 
 value for PLAYWRIGHT_TEST_MATCH >\${PLAYWRIGHT_TEST_MATCH}<  
 fallback to \$(NODE_OPTIONS="" node playwright.config.js | grep testMatch)
 
-  /bin/bash node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  ./node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
 OOO
   echo =========== inspect =========== ^^
-  /bin/bash node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  ./node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 EEE
 EOF
 )"
