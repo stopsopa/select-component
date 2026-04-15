@@ -208,6 +208,41 @@ export class SelectComponent extends HTMLElement {
 
           .filter {
             flex-shrink: 0; /* Stick to top, don't shrink */
+            padding: 0 8px 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 8px;
+
+            input {
+              flex: 1;
+              padding: 4px 8px;
+              border: 1px solid var(--gcp-css-border, #99999b);
+              border-radius: 4px;
+              font-size: 14px;
+              font-family: inherit;
+              outline: none;
+
+              &:focus {
+                border-color: var(--gcp-css-primary, #1a73e8);
+                box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+              }
+            }
+
+            .spinner {
+              width: 14px;
+              height: 14px;
+              border: 2px solid #ccc;
+              border-top-color: var(--gcp-css-primary, #1a73e8);
+              border-radius: 50%;
+              animation: spin 0.8s linear infinite;
+              display: none; /* Hidden by default, can be shown via JS */
+            }
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
           }
 
           .options {
@@ -275,6 +310,10 @@ export class SelectComponent extends HTMLElement {
         </div>
 
         <div class="popover cover-bottom" data-popover popover>
+          <div class="filter">
+            <input type="text" placeholder="Search...">
+            <span class="spinner"></span>
+          </div>
           <div class="options">
           </div>
           <div class="footer">
