@@ -13,7 +13,7 @@ import { dirname, join, basename, resolve, relative } from "node:path";
 import { stdin, env } from "node:process";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
-import Semaphore from "./Semaphore.ts";
+import Semaphore from "./js/Semaphore.ts";
 
 const th = (msg: string) => new Error(`es.ts error: ${msg}`);
 
