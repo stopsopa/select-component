@@ -1,9 +1,11 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [[ -f "${DIR}/.env" ]]; then
+ENVFILE="${ENVFILE:-.env}"
+
+if [[ -f "${DIR}/${ENVFILE}" ]]; then
     # https://unix.stackexchange.com/a/79065
-    eval "$(/bin/bash "${DIR}/bash/exportsource.sh" "${DIR}/.env")"
+    eval "$(/bin/bash "${DIR}/bash/exportsource.sh" "${DIR}/${ENVFILE}")"
 fi
 
 # -----------------------------------------------------------------------------

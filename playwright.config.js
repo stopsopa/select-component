@@ -2,7 +2,7 @@ import path from "path";
 
 import { fileURLToPath } from "url";
 
-// import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 
 // require("dotenv").config();
 // const { devices } = require("@playwright/test");
@@ -11,6 +11,7 @@ import { devices } from "@playwright/test";
 import buildBASE_URL from "./playwright.generateBASE_URL.js";
 
 import fs from "fs";
+
 
 // const cmd = require("./tests/tools/cmd");
 // import cmd from "./lib/cmd.js";
@@ -22,19 +23,19 @@ const __dirname = path.dirname(__filename);
 /** @type {import('./types.types.ts').ThType} ThType */
 const th = (msg) => new Error(`playwright.config.js error: ${msg}`);
 
-// if (typeof process.env.ENVFILE === "string" && process.env.ENVFILE.trim()) {
-//   // if different file specified to playwright.sh like:
-//   // /bin/bash playwright.sh --env .env_test_against_vite -- --debug tests/e2e/sandbox/img.spec.js
-//   if (!fs.existsSync(process.env.ENVFILE)) {
-//     throw th(`process.env.ENVFILE provided but specified file '${process.env.ENVFILE}' doesn't exist`);
-//   }
+if (typeof process.env.ENVFILE === "string" && process.env.ENVFILE.trim()) {
+  // if different file specified to playwright.sh like:
+  // /bin/bash playwright.sh --env .env_test_against_vite -- --debug tests/e2e/sandbox/img.spec.js
+  if (!fs.existsSync(process.env.ENVFILE)) {
+    throw th(`process.env.ENVFILE provided but specified file '${process.env.ENVFILE}' doesn't exist`);
+  }
 
-//   dotenv.config({
-//     path: process.env.ENVFILE,
-//   });
-// } else {
-//   dotenv.config();
-// }
+  dotenv.config({
+    path: process.env.ENVFILE,
+  });
+} else {
+  dotenv.config();
+}
 
 buildBASE_URL("playwright.config.js");
 
@@ -80,7 +81,7 @@ const config = {
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [["html", { open: "never" }]], // or CI=1 from: https://github.com/microsoft/playwright/issues/11773#issuecomment-1026742482
+  reporter: [["list"], ["html", { open: "never" }]], // or CI=1 from: https://github.com/microsoft/playwright/issues/11773#issuecomment-1026742482
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {

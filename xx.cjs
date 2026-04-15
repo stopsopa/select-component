@@ -50,6 +50,19 @@ EEE
       source: false,
       confirm: false,
     },
+    [`playwright`]: {
+      command: `
+cat <<EEE
+
+ENVFILE=.env.playwright /bin/bash pw.sh
+ENVFILE=.env.playwright /bin/bash pw.sh --target docker
+
+EEE
+      `,
+      description: "Transpile choice.js/select.ts to choice.js/select.js",
+      source: false,
+      confirm: false,
+    },
 
     ...setup,
   };

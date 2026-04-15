@@ -31,18 +31,13 @@ ${NODE_API_PORT_DEFAULT} $S
 ${MYSQL_DB_CHANGE_DEFAULT} $S
 ${PLAYWRIGHT_TEST_MATCH_DEFAULT} $S
 ${MYSQL_HOST_PASS} $S
--v "\$(pwd)/tests:/code/tests" $S
--v "\$(pwd)/src:/code/src" $S
--v "\$(pwd)/app:/code/app" $S
--v "\$(pwd)/lib:/code/lib" $S
--v "\$(pwd)/jasmine:/code/jasmine" $S
--v "\$(pwd)/fixtures:/code/fixtures" $S
+-v "\$(pwd)/choice.js:/code/choice.js" $S
+-v "\$(pwd)/js:/code/js" $S
 -v "\$(pwd)/package.json:/code/package.json" $S
 -v "\$(pwd)/yarn.lock:/code/yarn.lock" $S
 -v "\$(pwd)/node_modules:/code/node_modules" $S
 -v "\$(pwd)/playwright-async.config.js:/code/playwright-async.config.js" $S
 -v "\$(pwd)/playwright.config.js:/code/playwright.config.js" $S
--v "\$(pwd)/playwright.generateBASE_URL.js:/code/playwright.generateBASE_URL.js" $S
--v "\$(pwd)/getDbName.cjs:/code/getDbName.cjs"
+-v "\$(pwd)/playwright.generateBASE_URL.js:/code/playwright.generateBASE_URL.js"
 EOF
 

@@ -34,11 +34,18 @@ if [ -f .env.sh ]; then
   source .env.sh
 fi
 
-PACKAGE="npm"
-
-yarn --version 1> /dev/null 2> /dev/null
-if [ "${?}" = "0" ]; then
+if [ -f "pnpm-lock.yaml" ]; then
+  echo "DETECTION: pnpm-lock.yaml found, using pnpm"
+  PACKAGE="pnpm"
+elif [ -f "yarn.lock" ]; then
+  echo "DETECTION: yarn.lock found, using yarn"
   PACKAGE="yarn"
+elif [ -f "package-lock.json" ]; then
+  echo "DETECTION: package-lock.json found, using npm"
+  PACKAGE="npm"
+else
+  echo "DETECTION: no lock file found, pnpm-lock.yaml or yarn.lock or package-lock.json is required"    
+  exit 1
 fi
 
 node -v 1> /dev/null 2> /dev/null
@@ -129,8 +136,15 @@ add yarn add @playwright/test playwright
 function extractVersion() {
   if [ "${PACKAGE}" = "npm" ]; then
     PLAYWRIGHT_VER="$(NODE_OPTIONS="" npm ls --depth=9999 | nodeExtractVersion)";
-  else
+  elif [ "${PACKAGE}" = "yarn" ]; then
     PLAYWRIGHT_VER="$(NODE_OPTIONS="" yarn list | nodeExtractVersion)";
+  elif [ "${PACKAGE}" = "pnpm" ]; then
+    PLAYWRIGHT_VER="$(NODE_OPTIONS="" pnpm ls | nodeExtractVersion)";
+  fi
+
+  if ! [[ "${PLAYWRIGHT_VER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "${0} error: playwright version ${PLAYWRIGHT_VER} is not valid"
+    exit 1
   fi
 }
 
@@ -266,6 +280,7 @@ fi
 
 export ENVFILE
 # export it for playwright.config.js to read for -t local mode
+
 
 if [ "${_GENDOCKERDEFAULTS}" = "1" ]; then
 
@@ -450,13 +465,13 @@ if [ "${_TARGET}" = "local" ]; then
 
   cat <<EEE
 
-  node node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  /bin/bash node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
 EEE
 
 node -v
 
-  node node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  /bin/bash node_modules/.bin/playwright test ${_HEADLESS} ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
   exit 0
 fi
@@ -547,7 +562,6 @@ if [ "${_TARGET}" = "docker" ]; then
   if [ "${_TESTAGAINSTHOST}" = "0" ]; then
     PASS_NO_HOST="--nohost"
   fi
-
   DOCKERDEFAULTS="$(/bin/bash "${_DOCKERDEFAULTS}" ${PASS_NO_HOST})"
 
   if [ "${?}" != "0" ]; then
@@ -557,10 +571,14 @@ if [ "${_TARGET}" = "docker" ]; then
       exit 1
   fi
 
+
 extractVersion
 
 # IMAGE="mcr.microsoft.com/playwright:v${PLAYWRIGHT_VER}-focal"
-IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-focal-just-chromium"
+# IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-focal-just-chromium"
+# IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-focal-just-chromium"
+IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-noble-just-chromium"
+
 
 # testing how to run multiline bash script
 # cat <<EEE | docker run --rm -i --entrypoint="" \
@@ -587,17 +605,19 @@ bash
   ls -la
   set -x
   echo yarn.lock and package.json are required to run yarn list playwright but lets try  
-  yarn --version
-  yarn list | grep playwright
-  node node_modules/.bin/playwright --version
+  npm ls | grep playwright
+  /bin/bash node_modules/.bin/playwright --version
   node playwright.config.js
   cat <<OOO
 
-  node node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+value for PLAYWRIGHT_TEST_MATCH >\${PLAYWRIGHT_TEST_MATCH}<  
+fallback to \$(NODE_OPTIONS="" node playwright.config.js | grep testMatch)
+
+  /bin/bash node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 
 OOO
   echo =========== inspect =========== ^^
-  node node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
+  /bin/bash node_modules/.bin/playwright test ${_ALLOWONLY} ${_PROJECT} --workers=1 $@
 EEE
 EOF
 )"

@@ -23,15 +23,16 @@ import serveIndex from "serve-index";
 
 const host = process.env.HOST || "0.0.0.0";
 const port = process.env.PORT || 8080;
-const web = path.resolve(__dirname, ".");
-const templates = path.resolve(__dirname, "templates");
-
-const readFile = (file) => fs.readFileSync(file).toString();
+const web = __dirname;
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.json({ ok: true });
+});
 
 app.post("/formData", (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
