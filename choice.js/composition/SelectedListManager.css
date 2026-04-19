@@ -1,0 +1,137 @@
+.selected-list {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--gcp-css-border, #99999b);
+  transition: box-shadow var(--gcp-css-transition, 150ms cubic-bezier(0.4, 0, 0.2, 1));
+  min-height: 36px;
+  cursor: text;
+
+  &:focus-within {
+    box-shadow: 0 0 0 2px var(--gcp-css-primary, #1a73e8);
+  }
+
+  &.error {
+    box-shadow: 0 0 0 2px var(--gcp-css-error, #d93025);
+  }
+
+  &.disabled {
+    background: #f1f3f4;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .flex-list {
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    row-gap: 0;
+    column-gap: 6px;
+    align-items: center;
+    z-index: 1;
+    min-width: 0;
+    padding: 0;
+    padding-left: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+
+    > * {
+      font-size: 16px;
+      line-height: 1.15;
+      padding-top: 3px;
+      padding-bottom: 3px;
+      box-sizing: border-box;
+      margin-top: 3px;
+      margin-bottom: 3px;
+    }
+
+    input {
+      border: none;
+      outline: none;
+      background: transparent;
+      field-sizing: content;
+      flex: 1 1 auto;
+      min-width: 50px;
+      max-width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+      font-family: inherit;
+      color: inherit;
+
+      &::placeholder {
+        color: transparent;
+      }
+    }
+  }
+
+  .buttons-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    padding-left: 4px;
+    z-index: 2;
+    flex-shrink: 0;
+
+    button.clear-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gcp-css-gray-text, #5f6368);
+      line-height: 1;
+
+      &:hover {
+        color: #333;
+      }
+    }
+  }
+
+  .element {
+    display: flex;
+    align-items: center;
+    background: rgb(0 0 0 / 12%);
+    border-radius: 2px;
+    padding-left: 4px;
+    padding-right: 5px;
+    color: rgba(0, 0, 0, 0.88);
+    margin-left: -4px;
+    margin-right: 5px;
+
+    [data-remove] {
+      cursor: pointer;
+      margin-left: 4px;
+      width: 14px;
+      height: 14px;
+      min-width: 14px;
+      min-height: 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+
+      &::before {
+        content: "✕";
+        font-size: 10px;
+        line-height: 1;
+        color: rgba(0, 0, 0, 0.45);
+      }
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+
+        &::before {
+          color: rgba(0, 0, 0, 0.85);
+        }
+      }
+    }
+  }
+}

@@ -3,9 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>SelectedListManager Demo</title>
+    <link rel="stylesheet" href="SelectedListManager.css">
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .controls { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .demo-container { margin-top: 20px; padding: 20px; border: 1px dashed #ccc;}
+        label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
+    <h1>SelectedListManager Demo</h1>
+    <button id="init-btn">Initialize Component</button>
     
+    <div id="demo-area" class="demo-container" style="display: none;">
+        <center-resizer left="50px" center="350px">
+            <div id="list-parent"></div>
+        </center-resizer>
+        
+        <div style="margin-top: 10px;">
+            Input Value: <pre id="input-value-out" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="new-item-input" placeholder="New item label">
+            <button id="add-btn">Add Item</button>
+        </div>
+        
+        <div class="controls">
+            <label><input type="checkbox" id="error-cb"> Error State</label>
+            <label><input type="checkbox" id="disabled-cb"> Disabled State</label>
+            <label><input type="checkbox" id="input-field-cb" checked> Show Input Field</label>
+        </div>
+    </div>
+
+    <script type="module">
+        import "../../js/CenterResizer.js";
+        import { SelectedListManager } from "./SelectedListManager.js";
+
+        const initBtn = document.getElementById('init-btn');
+        const demoArea = document.getElementById('demo-area');
+        const parentElement = document.getElementById('list-parent');
+        
+        const newItemInput = document.getElementById('new-item-input');
+        const addBtn = document.getElementById('add-btn');
+        
+        const errorCb = document.getElementById('error-cb');
+        const disabledCb = document.getElementById('disabled-cb');
+        const inputFieldCb = document.getElementById('input-field-cb');
+
+        const inputValueOut = document.getElementById('input-value-out');
+
+        let manager = null;
+        let localList = [];
+        let idCounter = 1;
+
+        initBtn.addEventListener('click', () => {
+            initBtn.style.display = 'none';
+            demoArea.style.display = 'block';
+
+            manager = new SelectedListManager(parentElement, {
+                list: localList,
+                onDelete: (id) => {
+                    localList = localList.filter(item => String(item.id) !== String(id));
+                    manager.updateList(localList);
+                },
+                onClear: () => {
+                    localList = [];
+                    manager.updateList(localList);
+                },
+                onChange: (value) => {
+                    inputValueOut.textContent = value;
+                }
+            });
+            
+            // Listen to input from the internal input element if it exists
+            const handleInternalInput = (e) => {
+                if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                    localList.push({ id: idCounter++, label: e.target.value.trim() });
+                    e.target.value = '';
+                    manager.updateList(localList);
+                }
+            };
+            
+            parentElement.addEventListener('keydown', (e) => {
+                if (e.target.tagName.toLowerCase() === 'input') {
+                    handleInternalInput(e);
+                }
+            });
+        });
+
+        addBtn.addEventListener('click', () => {
+            if (!manager) return;
+
+            let val = newItemInput.value.trim();
+            let usedInternal = false;
+
+            if (!val && manager.inputElement) {
+                val = manager.inputElement.value.trim();
+                usedInternal = true;
+            }
+
+            // Always clear the "New item label" input on each press
+            newItemInput.value = '';
+
+            if (val) {
+                localList.push({ id: idCounter++, label: val });
+                manager.updateList(localList);
+
+                // If we consumed the value from the internal input, clear it too
+                if (usedInternal) {
+                    manager.setInputValue('');
+                    inputValueOut.textContent = '';
+                }
+            }
+        });
+
+        errorCb.addEventListener('change', (e) => {
+            if (manager) manager.setErrorState(e.target.checked);
+        });
+
+        disabledCb.addEventListener('change', (e) => {
+            if (manager) manager.setDisabled(e.target.checked);
+        });
+
+        inputFieldCb.addEventListener('change', (e) => {
+            if (manager) manager.setInputField(e.target.checked);
+        });
+    </script>
 </body>
 </html>

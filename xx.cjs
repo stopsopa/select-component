@@ -46,7 +46,13 @@ set -e
     },
     [`transpile`]: {
       command: `
+cat <<EEE
+
 /bin/bash transpile.sh choice.js/select.ts
+
+/bin/bash transpile.sh choice.js/composition/SelectedListManager.ts
+
+EEE
       `,
       description: "Transpile choice.js/select.ts to choice.js/select.js",
       source: false,

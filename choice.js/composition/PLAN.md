@@ -128,6 +128,8 @@ we should also have method to change error state, disable state and inputField w
 
 We should also have "X" button on the right (like it is now done in choice.js/select.ts in <button class="clear-btn">✕</button>, it should trigger onClear event)
 
+we have to also allow user to attach to onChange event on input.
+
 # style management
 
 style for this component should rely on parent element class , let's decide about it's name here. Let's make it 'selected-list'.
@@ -146,12 +148,16 @@ and make all css styling all it's content encapsulated inside like
 
 IMPORTANT: use nesting css like it is now done in choice.js/select.ts
 
+all style should be placed in SelectedListManager.css file
+
 # input manipulation
 
 I have to have method on that class to update value in <input>
 also to control enabled disabled and error state
 
+Also our class need to have option to register onChange event for inuput value
 
+BTW: all events should be registered using event deletage on the parent element.
 
 
 
@@ -165,7 +171,7 @@ also to control enabled disabled and error state
 
 <end to end testing>
 
-Create html interactive demo using SelectedListManager class.
+Create html choice.js/composition/SelectedListManager.html interactive demo using SelectedListManager class.
 
 we should have button and once that button will be clicked it should in it's event listener:
 - create parent element for selected list
@@ -174,10 +180,21 @@ we should have button and once that button will be clicked it should in it's eve
 - that dom element should be mounted inside center-resizer
 - but no only in resizer it should be mnounded with surrounding input to allow user to type, and once button will be clicked next to that input it should add element to the local list and trigger update in the list rendering in SelectedListManager.
 - also we should subscribe to onDelete event from SelectedListManager and if user click "x" button on some element in the list we should remove it from our local list and trigger update in the list rendering in SelectedListManager.
-
+- we have to also attach to onChange event and create small <pre> tag and always render in it value from input.
 - also to the surrounding of of that instance of SelectedListManager we should add checkbox for controlling error state and disabled state also for inputField 
 - we should also listend to onClear and handle it in our local state and then trigger rerender using SelectedListManager 
-
 So generally we have to create like todo list instantiating one instance of SelectedListManager, and render it with surrounding inputs/buttons to manipulate all states (to tests all states) of SelectedListManager.
+
+
+this demo page should obviously load SelectedListManager.css too
+
+When user click "Add Item" we should prioritise value from input "New item label" but if empty we should also take value from input field attached to SelectedListManager
+
+also on each press to "Add Item" clear "New item label" input
+
+and if none of these inputs has value we should not add any item and not trigger the event to re-render the list.
+
+
+
 
 </end to end testing>

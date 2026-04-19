@@ -1,3 +1,8 @@
+/**
+ *       <center-resizer left="50px" center="350px">
+            <div ...
+        </center-resizer>
+ */
 export class CenterResizer extends HTMLElement {
   leftDiv!: HTMLElement;
   rightDiv!: HTMLElement;
