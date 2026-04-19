@@ -306,6 +306,7 @@ export class SelectComponent extends HTMLElement {
         </div>
         <div class="buttons-container">
           <button class="clear-btn">✕</button>
+          <button class="dropdown-btn">⬇️</button>
         </div>
 
         <div class="popover cover-bottom" data-popover popover>

@@ -36,6 +36,8 @@ EEE
     },
     [`server`]: {
       command: `
+set -e      
+/bin/bash .env.sh      
 /bin/bash bash/proc/watchServer.sh server.js -- node --env-file .env --watch server.js
       `,
       description: "Start server",
