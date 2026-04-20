@@ -42,9 +42,13 @@
   </head>
   <body>
     <h1>SelectedListManager Templates</h1>
-    <button id="init-btn">Initialize Component</button>
+    <button id="init-btn">Initialize Component</button> <a href="" id="reload-link">reload</a>
 
     <div id="instances-area"></div>
+
+    <script>
+      document.getElementById("reload-link").href = window.location.pathname;
+    </script>
 
     <script type="module">
       import "../../js/CenterResizer.js";
