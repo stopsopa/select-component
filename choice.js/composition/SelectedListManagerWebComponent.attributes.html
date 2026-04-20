@@ -191,7 +191,7 @@
         sl.addEventListener("onChange", (e) => {
           inputValueOut.textContent = e.detail.value;
           onChangeCounter.textContent = ++counter;
-          lastKeyOut.textContent = e.detail.key || "-";
+          lastKeyOut.textContent = e.detail.key || (typeof e.detail.key);
 
           const originalEvent = e.detail.originalEvent;
           if (originalEvent.type === "keydown") {

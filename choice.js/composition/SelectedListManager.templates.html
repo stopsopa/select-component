@@ -195,7 +195,8 @@
           onChange: function (e) {
             inputValueOut.textContent = e.target.value;
             onChangeCounter.textContent = ++counter;
-            lastKeyOut.textContent = e.key || e.data || e.type;
+            // lastKeyOut.textContent = e.key || e.data || e.type;
+            lastKeyOut.textContent = e.key || typeof e.key;
 
             if (e.type === "keydown") {
               if (e.key === "Enter" && e.target.value.trim() !== "") {
