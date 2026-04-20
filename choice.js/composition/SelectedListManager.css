@@ -139,7 +139,7 @@
       width: 24px;
       height: 24px;
       margin-right: 5px;
-      background-image: url("data:image/svg+xml,%3Csvg fill='hsl(228, 97%25, 42%25)' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg fill='%231a73e8' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12,4a8,8,0,0,1,7.89,6.7A1.53,1.53,0,0,0,21.38,12h0a1.5,1.5,0,0,0,1.48-1.75,11,11,0,0,0-21.72,0A1.5,1.5,0,0,0,2.62,12h0a1.53,1.53,0,0,0,1.49-1.3A8,8,0,0,1,12,4Z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-size: contain;
       animation: spin 0.75s linear infinite;
@@ -156,7 +156,7 @@
       justify-content: center;
       color: var(--gcp-css-gray-text, #5f6368);
       line-height: 1;
-
+      margin-right: 3px;
       &:hover {
         color: #333;
       }
