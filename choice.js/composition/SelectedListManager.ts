@@ -7,14 +7,16 @@ export type ListElement = {
 export type SelectedListManagerOptions<T extends ListElement> = {
     list?: T[];
     inputField?: boolean;
-    inputFieldValue?: string;
+    value?: string;
     inputFieldRender?: (value: string) => HTMLInputElement;
     renderItem?: (item: T) => HTMLElement;
     renderList?: (list: T[]) => HTMLElement[];
     onDelete?: (id: string) => void;
     onClear?: () => void;
     onChange?: (value: string) => void;
-    floatingLabel?: string;
+    label?: string;
+    disabled?: boolean;
+    error?: boolean;
 };
 
 export class SelectedListManager<T extends ListElement> {
@@ -26,7 +28,7 @@ export class SelectedListManager<T extends ListElement> {
     public list: T[];
     public inputElement: HTMLInputElement | null = null;
     public clearButton: HTMLButtonElement;
-    public floatingLabelElement: HTMLLabelElement | null = null;
+    public labelElement: HTMLLabelElement | null = null;
 
     constructor(parentElement: HTMLElement, options: SelectedListManagerOptions<T> = {}) {
         this.parentElement = parentElement;
@@ -34,7 +36,7 @@ export class SelectedListManager<T extends ListElement> {
         this.options = {
             list: [],
             inputField: true,
-            inputFieldValue: '',
+            value: '',
             inputFieldRender: (value: string) => {
                 const input = document.createElement('input');
                 input.type = 'text';
@@ -59,6 +61,8 @@ export class SelectedListManager<T extends ListElement> {
 
                 return el;
             },
+            disabled: false,
+            error: false,
             ...options
         };
 
@@ -73,11 +77,11 @@ export class SelectedListManager<T extends ListElement> {
         this.container = document.createElement('div');
         this.container.className = 'selected-list';
 
-        if (this.options.floatingLabel) {
-            this.floatingLabelElement = document.createElement('label');
-            this.floatingLabelElement.className = 'floating-label';
-            this.floatingLabelElement.textContent = this.options.floatingLabel;
-            this.container.appendChild(this.floatingLabelElement);
+        if (this.options.label) {
+            this.labelElement = document.createElement('label');
+            this.labelElement.className = 'floating-label';
+            this.labelElement.textContent = this.options.label;
+            this.container.appendChild(this.labelElement);
         }
 
         this.flexList = document.createElement('div');
@@ -96,10 +100,19 @@ export class SelectedListManager<T extends ListElement> {
         this.parentElement.appendChild(this.container);
 
         if (this.options.inputField) {
-            this.inputElement = this.options.inputFieldRender!(this.options.inputFieldValue!);
+            this.inputElement = this.options.inputFieldRender!(this.options.value!);
         }
 
         this._bindEvents();
+        
+        if (this.options.disabled) {
+            this.setDisabled(true);
+        }
+
+        if (this.options.error) {
+            this.setErrorState(true);
+        }
+
         this.render();
     }
 
@@ -157,27 +170,27 @@ export class SelectedListManager<T extends ListElement> {
     setInputField(show: boolean) {
         this.options.inputField = show;
         if (show && !this.inputElement) {
-            this.inputElement = this.options.inputFieldRender!(this.options.inputFieldValue || '');
+            this.inputElement = this.options.inputFieldRender!(this.options.value || '');
         }
         this.render();
     }
 
-    setInputValue(value: string) {
-        this.options.inputFieldValue = value;
+    setValue(value: string) {
+        this.options.value = value;
         if (this.inputElement) {
             this.inputElement.value = value;
         }
     }
 
-    setInputLabel(label: string) {
-        this.options.floatingLabel = label;
-        if (this.floatingLabelElement) {
-            this.floatingLabelElement.textContent = label;
+    setLabel(label: string) {
+        this.options.label = label;
+        if (this.labelElement) {
+            this.labelElement.textContent = label;
         } else if (label) {
-            this.floatingLabelElement = document.createElement('label');
-            this.floatingLabelElement.className = 'floating-label';
-            this.floatingLabelElement.textContent = label;
-            this.container.insertBefore(this.floatingLabelElement, this.container.firstChild);
+            this.labelElement = document.createElement('label');
+            this.labelElement.className = 'floating-label';
+            this.labelElement.textContent = label;
+            this.container.insertBefore(this.labelElement, this.container.firstChild);
         }
     }
 

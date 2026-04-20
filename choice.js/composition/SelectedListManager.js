@@ -7,13 +7,13 @@ class SelectedListManager {
   list;
   inputElement = null;
   clearButton;
-  floatingLabelElement = null;
+  labelElement = null;
   constructor(parentElement, options = {}) {
     this.parentElement = parentElement;
     this.options = {
       list: [],
       inputField: true,
-      inputFieldValue: "",
+      value: "",
       inputFieldRender: (value) => {
         const input = document.createElement("input");
         input.type = "text";
@@ -34,6 +34,8 @@ class SelectedListManager {
         el.appendChild(del);
         return el;
       },
+      disabled: false,
+      error: false,
       ...options
     };
     if (!this.options.renderList) {
@@ -44,11 +46,11 @@ class SelectedListManager {
     this.list = this.options.list || [];
     this.container = document.createElement("div");
     this.container.className = "selected-list";
-    if (this.options.floatingLabel) {
-      this.floatingLabelElement = document.createElement("label");
-      this.floatingLabelElement.className = "floating-label";
-      this.floatingLabelElement.textContent = this.options.floatingLabel;
-      this.container.appendChild(this.floatingLabelElement);
+    if (this.options.label) {
+      this.labelElement = document.createElement("label");
+      this.labelElement.className = "floating-label";
+      this.labelElement.textContent = this.options.label;
+      this.container.appendChild(this.labelElement);
     }
     this.flexList = document.createElement("div");
     this.flexList.className = "flex-list";
@@ -62,9 +64,15 @@ class SelectedListManager {
     this.container.appendChild(this.buttonsContainer);
     this.parentElement.appendChild(this.container);
     if (this.options.inputField) {
-      this.inputElement = this.options.inputFieldRender(this.options.inputFieldValue);
+      this.inputElement = this.options.inputFieldRender(this.options.value);
     }
     this._bindEvents();
+    if (this.options.disabled) {
+      this.setDisabled(true);
+    }
+    if (this.options.error) {
+      this.setErrorState(true);
+    }
     this.render();
   }
   _bindEvents() {
@@ -115,25 +123,25 @@ class SelectedListManager {
   setInputField(show) {
     this.options.inputField = show;
     if (show && !this.inputElement) {
-      this.inputElement = this.options.inputFieldRender(this.options.inputFieldValue || "");
+      this.inputElement = this.options.inputFieldRender(this.options.value || "");
     }
     this.render();
   }
-  setInputValue(value) {
-    this.options.inputFieldValue = value;
+  setValue(value) {
+    this.options.value = value;
     if (this.inputElement) {
       this.inputElement.value = value;
     }
   }
-  setInputLabel(label) {
-    this.options.floatingLabel = label;
-    if (this.floatingLabelElement) {
-      this.floatingLabelElement.textContent = label;
+  setLabel(label) {
+    this.options.label = label;
+    if (this.labelElement) {
+      this.labelElement.textContent = label;
     } else if (label) {
-      this.floatingLabelElement = document.createElement("label");
-      this.floatingLabelElement.className = "floating-label";
-      this.floatingLabelElement.textContent = label;
-      this.container.insertBefore(this.floatingLabelElement, this.container.firstChild);
+      this.labelElement = document.createElement("label");
+      this.labelElement.className = "floating-label";
+      this.labelElement.textContent = label;
+      this.container.insertBefore(this.labelElement, this.container.firstChild);
     }
   }
   setErrorState(isError) {

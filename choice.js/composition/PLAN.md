@@ -132,7 +132,7 @@ we have to also allow user to attach to onChange event on input.
 
 .flex-list shold also implement floating label for input field like it is done in choice.js/select.ts
 
-also we have to have similar method like setInputValue (let's call it setInputLabel) to control text in <label>
+also we have to have similar method like setValue (let's call it setLabel) to control text in <label>
 
 # style management
 
@@ -199,9 +199,9 @@ also on each press to "Add Item" clear "New item label" input
 and if none of these inputs has value we should not add any item and not trigger the event to re-render the list.
 
 
-in the group of control add also additional input to inject value for setInputValue in our class, to see if we will be able to control input value from outside
+in the group of control add also additional input to inject value for setValue in our class, to see if we will be able to control input value from outside
 
-in the group of control add also additional input to inject value for setInputLabel in our class, to see if we will be able to control input value from outside
+in the group of control add also additional input to inject value for setLabel in our class, to see if we will be able to control input value from outside
 
 
 

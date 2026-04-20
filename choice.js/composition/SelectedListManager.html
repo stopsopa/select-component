@@ -100,7 +100,7 @@
 
         manager = new SelectedListManager(parentElement, {
           list: localList,
-          floatingLabel: "Select options",
+          label: "Select options",
           onDelete: (id) => {
             localList = localList.filter((item) => String(item.id) !== String(id));
             manager.updateList(localList);
@@ -139,7 +139,7 @@
             manager.updateList(localList);
 
             if (usedInternal) {
-              manager.setInputValue("");
+              manager.setValue("");
               inputValueOut.textContent = "";
             }
           }
@@ -158,12 +158,12 @@
         });
 
         injectBtn.addEventListener("click", () => {
-          manager.setInputValue(injectInput.value);
+          manager.setValue(injectInput.value);
           injectInput.value = "";
         });
 
         injectLabelBtn.addEventListener("click", () => {
-          manager.setInputLabel(injectLabelInput.value);
+          manager.setLabel(injectLabelInput.value);
           injectLabelInput.value = "";
         });
       });
