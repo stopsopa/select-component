@@ -40,7 +40,7 @@
   }
 
   /* Float condition */
-  &:focus-within .floating-label,
+  &:has(input:focus) .floating-label,
   &:has(.element) .floating-label,
   &:has(input:not(:placeholder-shown)) .floating-label {
     top: 0;
