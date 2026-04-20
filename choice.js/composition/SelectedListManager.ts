@@ -14,6 +14,7 @@ export type SelectedListManagerOptions<T extends ListElement> = {
     onDelete?: (id: string) => void;
     onClear?: () => void;
     onChange?: (value: string) => void;
+    floatingLabel?: string;
 };
 
 export class SelectedListManager<T extends ListElement> {
@@ -25,6 +26,7 @@ export class SelectedListManager<T extends ListElement> {
     public list: T[];
     public inputElement: HTMLInputElement | null = null;
     public clearButton: HTMLButtonElement;
+    public floatingLabelElement: HTMLLabelElement | null = null;
 
     constructor(parentElement: HTMLElement, options: SelectedListManagerOptions<T> = {}) {
         this.parentElement = parentElement;
@@ -70,6 +72,13 @@ export class SelectedListManager<T extends ListElement> {
 
         this.container = document.createElement('div');
         this.container.className = 'selected-list';
+
+        if (this.options.floatingLabel) {
+            this.floatingLabelElement = document.createElement('label');
+            this.floatingLabelElement.className = 'floating-label';
+            this.floatingLabelElement.textContent = this.options.floatingLabel;
+            this.container.appendChild(this.floatingLabelElement);
+        }
 
         this.flexList = document.createElement('div');
         this.flexList.className = 'flex-list';

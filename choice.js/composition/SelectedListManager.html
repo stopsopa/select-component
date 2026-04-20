@@ -1,135 +1,160 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SelectedListManager Demo</title>
-    <link rel="stylesheet" href="SelectedListManager.css">
+    <link rel="stylesheet" href="SelectedListManager.css" />
     <style>
-        body { font-family: sans-serif; padding: 20px; }
-        .controls { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .demo-container { margin-top: 20px; padding: 20px; border: 1px dashed #ccc;}
-        label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .demo-container {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px dashed #ccc;
+      }
+      .demo-container label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
     </style>
-</head>
-<body>
-    <h1>SelectedListManager Demo</h1>
+  </head>
+  <body>
     <button id="init-btn">Initialize Component</button>
-    
-    <div id="demo-area" class="demo-container" style="display: none;">
-        <center-resizer left="50px" center="350px">
-            <div id="list-parent"></div>
-        </center-resizer>
-        
-        <div style="margin-top: 10px;">
-            Input Value: <pre id="input-value-out" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
-        </div>
 
-        <div class="controls">
-            <input type="text" id="new-item-input" placeholder="New item label">
-            <button id="add-btn">Add Item</button>
-        </div>
-        
-        <div class="controls">
-            <label><input type="checkbox" id="error-cb"> Error State</label>
-            <label><input type="checkbox" id="disabled-cb"> Disabled State</label>
-            <label><input type="checkbox" id="input-field-cb" checked> Show Input Field</label>
-        </div>
-    </div>
+    <div id="instances-area"></div>
 
     <script type="module">
-        import "../../js/CenterResizer.js";
-        import { SelectedListManager } from "./SelectedListManager.js";
+      import "../../js/CenterResizer.js";
+      import { SelectedListManager } from "./SelectedListManager.js";
 
-        const initBtn = document.getElementById('init-btn');
-        const demoArea = document.getElementById('demo-area');
-        const parentElement = document.getElementById('list-parent');
-        
-        const newItemInput = document.getElementById('new-item-input');
-        const addBtn = document.getElementById('add-btn');
-        
-        const errorCb = document.getElementById('error-cb');
-        const disabledCb = document.getElementById('disabled-cb');
-        const inputFieldCb = document.getElementById('input-field-cb');
+      let globalIdCounter = 1;
+      let instanceCounter = 0;
 
-        const inputValueOut = document.getElementById('input-value-out');
+      document.getElementById("init-btn").addEventListener("click", () => {
+        instanceCounter++;
+        const instanceId = instanceCounter;
 
-        let manager = null;
         let localList = [];
-        let idCounter = 1;
+        let manager = null;
 
-        initBtn.addEventListener('click', () => {
-            initBtn.style.display = 'none';
-            demoArea.style.display = 'block';
+        // Build the DOM group
+        const group = document.createElement("div");
+        group.className = "demo-container";
 
-            manager = new SelectedListManager(parentElement, {
-                list: localList,
-                onDelete: (id) => {
-                    localList = localList.filter(item => String(item.id) !== String(id));
-                    manager.updateList(localList);
-                },
-                onClear: () => {
-                    localList = [];
-                    manager.updateList(localList);
-                },
-                onChange: (value) => {
-                    inputValueOut.textContent = value;
-                }
-            });
-            
-            // Listen to input from the internal input element if it exists
-            const handleInternalInput = (e) => {
-                if (e.key === 'Enter' && e.target.value.trim() !== '') {
-                    localList.push({ id: idCounter++, label: e.target.value.trim() });
-                    e.target.value = '';
-                    manager.updateList(localList);
-                }
-            };
-            
-            parentElement.addEventListener('keydown', (e) => {
-                if (e.target.tagName.toLowerCase() === 'input') {
-                    handleInternalInput(e);
-                }
-            });
+        group.innerHTML = `
+                <center-resizer left="50px" center="350px">
+                    <div data-role="list-parent"></div>
+                </center-resizer>
+
+                <div style="margin-top: 10px;">
+                    Input Value: <pre data-role="input-value-out" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="new-item-input" placeholder="New item label">
+                    <button data-role="add-btn">Add Item</button>
+                </div>
+
+                <div class="controls">
+                    <label><input type="checkbox" data-role="error-cb"> Error State</label>
+                    <label><input type="checkbox" data-role="disabled-cb"> Disabled State</label>
+                    <label><input type="checkbox" data-role="input-field-cb" checked> Show Input Field</label>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="inject-input-value" placeholder="Inject input value">
+                    <button data-role="inject-btn">Set Input Value</button>
+                </div>
+            `;
+
+        document.getElementById("instances-area").appendChild(group);
+
+        const parentElement = group.querySelector('[data-role="list-parent"]');
+        const inputValueOut = group.querySelector('[data-role="input-value-out"]');
+        const newItemInput = group.querySelector('[data-role="new-item-input"]');
+        const addBtn = group.querySelector('[data-role="add-btn"]');
+        const errorCb = group.querySelector('[data-role="error-cb"]');
+        const disabledCb = group.querySelector('[data-role="disabled-cb"]');
+        const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
+        const injectInput = group.querySelector('[data-role="inject-input-value"]');
+        const injectBtn = group.querySelector('[data-role="inject-btn"]');
+
+        manager = new SelectedListManager(parentElement, {
+          list: localList,
+          floatingLabel: "Select options",
+          onDelete: (id) => {
+            localList = localList.filter((item) => String(item.id) !== String(id));
+            manager.updateList(localList);
+          },
+          onClear: () => {
+            localList = [];
+            manager.updateList(localList);
+          },
+          onChange: (value) => {
+            inputValueOut.textContent = value;
+          },
         });
 
-        addBtn.addEventListener('click', () => {
-            if (!manager) return;
+        // Enter key on internal input adds item
+        parentElement.addEventListener("keydown", (e) => {
+          if (e.target.tagName.toLowerCase() === "input" && e.key === "Enter" && e.target.value.trim() !== "") {
+            localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
+            e.target.value = "";
+            manager.updateList(localList);
+          }
+        });
 
-            let val = newItemInput.value.trim();
-            let usedInternal = false;
+        addBtn.addEventListener("click", () => {
+          let val = newItemInput.value.trim();
+          let usedInternal = false;
 
-            if (!val && manager.inputElement) {
-                val = manager.inputElement.value.trim();
-                usedInternal = true;
+          if (!val && manager.inputElement) {
+            val = manager.inputElement.value.trim();
+            usedInternal = true;
+          }
+
+          newItemInput.value = "";
+
+          if (val) {
+            localList.push({ id: globalIdCounter++, label: val });
+            manager.updateList(localList);
+
+            if (usedInternal) {
+              manager.setInputValue("");
+              inputValueOut.textContent = "";
             }
-
-            // Always clear the "New item label" input on each press
-            newItemInput.value = '';
-
-            if (val) {
-                localList.push({ id: idCounter++, label: val });
-                manager.updateList(localList);
-
-                // If we consumed the value from the internal input, clear it too
-                if (usedInternal) {
-                    manager.setInputValue('');
-                    inputValueOut.textContent = '';
-                }
-            }
+          }
         });
 
-        errorCb.addEventListener('change', (e) => {
-            if (manager) manager.setErrorState(e.target.checked);
+        errorCb.addEventListener("change", (e) => {
+          manager.setErrorState(e.target.checked);
         });
 
-        disabledCb.addEventListener('change', (e) => {
-            if (manager) manager.setDisabled(e.target.checked);
+        disabledCb.addEventListener("change", (e) => {
+          manager.setDisabled(e.target.checked);
         });
 
-        inputFieldCb.addEventListener('change', (e) => {
-            if (manager) manager.setInputField(e.target.checked);
+        inputFieldCb.addEventListener("change", (e) => {
+          manager.setInputField(e.target.checked);
         });
+
+        injectBtn.addEventListener("click", () => {
+          manager.setInputValue(injectInput.value);
+          injectInput.value = "";
+        });
+      });
     </script>
-</body>
+  </body>
 </html>

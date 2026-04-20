@@ -7,6 +7,7 @@ class SelectedListManager {
   list;
   inputElement = null;
   clearButton;
+  floatingLabelElement = null;
   constructor(parentElement, options = {}) {
     this.parentElement = parentElement;
     this.options = {
@@ -43,6 +44,12 @@ class SelectedListManager {
     this.list = this.options.list || [];
     this.container = document.createElement("div");
     this.container.className = "selected-list";
+    if (this.options.floatingLabel) {
+      this.floatingLabelElement = document.createElement("label");
+      this.floatingLabelElement.className = "floating-label";
+      this.floatingLabelElement.textContent = this.options.floatingLabel;
+      this.container.appendChild(this.floatingLabelElement);
+    }
     this.flexList = document.createElement("div");
     this.flexList.className = "flex-list";
     this.buttonsContainer = document.createElement("div");
