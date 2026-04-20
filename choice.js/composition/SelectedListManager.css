@@ -40,38 +40,40 @@
   }
 
   /* Float condition */
-  &:has(input:focus) .floating-label,
-  &:has(.element) .floating-label,
-  &:has(input:not(:placeholder-shown)) .floating-label {
-    top: 0;
-    transform: translateY(-50%);
-    font-size: 12px;
+  &:has(input:focus),
+  &:has(.element),
+  &:has(input:not(:placeholder-shown)) {
+    .floating-label {
+      top: 0;
+      transform: translateY(-50%);
+      font-size: 12px;
+    }
+
+    &:focus-within .floating-label {
+      color: var(--gcp-css-primary, #1a73e8);
+    }
+
+    &.error .floating-label {
+      color: var(--gcp-css-error, #d93025);
+    }
+
+    &.disabled .floating-label {
+      color: var(--gcp-css-gray-text, #5f6368);
+    }
   }
 
   &:focus-within {
     box-shadow: 0 0 0 2px var(--gcp-css-primary, #1a73e8);
-
-    .floating-label {
-      color: var(--gcp-css-primary, #1a73e8);
-    }
   }
 
   &.error {
     box-shadow: 0 0 0 2px var(--gcp-css-error, #d93025);
-
-    .floating-label {
-      color: var(--gcp-css-error, #d93025);
-    }
   }
 
   &.disabled {
     pointer-events: none;
     opacity: 0.6;
     color: var(--gcp-css-gray-text, #5f6368);
-
-    .floating-label {
-      color: var(--gcp-css-gray-text, #5f6368);
-    }
 
     .buttons-container .clear-btn {
       opacity: 0.7;
