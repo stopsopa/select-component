@@ -12,7 +12,7 @@ class SelectedListManager {
     this.parentElement = parentElement;
     this.options = {
       list: [],
-      inputField: true,
+      showInput: true,
       value: "",
       inputFieldRender: (value) => {
         const input = document.createElement("input");
@@ -34,15 +34,13 @@ class SelectedListManager {
         el.appendChild(del);
         return el;
       },
+      renderList: (list) => {
+        return list.map((item) => this.options.renderItem(item));
+      },
       disabled: false,
       error: false,
       ...options
     };
-    if (!this.options.renderList) {
-      this.options.renderList = (list) => {
-        return list.map((item) => this.options.renderItem(item));
-      };
-    }
     this.list = this.options.list || [];
     this.container = document.createElement("div");
     this.container.className = "selected-list";
@@ -63,7 +61,7 @@ class SelectedListManager {
     this.container.appendChild(this.flexList);
     this.container.appendChild(this.buttonsContainer);
     this.parentElement.appendChild(this.container);
-    if (this.options.inputField) {
+    if (this.options.showInput) {
       this.inputElement = this.options.inputFieldRender(this.options.value);
     }
     this._bindEvents();
@@ -120,8 +118,8 @@ class SelectedListManager {
     this.list = list;
     this.render();
   }
-  setInputField(show) {
-    this.options.inputField = show;
+  setShowInput(show) {
+    this.options.showInput = show;
     if (show && !this.inputElement) {
       this.inputElement = this.options.inputFieldRender(this.options.value || "");
     }
@@ -186,11 +184,11 @@ class SelectedListManager {
       }
     }
     // ensure input is at the end if it was just created or detached
-    if (this.options.inputField && this.inputElement) {
+    if (this.options.showInput && this.inputElement) {
       if (this.inputElement.parentNode !== this.flexList) {
         this.flexList.appendChild(this.inputElement);
       }
-    } else if (!this.options.inputField && this.inputElement && this.inputElement.parentNode === this.flexList) {
+    } else if (!this.options.showInput && this.inputElement && this.inputElement.parentNode === this.flexList) {
       this.flexList.removeChild(this.inputElement);
     }
   }

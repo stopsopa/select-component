@@ -124,7 +124,7 @@ User outside should decide how to handle this event.
 
 Really source of truth is outside.
 
-we should also have method to change error state, disable state and inputField which will add or remove input element.
+we should also have method to change error state, disable state and showInput which will add or remove input element.
 
 We should also have "X" button on the right (like it is now done in choice.js/select.ts in <button class="clear-btn">✕</button>, it should trigger onClear event)
 
@@ -185,7 +185,7 @@ we should have button and once that button will be clicked it should in it's eve
 - but no only in resizer it should be mnounded with surrounding input to allow user to type, and once button will be clicked next to that input it should add element to the local list and trigger update in the list rendering in SelectedListManager.
 - also we should subscribe to onDelete event from SelectedListManager and if user click "x" button on some element in the list we should remove it from our local list and trigger update in the list rendering in SelectedListManager.
 - we have to also attach to onChange event and create small <pre> tag and always render in it value from input.
-- also to the surrounding of of that instance of SelectedListManager we should add checkbox for controlling error state and disabled state also for inputField 
+- also to the surrounding of of that instance of SelectedListManager we should add checkbox for controlling error state and disabled state also for showInput 
 - we should also listend to onClear and handle it in our local state and then trigger rerender using SelectedListManager 
 So generally we have to create like todo list instantiating one instance of SelectedListManager, and render it with surrounding inputs/buttons to manipulate all states (to tests all states) of SelectedListManager.
 

@@ -6,7 +6,7 @@ export type ListElement = {
 
 export type SelectedListManagerOptions<T extends ListElement> = {
     list?: T[];
-    inputField?: boolean;
+    showInput?: boolean;
     value?: string;
     inputFieldRender?: (value: string) => HTMLInputElement;
     renderItem?: (item: T) => HTMLElement;
@@ -35,7 +35,7 @@ export class SelectedListManager<T extends ListElement> {
         
         this.options = {
             list: [],
-            inputField: true,
+            showInput: true,
             value: '',
             inputFieldRender: (value: string) => {
                 const input = document.createElement('input');
@@ -61,16 +61,13 @@ export class SelectedListManager<T extends ListElement> {
 
                 return el;
             },
+            renderList: (list: T[]) => {
+                return list.map(item => this.options.renderItem!(item));
+            },
             disabled: false,
             error: false,
             ...options
         };
-
-        if (!this.options.renderList) {
-            this.options.renderList = (list: T[]) => {
-                return list.map(item => this.options.renderItem!(item));
-            };
-        }
 
         this.list = this.options.list || [];
 
@@ -99,7 +96,7 @@ export class SelectedListManager<T extends ListElement> {
         this.container.appendChild(this.buttonsContainer);
         this.parentElement.appendChild(this.container);
 
-        if (this.options.inputField) {
+        if (this.options.showInput) {
             this.inputElement = this.options.inputFieldRender!(this.options.value!);
         }
 
@@ -167,8 +164,8 @@ export class SelectedListManager<T extends ListElement> {
         this.render();
     }
 
-    setInputField(show: boolean) {
-        this.options.inputField = show;
+    setShowInput(show: boolean) {
+        this.options.showInput = show;
         if (show && !this.inputElement) {
             this.inputElement = this.options.inputFieldRender!(this.options.value || '');
         }
@@ -242,11 +239,11 @@ export class SelectedListManager<T extends ListElement> {
         }
 
         // ensure input is at the end if it was just created or detached
-        if (this.options.inputField && this.inputElement) {
+        if (this.options.showInput && this.inputElement) {
             if (this.inputElement.parentNode !== this.flexList) {
                 this.flexList.appendChild(this.inputElement);
             }
-        } else if (!this.options.inputField && this.inputElement && this.inputElement.parentNode === this.flexList) {
+        } else if (!this.options.showInput && this.inputElement && this.inputElement.parentNode === this.flexList) {
             this.flexList.removeChild(this.inputElement);
         }
     }
