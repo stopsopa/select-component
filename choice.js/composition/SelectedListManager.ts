@@ -169,6 +169,18 @@ export class SelectedListManager<T extends ListElement> {
         }
     }
 
+    setInputLabel(label: string) {
+        this.options.floatingLabel = label;
+        if (this.floatingLabelElement) {
+            this.floatingLabelElement.textContent = label;
+        } else if (label) {
+            this.floatingLabelElement = document.createElement('label');
+            this.floatingLabelElement.className = 'floating-label';
+            this.floatingLabelElement.textContent = label;
+            this.container.insertBefore(this.floatingLabelElement, this.container.firstChild);
+        }
+    }
+
     setErrorState(isError: boolean) {
         if (isError) {
             this.container.classList.add('error');

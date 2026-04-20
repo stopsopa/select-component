@@ -125,6 +125,17 @@ class SelectedListManager {
       this.inputElement.value = value;
     }
   }
+  setInputLabel(label) {
+    this.options.floatingLabel = label;
+    if (this.floatingLabelElement) {
+      this.floatingLabelElement.textContent = label;
+    } else if (label) {
+      this.floatingLabelElement = document.createElement("label");
+      this.floatingLabelElement.className = "floating-label";
+      this.floatingLabelElement.textContent = label;
+      this.container.insertBefore(this.floatingLabelElement, this.container.firstChild);
+    }
+  }
   setErrorState(isError) {
     if (isError) {
       this.container.classList.add("error");

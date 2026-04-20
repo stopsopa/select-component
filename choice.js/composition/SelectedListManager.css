@@ -67,6 +67,10 @@
     .buttons-container .clear-btn {
       opacity: 0.7;
     }
+
+    .flex-list input {
+      color: #74797e;
+    }
   }
 
   .flex-list {

@@ -77,6 +77,11 @@
                     <input type="text" data-role="inject-input-value" placeholder="Inject input value">
                     <button data-role="inject-btn">Set Input Value</button>
                 </div>
+
+                <div class="controls">
+                    <input type="text" data-role="inject-label-value" placeholder="Inject label value">
+                    <button data-role="inject-label-btn">Set Label Value</button>
+                </div>
             `;
 
         document.getElementById("instances-area").appendChild(group);
@@ -90,6 +95,8 @@
         const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
         const injectInput = group.querySelector('[data-role="inject-input-value"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
+        const injectLabelInput = group.querySelector('[data-role="inject-label-value"]');
+        const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
 
         manager = new SelectedListManager(parentElement, {
           list: localList,
@@ -153,6 +160,11 @@
         injectBtn.addEventListener("click", () => {
           manager.setInputValue(injectInput.value);
           injectInput.value = "";
+        });
+
+        injectLabelBtn.addEventListener("click", () => {
+          manager.setInputLabel(injectLabelInput.value);
+          injectLabelInput.value = "";
         });
       });
     </script>
