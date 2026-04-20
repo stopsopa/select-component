@@ -145,6 +145,10 @@
                     <input type="text" data-role="inject-label-value" id="inject-label-value-${instanceId}" placeholder="Inject label value">
                     <button data-role="inject-label-btn" id="inject-label-btn-${instanceId}">Set Label Value</button>
                 </div>
+
+                <div class="controls">
+                    <pre data-role="list-dump" style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px; width: 100%; box-sizing: border-box; overflow: auto;"></pre>
+                </div>
             `;
 
         document.getElementById("instances-area").appendChild(group);
@@ -162,7 +166,12 @@
         const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
         const onChangeCounter = group.querySelector('[data-role="onchange-counter"]');
         const lastKeyOut = group.querySelector('[data-role="last-key"]');
+        const listDump = group.querySelector('[data-role="list-dump"]');
         let counter = 0;
+
+        const updateDump = () => {
+          listDump.textContent = JSON.stringify(localList, null, 2);
+        };
 
         manager = new SelectedListManager(parentElement, {
           list: localList,
@@ -171,11 +180,13 @@
             localList = localList.filter((item) => String(item.id) !== String(id));
             manager.updateList(localList);
             syncUrl();
+            updateDump();
           },
           onClear: () => {
             localList = [];
             manager.updateList(localList);
             syncUrl();
+            updateDump();
           },
           onChange: (e) => {
             inputValueOut.textContent = e.target.value;
@@ -187,6 +198,7 @@
               e.target.value = "";
               manager.updateList(localList);
               syncUrl();
+              updateDump();
             }
           },
           renderItem: (item) => {
@@ -238,6 +250,8 @@
           },
         });
 
+        updateDump();
+
         // Apply states
         if (states.error) {
           errorCb.checked = true;
@@ -269,6 +283,7 @@
                 });
                 manager.updateList(localList);
                 syncUrl();
+                updateDump();
             });
         });
 
@@ -287,6 +302,7 @@
             localList.push({ id: globalIdCounter++, label: val });
             manager.updateList(localList);
             syncUrl();
+            updateDump();
 
             if (usedInternal) {
               manager.setValue("");
