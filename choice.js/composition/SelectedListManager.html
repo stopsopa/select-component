@@ -127,8 +127,8 @@
           let val = newItemInput.value.trim();
           let usedInternal = false;
 
-          if (!val && manager.inputElement) {
-            val = manager.inputElement.value.trim();
+          if (!val && manager.propInputElement) {
+            val = manager.propInputElement.value.trim();
             usedInternal = true;
           }
 

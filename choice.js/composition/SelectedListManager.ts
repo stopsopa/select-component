@@ -1,250 +1,256 @@
 export type ListElement = {
-    id: number | string;
-    label: string;
-    [key: string]: any;
+  id: number | string;
+  label: string;
+  [key: string]: any;
 };
 
 export type SelectedListManagerOptions<T extends ListElement> = {
-    list?: T[];
-    showInput?: boolean;
-    value?: string;
-    inputFieldRender?: (value: string) => HTMLInputElement;
-    renderItem?: (item: T) => HTMLElement;
-    renderList?: (list: T[]) => HTMLElement[];
-    onDelete?: (id: string) => void;
-    onClear?: () => void;
-    onChange?: (value: string) => void;
-    label?: string;
-    disabled?: boolean;
-    error?: boolean;
+  list?: T[];
+  showInput?: boolean;
+  value?: string;
+  inputFieldRender?: (value: string) => HTMLInputElement;
+  renderItem?: (item: T) => HTMLElement;
+  renderList?: (list: T[]) => HTMLElement[];
+  onDelete?: (id: string) => void;
+  onClear?: () => void;
+  onChange?: (value: string) => void;
+  label?: string;
+  disabled?: boolean;
+  error?: boolean;
 };
 
 export class SelectedListManager<T extends ListElement> {
-    public parentElement: HTMLElement;
-    public container: HTMLElement;
-    public flexList: HTMLElement;
-    public buttonsContainer: HTMLElement;
-    public options: SelectedListManagerOptions<T>;
-    public list: T[];
-    public inputElement: HTMLInputElement | null = null;
-    public clearButton: HTMLButtonElement;
-    public labelElement: HTMLLabelElement | null = null;
+  public propParentElement: HTMLElement;
+  public propContainer!: HTMLElement;
+  public propFlexList!: HTMLElement;
+  public propButtonsContainer!: HTMLElement;
+  public propOptions: SelectedListManagerOptions<T>;
+  public propList: T[];
+  public propInputElement: HTMLInputElement | null = null;
+  public propClearButton!: HTMLButtonElement;
+  public propLabelElement: HTMLLabelElement | null = null;
 
-    constructor(parentElement: HTMLElement, options: SelectedListManagerOptions<T> = {}) {
-        this.parentElement = parentElement;
-        
-        this.options = {
-            list: [],
-            showInput: true,
-            value: '',
-            inputFieldRender: (value: string) => {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = value;
-                input.placeholder = " ";
-                input.size = 1;
-                return input;
-            },
-            renderItem: (item: T) => {
-                const el = document.createElement('div');
-                el.className = 'element';
-                el.dataset.id = String(item.id);
+  constructor(parentElement: HTMLElement, options: SelectedListManagerOptions<T> = {}) {
+    this.propParentElement = parentElement;
 
-                const label = document.createElement('label');
-                label.textContent = item.label;
+    this.propOptions = {
+      list: [],
+      showInput: true,
+      value: "",
+      inputFieldRender: (value: string) => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = value;
+        input.placeholder = " ";
+        input.size = 1;
+        return input;
+      },
+      renderItem: (item: T) => {
+        const el = document.createElement("div");
+        el.className = "element";
+        el.dataset.id = String(item.id);
 
-                const del = document.createElement('div');
-                del.dataset.remove = String(item.id);
+        const label = document.createElement("label");
+        label.textContent = item.label;
 
-                el.appendChild(label);
-                el.appendChild(del);
+        const del = document.createElement("div");
+        del.dataset.remove = String(item.id);
 
-                return el;
-            },
-            renderList: (list: T[]) => {
-                return list.map(item => this.options.renderItem!(item));
-            },
-            disabled: false,
-            error: false,
-            ...options
-        };
+        el.appendChild(label);
+        el.appendChild(del);
 
-        this.list = this.options.list || [];
+        return el;
+      },
+      renderList: (list: T[]) => {
+        return list.map((item) => this.propOptions.renderItem!(item));
+      },
+      onDelete: (id: string) => {},
+      onClear: () => {},
+      onChange: (value: string) => {},
+      disabled: false,
+      error: false,
+      label: "",
+      ...options,
+    };
 
-        this.container = document.createElement('div');
-        this.container.className = 'selected-list';
+    this.propList = this.propOptions.list || [];
 
-        if (this.options.label) {
-            this.labelElement = document.createElement('label');
-            this.labelElement.className = 'floating-label';
-            this.labelElement.textContent = this.options.label;
-            this.container.appendChild(this.labelElement);
+    this._bindEvents();
+
+    this.render();
+  }
+
+  private _bindEvents() {
+    this.propParentElement.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+
+      // Handle Clear Button
+      const clearBtn = target.closest(".clear-btn");
+      if (clearBtn && this.propParentElement.contains(clearBtn)) {
+        e.preventDefault();
+        this.propOptions.onClear!();
+        return;
+      }
+
+      // Handle Delete Item
+      const delBtn = target.closest("[data-remove]");
+      if (delBtn && this.propParentElement.contains(delBtn)) {
+        const id = delBtn.getAttribute("data-remove");
+        if (id) {
+          this.propOptions.onDelete!(id);
         }
+        return;
+      }
 
-        this.flexList = document.createElement('div');
-        this.flexList.className = 'flex-list';
-
-        this.buttonsContainer = document.createElement('div');
-        this.buttonsContainer.className = 'buttons-container';
-
-        this.clearButton = document.createElement('button');
-        this.clearButton.className = 'clear-btn';
-        this.clearButton.textContent = '✕';
-        this.buttonsContainer.appendChild(this.clearButton);
-
-        this.container.appendChild(this.flexList);
-        this.container.appendChild(this.buttonsContainer);
-        this.parentElement.appendChild(this.container);
-
-        if (this.options.showInput) {
-            this.inputElement = this.options.inputFieldRender!(this.options.value!);
+      // Handle Focus Input
+      const container = target.closest(".selected-list");
+      if (container && this.propParentElement.contains(container)) {
+        if (target.closest(".buttons-container")) {
+          return;
         }
-
-        this._bindEvents();
-        
-        if (this.options.disabled) {
-            this.setDisabled(true);
+        if (this.propInputElement && target !== this.propInputElement) {
+          this.propInputElement.focus();
         }
+      }
+    });
 
-        if (this.options.error) {
-            this.setErrorState(true);
-        }
+    this.propParentElement.addEventListener("input", (e) => {
+      const target = e.target as HTMLElement;
+      if (target === this.propInputElement) {
+        this.propOptions.onChange!((target as HTMLInputElement).value);
+      }
+    });
+  }
 
-        this.render();
+  updateList(list: T[]) {
+    this.propList = list;
+    this.render();
+  }
+
+  setShowInput(show: boolean) {
+    if ((this.propOptions.showInput = show)) {
+      if (!this.propInputElement) {
+        this.propInputElement = this.propOptions.inputFieldRender!(this.propOptions.value || "");
+      }
+
+      if (this.propOptions.disabled) {
+        this.propInputElement.disabled = true;
+      }
+
+      if (this.propInputElement.parentNode !== this.propFlexList) {
+        this.propFlexList.appendChild(this.propInputElement);
+      }
+
+      if (!this.propLabelElement) {
+        this.propLabelElement = document.createElement("label");
+        this.propLabelElement.className = "floating-label";
+      }
+
+      if (this.propLabelElement.parentNode !== this.propContainer) {
+        this.propContainer.insertBefore(this.propLabelElement, this.propContainer.firstChild);
+      }
+
+      if (this.propOptions.label) {
+        this.propLabelElement.textContent = this.propOptions.label;
+      } else if (this.propLabelElement && this.propLabelElement.parentNode === this.propContainer) {
+        this.propContainer.removeChild(this.propLabelElement);
+      }
+    } else {
+      if (this.propInputElement && this.propInputElement.parentNode === this.propFlexList) {
+        this.propFlexList.removeChild(this.propInputElement);
+      }
+      if (this.propLabelElement && this.propLabelElement.parentNode === this.propContainer) {
+        this.propContainer.removeChild(this.propLabelElement);
+      }
+    }
+  }
+
+  setValue(value: string) {
+    this.propOptions.value = value;
+    if (this.propInputElement) {
+      this.propInputElement.value = value;
+    }
+  }
+
+  setLabel(label: string) {
+    this.propOptions.label = label;
+    if (this.propLabelElement) {
+      this.propLabelElement.textContent = label;
+    } else if (label) {
+      this.propLabelElement = document.createElement("label");
+      this.propLabelElement.className = "floating-label";
+      this.propLabelElement.textContent = label;
+      this.propContainer.insertBefore(this.propLabelElement, this.propContainer.firstChild);
+    }
+  }
+
+  setErrorState(isError: boolean) {
+    this.propContainer.classList.toggle("error", isError);
+  }
+
+  setDisabled(disabled: boolean) {
+    this.propOptions.disabled = disabled;
+
+    if (this.propInputElement) {
+      this.propInputElement.disabled = disabled;
     }
 
-    private _bindEvents() {
-        this.parentElement.addEventListener('click', (e) => {
-            const target = e.target as HTMLElement;
+    this.propClearButton.disabled = disabled;
 
-            // Handle Clear Button
-            const clearBtn = target.closest('.clear-btn');
-            if (clearBtn && this.parentElement.contains(clearBtn)) {
-                e.preventDefault();
-                if (this.options.onClear) {
-                    this.options.onClear();
-                }
-                return;
-            }
+    this.propContainer.classList.toggle("disabled", disabled);
+  }
 
-            // Handle Delete Item
-            const delBtn = target.closest('[data-remove]');
-            if (delBtn && this.parentElement.contains(delBtn)) {
-                if (this.options.onDelete) {
-                    const id = delBtn.getAttribute('data-remove');
-                    if (id) {
-                        this.options.onDelete(id);
-                    }
-                }
-                return;
-            }
+  render() {
+    if (!this.propContainer) {
+      this.propContainer = document.createElement("div");
+      this.propContainer.className = "selected-list";
 
-            // Handle Focus Input
-            const container = target.closest('.selected-list');
-            if (container && this.parentElement.contains(container)) {
-                if (target.closest('.buttons-container')) {
-                    return;
-                }
-                if (this.inputElement && target !== this.inputElement) {
-                    this.inputElement.focus();
-                }
-            }
-        });
+      this.propFlexList = document.createElement("div");
+      this.propFlexList.className = "flex-list";
 
-        this.parentElement.addEventListener('input', (e) => {
-            const target = e.target as HTMLElement;
-            if (target === this.inputElement && this.options.onChange) {
-                this.options.onChange((target as HTMLInputElement).value);
-            }
-        });
+      this.propButtonsContainer = document.createElement("div");
+      this.propButtonsContainer.className = "buttons-container";
+
+      this.propClearButton = document.createElement("button");
+      this.propClearButton.className = "clear-btn";
+      this.propClearButton.textContent = "✕";
+      this.propButtonsContainer.appendChild(this.propClearButton);
+
+      this.propContainer.appendChild(this.propFlexList);
+      this.propContainer.appendChild(this.propButtonsContainer);
+      this.propParentElement.appendChild(this.propContainer);
     }
 
-    updateList(list: T[]) {
-        this.list = list;
-        this.render();
+    this.setErrorState(Boolean(this.propOptions.error));
+
+    this.setDisabled(Boolean(this.propOptions.disabled));
+
+    this.setShowInput(Boolean(this.propOptions.showInput));
+
+    const elements = this.propOptions.renderList!(this.propList);
+
+    if (!Array.isArray(elements)) {
+      throw new Error("renderList must return an array of HTMLElements");
     }
 
-    setShowInput(show: boolean) {
-        this.options.showInput = show;
-        if (show && !this.inputElement) {
-            this.inputElement = this.options.inputFieldRender!(this.options.value || '');
-        }
-        this.render();
+    // clear the list (except touching input)
+    const children = Array.from(this.propFlexList.childNodes);
+    for (const child of children) {
+      if (child !== this.propInputElement) {
+        this.propFlexList.removeChild(child);
+      }
     }
 
-    setValue(value: string) {
-        this.options.value = value;
-        if (this.inputElement) {
-            this.inputElement.value = value;
-        }
+    // rendering elements in order before input
+    for (const el of elements) {
+      if (!(el instanceof HTMLElement)) {
+        throw new Error("each element returned from renderList must be an HTMLElement");
+      }
+      if (this.propInputElement && this.propInputElement.parentNode === this.propFlexList) {
+        this.propFlexList.insertBefore(el, this.propInputElement);
+      } else {
+        this.propFlexList.appendChild(el);
+      }
     }
-
-    setLabel(label: string) {
-        this.options.label = label;
-        if (this.labelElement) {
-            this.labelElement.textContent = label;
-        } else if (label) {
-            this.labelElement = document.createElement('label');
-            this.labelElement.className = 'floating-label';
-            this.labelElement.textContent = label;
-            this.container.insertBefore(this.labelElement, this.container.firstChild);
-        }
-    }
-
-    setErrorState(isError: boolean) {
-        if (isError) {
-            this.container.classList.add('error');
-        } else {
-            this.container.classList.remove('error');
-        }
-    }
-
-    setDisabled(disabled: boolean) {
-        if (disabled) {
-            this.container.classList.add('disabled');
-            if (this.inputElement) this.inputElement.disabled = true;
-            this.clearButton.disabled = true;
-        } else {
-            this.container.classList.remove('disabled');
-            if (this.inputElement) this.inputElement.disabled = false;
-            this.clearButton.disabled = false;
-        }
-    }
-
-    render() {
-        const elements = this.options.renderList!(this.list);
-
-        if (!Array.isArray(elements)) {
-            throw new Error('renderList must return an array of HTMLElements');
-        }
-
-        // clear the list (except touching input)
-        const children = Array.from(this.flexList.childNodes);
-        for (const child of children) {
-            if (child !== this.inputElement) {
-                this.flexList.removeChild(child);
-            }
-        }
-
-        // rendering elements in order before input
-        for (const el of elements) {
-            if (!(el instanceof HTMLElement)) {
-                throw new Error('renderList must return an array of HTMLElements');
-            }
-            if (this.inputElement && this.inputElement.parentNode === this.flexList) {
-                this.flexList.insertBefore(el, this.inputElement);
-            } else {
-                this.flexList.appendChild(el);
-            }
-        }
-
-        // ensure input is at the end if it was just created or detached
-        if (this.options.showInput && this.inputElement) {
-            if (this.inputElement.parentNode !== this.flexList) {
-                this.flexList.appendChild(this.inputElement);
-            }
-        } else if (!this.options.showInput && this.inputElement && this.inputElement.parentNode === this.flexList) {
-            this.flexList.removeChild(this.inputElement);
-        }
-    }
+  }
 }
