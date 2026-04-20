@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SelectedListManager Templates Demo</title>
+    <link rel="stylesheet" href="SelectedListManager.css" />
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .demo-container {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px dashed #ccc;
+      }
+      .demo-container label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+      }
+      .template-btn {
+          padding: 5px 10px;
+          cursor: pointer;
+          border: 1px solid #ccc;
+          background: #fff;
+          border-radius: 4px;
+      }
+      .template-btn:hover {
+          background: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>SelectedListManager Templates</h1>
+    <button id="init-btn">Initialize Component</button>
+
+    <div id="instances-area"></div>
+
+    <script type="module">
+      import "../../js/CenterResizer.js";
+      import { SelectedListManager } from "./SelectedListManager.js";
+
+      let globalIdCounter = 1;
+      let instanceCounter = 0;
+
+      const imgData = await fetch('img/img.json').then(r => r.json());
+
+      document.getElementById("init-btn").addEventListener("click", () => {
+        instanceCounter++;
+        const instanceId = instanceCounter;
+
+        let localList = [];
+        let manager = null;
+
+        // Build the DOM group
+        const group = document.createElement("div");
+        group.className = "demo-container";
+
+        let templateButtonsHtml = '';
+        for (const [color, images] of Object.entries(imgData)) {
+            images.forEach(img => {
+                templateButtonsHtml += `<button class="template-btn" data-role="template-btn" data-color="${color}" data-img="${img}" style="color: ${color}">${img}</button>`;
+            });
+        }
+
+        group.innerHTML = `
+                <center-resizer left="50px" center="350px">
+                    <div data-role="list-parent"></div>
+                </center-resizer>
+
+                <div style="margin-top: 10px;">
+                    Input Value: <pre data-role="input-value-out" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
+                    (onChange triggers: <span data-role="onchange-counter" style="font-weight: bold;">0</span>,
+                    last key: <span data-role="last-key" style="font-weight: bold; color: #d11;">-</span>)
+                </div>
+
+                <div class="controls">
+                    <strong>Templates:</strong>
+                    ${templateButtonsHtml}
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="new-item-input" placeholder="New item label">
+                    <button data-role="add-btn">Add Item</button>
+                </div>
+
+                <div class="controls">
+                    <label><input type="checkbox" data-role="error-cb"> Error State</label>
+                    <label><input type="checkbox" data-role="disabled-cb"> Disabled State</label>
+                    <label><input type="checkbox" data-role="input-field-cb" checked> Show Input Field</label>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="inject-input-value" placeholder="Inject input value">
+                    <button data-role="inject-btn">Set Input Value</button>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="inject-label-value" placeholder="Inject label value">
+                    <button data-role="inject-label-btn">Set Label Value</button>
+                </div>
+            `;
+
+        document.getElementById("instances-area").appendChild(group);
+
+        const parentElement = group.querySelector('[data-role="list-parent"]');
+        const inputValueOut = group.querySelector('[data-role="input-value-out"]');
+        const newItemInput = group.querySelector('[data-role="new-item-input"]');
+        const addBtn = group.querySelector('[data-role="add-btn"]');
+        const errorCb = group.querySelector('[data-role="error-cb"]');
+        const disabledCb = group.querySelector('[data-role="disabled-cb"]');
+        const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
+        const injectInput = group.querySelector('[data-role="inject-input-value"]');
+        const injectBtn = group.querySelector('[data-role="inject-btn"]');
+        const injectLabelInput = group.querySelector('[data-role="inject-label-value"]');
+        const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
+        const onChangeCounter = group.querySelector('[data-role="onchange-counter"]');
+        const lastKeyOut = group.querySelector('[data-role="last-key"]');
+        let counter = 0;
+
+        manager = new SelectedListManager(parentElement, {
+          list: localList,
+          label: "Select options",
+          onDelete: (id) => {
+            localList = localList.filter((item) => String(item.id) !== String(id));
+            manager.updateList(localList);
+          },
+          onClear: () => {
+            localList = [];
+            manager.updateList(localList);
+          },
+          onChange: (e) => {
+            inputValueOut.textContent = e.target.value;
+            onChangeCounter.textContent = ++counter;
+            lastKeyOut.textContent = e.key || e.data || e.type;
+          },
+          renderItem: (item) => {
+            const el = document.createElement("div");
+            el.className = "element";
+            el.dataset.id = String(item.id);
+            if (item.color) {
+                el.style.color = item.color;
+            }
+
+            const label = document.createElement("label");
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            label.style.gap = '5px';
+
+            if (item.img) {
+                const img = document.createElement('img');
+                img.src = 'img/' + item.img;
+                img.style.width = '16px';
+                img.style.height = '16px';
+                label.appendChild(img);
+            }
+            label.appendChild(document.createTextNode(item.label));
+
+            const del = document.createElement("div");
+            del.dataset.remove = String(item.id);
+
+            el.appendChild(label);
+            el.appendChild(del);
+
+            return el;
+          },
+          renderList: (list) => {
+            const elements = list.map(item => manager.propOptions.renderItem(item));
+            const groups = [];
+            for (let i = 0; i < elements.length; i += 3) {
+              const groupDiv = document.createElement('div');
+              groupDiv.style.border = '2px solid gray';
+              groupDiv.style.padding = '3px';
+              groupDiv.style.margin = '2px';
+              groupDiv.style.display = 'flex';
+              groupDiv.style.gap = '5px';
+              groupDiv.style.flexWrap = 'wrap';
+              const chunk = elements.slice(i, i + 3);
+              chunk.forEach(el => groupDiv.appendChild(el));
+              groups.push(groupDiv);
+            }
+            return groups;
+          },
+        });
+
+        // Template button handlers
+        group.querySelectorAll('[data-role="template-btn"]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const color = btn.dataset.color;
+                const img = btn.dataset.img;
+                localList.push({
+                    id: globalIdCounter++,
+                    label: img.split('.')[0],
+                    color: color,
+                    img: img
+                });
+                manager.updateList(localList);
+            });
+        });
+
+        // Enter key on internal input adds item
+        parentElement.addEventListener("keydown", (e) => {
+          if (e.target.tagName.toLowerCase() === "input" && e.key === "Enter" && e.target.value.trim() !== "") {
+            localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
+            e.target.value = "";
+            manager.updateList(localList);
+          }
+        });
+
+        addBtn.addEventListener("click", () => {
+          let val = newItemInput.value.trim();
+          let usedInternal = false;
+
+          if (!val && manager.propInputElement) {
+            val = manager.propInputElement.value.trim();
+            usedInternal = true;
+          }
+
+          newItemInput.value = "";
+
+          if (val) {
+            localList.push({ id: globalIdCounter++, label: val });
+            manager.updateList(localList);
+
+            if (usedInternal) {
+              manager.setValue("");
+              inputValueOut.textContent = "";
+            }
+          }
+        });
+
+        errorCb.addEventListener("change", (e) => {
+          manager.setErrorState(e.target.checked);
+        });
+
+        disabledCb.addEventListener("change", (e) => {
+          manager.setDisabled(e.target.checked);
+        });
+
+        inputFieldCb.addEventListener("change", (e) => {
+          manager.setShowInput(e.target.checked);
+        });
+
+        injectBtn.addEventListener("click", () => {
+          manager.setValue(injectInput.value);
+          injectInput.value = "";
+        });
+
+        injectLabelBtn.addEventListener("click", () => {
+          manager.setLabel(injectLabelInput.value);
+          injectLabelInput.value = "";
+        });
+      });
+    </script>
+  </body>
+</html>

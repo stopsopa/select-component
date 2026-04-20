@@ -243,9 +243,10 @@ export class SelectedListManager<T extends ListElement> {
     // clear the list (except touching input)
     const children = Array.from(this.propFlexList.childNodes);
     for (const child of children) {
-      if (child !== this.propInputElement) {
-        this.propFlexList.removeChild(child);
+      if (child instanceof HTMLElement && child.tagName === "INPUT") {
+        continue;
       }
+      this.propFlexList.removeChild(child);
     }
 
     // rendering elements in order before input
