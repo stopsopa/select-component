@@ -31,7 +31,7 @@
     </style>
   </head>
   <body>
-    <button id="init-btn">Initialize Component</button>
+    <button id="init-btn">Initialize Component</button> <a href="#">reload</a>
 
     <div id="instances-area"></div>
 
@@ -42,12 +42,33 @@
       let globalIdCounter = 1;
       let instanceCounter = 0;
 
-      document.getElementById("init-btn").addEventListener("click", () => {
+      const init = (initialList = []) => {
         instanceCounter++;
         const instanceId = instanceCounter;
 
-        let localList = [];
+        let localList = initialList;
         let manager = null;
+
+        const syncUrl = () => {
+          const url = new URL(window.location);
+          url.searchParams.delete(`v${instanceId}`);
+          localList.forEach((item) => {
+            const val = item.color || item.img ? [item.color || "", item.img || "", item.label || ""].join("|") : item.label;
+            url.searchParams.append(`v${instanceId}`, val);
+          });
+          window.history.replaceState({}, "", url);
+        };
+
+        // Update globalIdCounter based on loaded list
+        localList.forEach((item) => {
+          if (item.id >= globalIdCounter) {
+            globalIdCounter = item.id + 1;
+          }
+        });
+
+        if (localList.length > 0) {
+          syncUrl();
+        }
 
         // Build the DOM group
         const group = document.createElement("div");
@@ -111,10 +132,12 @@
           onDelete: (id) => {
             localList = localList.filter((item) => String(item.id) !== String(id));
             manager.updateList(localList);
+            syncUrl();
           },
           onClear: () => {
             localList = [];
             manager.updateList(localList);
+            syncUrl();
           },
           onChange: (e) => {
             inputValueOut.textContent = e.target.value;
@@ -125,6 +148,7 @@
               localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
               e.target.value = "";
               manager.updateList(localList);
+              syncUrl();
             }
           },
         });
@@ -143,6 +167,7 @@
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
             manager.updateList(localList);
+            syncUrl();
 
             if (usedInternal) {
               manager.setValue("");
@@ -176,7 +201,37 @@
           manager.setLabel(injectLabelInput.value);
           injectLabelInput.value = "";
         });
-      });
+      };
+
+      document.getElementById("init-btn").addEventListener("click", () => init());
+
+      // Initial populate from GET
+      const urlParams = new URLSearchParams(window.location.search);
+      const groups = {};
+      for (const [key, value] of urlParams.entries()) {
+        if (/^v\d+$/.test(key)) {
+          if (!groups[key]) groups[key] = [];
+          groups[key].push(value);
+        }
+      }
+
+      Object.keys(groups)
+        .sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)))
+        .forEach((key) => {
+          const initialList = groups[key].map((v) => {
+            const parts = v.split("|");
+            if (parts.length === 3) {
+              return {
+                id: globalIdCounter++,
+                color: parts[0] || undefined,
+                img: parts[1] || undefined,
+                label: parts[2],
+              };
+            }
+            return { id: globalIdCounter++, label: v };
+          });
+          init(initialList);
+        });
     </script>
   </body>
 </html>
