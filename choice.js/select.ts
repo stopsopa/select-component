@@ -342,7 +342,7 @@ export class SelectComponent extends HTMLElement {
         const element = removeBtn.closest(".element") as HTMLElement;
         if (element) {
           const strKey = element.dataset.key;
-          this._selectedKeys = this._selectedKeys.filter(k => k !== strKey);
+          this._selectedKeys = this._selectedKeys.filter((k) => k !== strKey);
           this._reconcileSelected();
           this.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
         }
@@ -361,17 +361,17 @@ export class SelectComponent extends HTMLElement {
       const targetEl = target.closest(".element") as HTMLElement;
       if (targetEl) {
         const strKey = targetEl.dataset.key;
-        const option = this._options.find(o => String(o.key) === strKey);
-        
+        const option = this._options.find((o) => String(o.key) === strKey);
+
         if (option) {
-           const toggledIndex = this._toggled.findIndex(o => o.key === option.key);
-           if (toggledIndex !== -1) {
-             this._toggled.splice(toggledIndex, 1);
-             targetEl.classList.remove("selected");
-           } else {
-             this._toggled.push({ ...option, new: false });
-             targetEl.classList.add("selected");
-           }
+          const toggledIndex = this._toggled.findIndex((o) => o.key === option.key);
+          if (toggledIndex !== -1) {
+            this._toggled.splice(toggledIndex, 1);
+            targetEl.classList.remove("selected");
+          } else {
+            this._toggled.push({ ...option, new: false });
+            targetEl.classList.add("selected");
+          }
         }
       }
     });
@@ -406,17 +406,19 @@ export class SelectComponent extends HTMLElement {
 
     // Dispatch onLoad event to signal hydration/readiness
     this._isReady = true;
-    this.dispatchEvent(new CustomEvent("onLoad", {
-      bubbles: true,
-      composed: true,
-      detail: { instance: this }
-    }));
+    this.dispatchEvent(
+      new CustomEvent("onLoad", {
+        bubbles: true,
+        composed: true,
+        detail: { instance: this },
+      }),
+    );
   }
 
   public override addEventListener(
     type: string,
     listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ) {
     super.addEventListener(type, listener, options);
     if (type === "onLoad" && this._isReady) {
@@ -434,8 +436,6 @@ export class SelectComponent extends HTMLElement {
       }, 0);
     }
   }
-
-
 
   static get observedAttributes() {
     return ["options", "selected"];
@@ -456,19 +456,24 @@ export class SelectComponent extends HTMLElement {
     }
 
     if (name === "selected" && oldValue !== newValue) {
-      const keys = newValue ? newValue.split(",").map((k) => k.trim()).filter(Boolean) : [];
+      const keys = newValue
+        ? newValue
+            .split(",")
+            .map((k) => k.trim())
+            .filter(Boolean)
+        : [];
       this.setSelected(keys);
     }
   }
 
   private _onChangeCallback: EventListener | null = null;
-  
+
   set onchange(handler: EventListener | null) {
     if (this._onChangeCallback) this.removeEventListener("change", this._onChangeCallback);
     this._onChangeCallback = handler;
     if (handler) this.addEventListener("change", handler);
   }
-  
+
   set onChange(handler: EventListener | null) {
     this.onchange = handler;
   }
@@ -538,7 +543,7 @@ export class SelectComponent extends HTMLElement {
     for (const item of this._selected) {
       const option = document.createElement("div");
       option.className = "element";
-      
+
       if (item.key === null) {
         option.dataset.key = "null";
       } else {
@@ -607,7 +612,7 @@ export class SelectComponent extends HTMLElement {
 
   private _renderOptions() {
     if (!this.shadowRoot) return;
-    
+
     const optionsContainer = this.shadowRoot.querySelector(".options");
     if (!optionsContainer) return;
 
@@ -616,20 +621,20 @@ export class SelectComponent extends HTMLElement {
     for (const opt of this._options) {
       const element = document.createElement("div");
       element.classList.add("element");
-      
+
       if (opt.selected) {
         element.classList.add("selected");
       }
-      
+
       if (opt.key === null) {
         element.dataset.key = "";
       } else {
         element.dataset.key = String(opt.key);
       }
-      
+
       const label = document.createElement("label");
       label.textContent = opt.label;
-      
+
       element.appendChild(label);
       optionsContainer.appendChild(element);
     }
@@ -643,12 +648,12 @@ export class SelectComponent extends HTMLElement {
 
     if (!popoverEl.matches(":popover-open")) {
       this._toggled = [...this._selected];
-      
+
       const optionEls = options.querySelectorAll(".element");
       optionEls.forEach((el: Element) => {
         const htmlEl = el as HTMLElement;
         const strKey = htmlEl.dataset.key;
-        const isSelected = this._toggled.some(t => String(t.key) === strKey);
+        const isSelected = this._toggled.some((t) => String(t.key) === strKey);
         htmlEl.classList.toggle("selected", isSelected);
       });
     }

@@ -151,7 +151,6 @@ export class SelectedListManager<T extends ListElement> {
       if (this.propInputElement.parentNode !== this.propFlexList) {
         this.propFlexList.appendChild(this.propInputElement);
       }
-
     } else {
       if (this.propInputElement && this.propInputElement.parentNode === this.propFlexList) {
         this.propFlexList.removeChild(this.propInputElement);

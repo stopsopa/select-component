@@ -59,7 +59,7 @@
 
       const imgData = await fetch('img/img.json').then(r => r.json());
 
-      const init = (initialList = [], resizerLeft = "50px", resizerCenter = "350px") => {
+      const init = (initialList = [], resizerLeft = "50px", resizerCenter = "350px", states = {}) => {
         instanceCounter++;
         const instanceId = instanceCounter;
 
@@ -80,6 +80,14 @@
             url.searchParams.set(`c${instanceId}`, resizer.getAttribute("center") || "350px");
           }
 
+          const errorCb = group.querySelector('[data-role="error-cb"]');
+          const disabledCb = group.querySelector('[data-role="disabled-cb"]');
+          const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
+
+          if (errorCb) url.searchParams.set(`e${instanceId}`, errorCb.checked ? "1" : "0");
+          if (disabledCb) url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
+          if (inputFieldCb) url.searchParams.set(`i${instanceId}`, inputFieldCb.checked ? "1" : "0");
+
           window.history.replaceState({}, "", url);
         };
 
@@ -89,10 +97,6 @@
             globalIdCounter = item.id + 1;
           }
         });
-
-        if ((localList.length > 0 || resizerLeft !== "50px" || resizerCenter !== "350px") && instanceId > 0) {
-          syncUrl();
-        }
 
         // Build the DOM group
         const group = document.createElement("div");
@@ -234,6 +238,24 @@
           },
         });
 
+        // Apply states
+        if (states.error) {
+          errorCb.checked = true;
+          manager.setErrorState(true);
+        }
+        if (states.disabled) {
+          disabledCb.checked = true;
+          manager.setDisabled(true);
+        }
+        if (states.showInput === false) {
+          inputFieldCb.checked = false;
+          manager.setShowInput(false);
+        }
+
+        if ((localList.length > 0 || resizerLeft !== "50px" || resizerCenter !== "350px" || states.error || states.disabled || states.showInput === false) && instanceId > 0) {
+          syncUrl();
+        }
+
         // Template button handlers
         group.querySelectorAll('[data-role="template-btn"]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -249,8 +271,6 @@
                 syncUrl();
             });
         });
-
-
 
         addBtn.addEventListener("click", () => {
           let val = newItemInput.value.trim();
@@ -277,14 +297,17 @@
 
         errorCb.addEventListener("change", (e) => {
           manager.setErrorState(e.target.checked);
+          syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
           manager.setDisabled(e.target.checked);
+          syncUrl();
         });
 
         inputFieldCb.addEventListener("change", (e) => {
           manager.setShowInput(e.target.checked);
+          syncUrl();
         });
 
         injectBtn.addEventListener("click", () => {
@@ -309,22 +332,27 @@
       const urlParams = new URLSearchParams(window.location.search);
       const groups = {};
       const resizerData = {};
+      const statesData = {};
 
       for (const [key, value] of urlParams.entries()) {
-        const match = key.match(/^([vlc])(\d+)$/);
+        const match = key.match(/^([vlcdeoi])(\d+)$/);
         if (match) {
           const [, type, id] = match;
           if (type === "v") {
             if (!groups[id]) groups[id] = [];
             groups[id].push(value);
-          } else {
+          } else if (type === "l" || type === "c") {
             if (!resizerData[id]) resizerData[id] = {};
             resizerData[id][type === "l" ? "left" : "center"] = value;
+          } else {
+            if (!statesData[id]) statesData[id] = {};
+            const map = { e: "error", d: "disabled", o: "loading", i: "showInput" };
+            statesData[id][map[type]] = value === "1";
           }
         }
       }
 
-      const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(resizerData)])).sort((a, b) => parseInt(a) - parseInt(b));
+      const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)])).sort((a, b) => parseInt(a) - parseInt(b));
 
       allIds.forEach((id) => {
         const list = (groups[id] || []).map((v) => {
@@ -341,7 +369,7 @@
         });
         const left = resizerData[id]?.left || "50px";
         const center = resizerData[id]?.center || "350px";
-        init(list, left, center);
+        init(list, left, center, statesData[id] || {});
       });
     </script>
   </body>
