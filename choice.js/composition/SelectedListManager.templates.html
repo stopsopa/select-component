@@ -204,6 +204,7 @@
                 this.updateList(localList);
                 syncUrl();
                 updateDump();
+                return;
               }
 
               if (e.key === "Backspace" && e.target.value === "" && localList.length > 0) {
@@ -211,6 +212,7 @@
                 this.updateList(localList);
                 syncUrl();
                 updateDump();
+                return;
               }
             }
           },

@@ -201,6 +201,7 @@
               sl.setAttribute("list", JSON.stringify(localList));
               syncUrl();
               updateDump();
+              return;
             }
 
             if (originalEvent.key === "Backspace" && e.detail.value === "" && localList.length > 0) {
@@ -208,6 +209,7 @@
               sl.setAttribute("list", JSON.stringify(localList));
               syncUrl();
               updateDump();
+              return;
             }
           }
         });
