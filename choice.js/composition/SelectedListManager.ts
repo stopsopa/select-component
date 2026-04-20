@@ -196,6 +196,7 @@ export class SelectedListManager<T extends ListElement> {
   }
 
   setErrorState(isError: boolean) {
+    this.propOptions.error = isError;
     this.propContainer.classList.toggle("error", isError);
   }
 

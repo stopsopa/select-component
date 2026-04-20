@@ -151,6 +151,7 @@ class SelectedListManager {
     }
   }
   setErrorState(isError) {
+    this.propOptions.error = isError;
     this.propContainer.classList.toggle("error", isError);
   }
   setDisabled(disabled) {
