@@ -111,6 +111,7 @@ export class SelectedListManager<T extends ListElement> {
         if (target.closest(".buttons-container")) {
           return;
         }
+
         if (this.propInputElement && target !== this.propInputElement) {
           this.propInputElement.focus();
         }
