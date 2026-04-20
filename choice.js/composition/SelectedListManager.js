@@ -112,24 +112,9 @@ class SelectedListManager {
       if (this.propInputElement.parentNode !== this.propFlexList) {
         this.propFlexList.appendChild(this.propInputElement);
       }
-      if (!this.propLabelElement) {
-        this.propLabelElement = document.createElement("label");
-        this.propLabelElement.className = "floating-label";
-      }
-      if (this.propLabelElement.parentNode !== this.propContainer) {
-        this.propContainer.insertBefore(this.propLabelElement, this.propContainer.firstChild);
-      }
-      if (this.propOptions.label) {
-        this.propLabelElement.textContent = this.propOptions.label;
-      } else if (this.propLabelElement && this.propLabelElement.parentNode === this.propContainer) {
-        this.propContainer.removeChild(this.propLabelElement);
-      }
     } else {
       if (this.propInputElement && this.propInputElement.parentNode === this.propFlexList) {
         this.propFlexList.removeChild(this.propInputElement);
-      }
-      if (this.propLabelElement && this.propLabelElement.parentNode === this.propContainer) {
-        this.propContainer.removeChild(this.propLabelElement);
       }
     }
   }
@@ -141,13 +126,19 @@ class SelectedListManager {
   }
   setLabel(label) {
     this.propOptions.label = label;
-    if (this.propLabelElement) {
+    if (label) {
+      if (!this.propLabelElement) {
+        this.propLabelElement = document.createElement("label");
+        this.propLabelElement.className = "floating-label";
+      }
+      if (this.propLabelElement.parentNode !== this.propContainer) {
+        this.propContainer.insertBefore(this.propLabelElement, this.propContainer.firstChild);
+      }
       this.propLabelElement.textContent = label;
-    } else if (label) {
-      this.propLabelElement = document.createElement("label");
-      this.propLabelElement.className = "floating-label";
-      this.propLabelElement.textContent = label;
-      this.propContainer.insertBefore(this.propLabelElement, this.propContainer.firstChild);
+    } else {
+      if (this.propLabelElement && this.propLabelElement.parentNode === this.propContainer) {
+        this.propContainer.removeChild(this.propLabelElement);
+      }
     }
   }
   setErrorState(isError) {
@@ -197,6 +188,7 @@ class SelectedListManager {
     this.setErrorState(Boolean(this.propOptions.error));
     this.setDisabled(Boolean(this.propOptions.disabled));
     this.setLoading(Boolean(this.propOptions.loading));
+    this.setLabel(this.propOptions.label || "");
     this.setShowInput(Boolean(this.propOptions.showInput));
     const elements = this.propOptions.renderList(this.propList);
     if (!Array.isArray(elements)) {
