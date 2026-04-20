@@ -46,11 +46,17 @@ set -e
     },
     [`transpile`]: {
       command: `
+S="\\\\"      
 cat <<EEE
 
 /bin/bash transpile.sh choice.js/select.ts
 
 /bin/bash transpile.sh choice.js/composition/SelectedListManager.ts
+
+/bin/bash transpile.sh \${S}
+  choice.js/select.ts \${S}
+  choice.js/composition/SelectedListManager.ts \${S}
+  js/CenterResizer.ts
 
 EEE
       `,

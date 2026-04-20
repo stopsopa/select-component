@@ -1,15 +1,17 @@
 /**
- *       <center-resizer left="50px" center="350px">
-            <div ...
-        </center-resizer>
+ *   <center-resizer left="50px" center="350px">
+ *      <div>Content</div>
+ *   </center-resizer>
+ *
+ *   const resizer = document.querySelector('center-resizer');
+ *   resizer.addEventListener('onLeft', e => console.log(e.detail.width));
+ *   resizer.addEventListener('onCenter', e => console.log(e.detail.width));
  */
 export class CenterResizer extends HTMLElement {
   leftDiv!: HTMLElement;
   rightDiv!: HTMLElement;
   resizerLeft!: HTMLElement;
   resizerRight!: HTMLElement;
-  storageKeyLeft!: string;
-  storageKeyRight!: string;
 
   constructor() {
     super();
@@ -83,14 +85,16 @@ export class CenterResizer extends HTMLElement {
     this.rightDiv = this.shadowRoot!.getElementById("right-div") as HTMLElement;
     this.resizerLeft = this.shadowRoot!.getElementById("resizer-left") as HTMLElement;
     this.resizerRight = this.shadowRoot!.getElementById("resizer-right") as HTMLElement;
+    const attrLeft = this.getAttribute("left");
+    const attrRight = this.getAttribute("center");
 
-    this.storageKeyLeft = this.getAttribute("storage-key-left") || "choice-width-px-left";
-    this.storageKeyRight = this.getAttribute("storage-key-right") || "choice-width-px-right";
+    if (attrLeft) {
+      this.leftDiv.style.width = attrLeft;
+    }
 
-    const savedLeft = localStorage.getItem(this.storageKeyLeft);
-    const savedRight = localStorage.getItem(this.storageKeyRight);
-    if (savedLeft) this.leftDiv.style.width = savedLeft + "px";
-    if (savedRight) this.rightDiv.style.width = savedRight + "px";
+    if (attrRight) {
+      this.rightDiv.style.width = attrRight;
+    }
 
     this.setupResizer(this.resizerLeft, this.leftDiv, false);
     this.setupResizer(this.resizerRight, this.rightDiv, true);
@@ -109,8 +113,14 @@ export class CenterResizer extends HTMLElement {
         let newWidth = startWidth + diff;
         newWidth = Math.max(0, newWidth);
         target.style.width = newWidth + "px";
-        const storageKey = isRightSide ? this.storageKeyRight : this.storageKeyLeft;
-        localStorage.setItem(storageKey, newWidth.toString());
+
+        if (isRightSide) {
+          this.setAttribute("center", newWidth + "px");
+          this.dispatchEvent(new CustomEvent("onCenter", { detail: { width: newWidth } }));
+        } else {
+          this.setAttribute("left", newWidth + "px");
+          this.dispatchEvent(new CustomEvent("onLeft", { detail: { width: newWidth } }));
+        }
       };
 
       const onMouseUp = () => {

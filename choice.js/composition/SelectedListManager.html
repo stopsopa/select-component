@@ -46,7 +46,7 @@
       let globalIdCounter = 1;
       let instanceCounter = 0;
 
-      const init = (initialList = []) => {
+      const init = (initialList = [], resizerLeft = "50px", resizerCenter = "350px") => {
         instanceCounter++;
         const instanceId = instanceCounter;
 
@@ -60,6 +60,13 @@
             const val = item.color || item.img ? [item.color || "", item.img || "", item.label || ""].join("|") : item.label;
             url.searchParams.append(`v${instanceId}`, val);
           });
+
+          const resizer = group.querySelector("center-resizer");
+          if (resizer) {
+            url.searchParams.set(`l${instanceId}`, resizer.getAttribute("left") || "50px");
+            url.searchParams.set(`c${instanceId}`, resizer.getAttribute("center") || "350px");
+          }
+
           window.history.replaceState({}, "", url);
         };
 
@@ -70,45 +77,45 @@
           }
         });
 
-        if (localList.length > 0) {
-          syncUrl();
-        }
-
         // Build the DOM group
         const group = document.createElement("div");
         group.className = "demo-container";
 
+        if ((localList.length > 0 || resizerLeft !== "50px" || resizerCenter !== "350px") && instanceId > 0) {
+          syncUrl();
+        }
+
         group.innerHTML = `
-                <center-resizer left="50px" center="350px">
-                    <div data-role="list-parent"></div>
+                <center-resizer id="resizer-${instanceId}" left="${resizerLeft}" center="${resizerCenter}">
+                    <div data-role="list-parent" id="list-parent-${instanceId}"></div>
                 </center-resizer>
 
                 <div style="margin-top: 10px;">
-                    Input Value: <pre data-role="input-value-out" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
-                    (onChange triggers: <span data-role="onchange-counter" style="font-weight: bold;">0</span>,
-                    last key: <span data-role="last-key" style="font-weight: bold; color: #d11;">-</span>)
+                    Input Value: <pre data-role="input-value-out" id="input-value-out-${instanceId}" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
+                    (onChange triggers: <span data-role="onchange-counter" id="onchange-counter-${instanceId}" style="font-weight: bold;">0</span>,
+                    last key: <span data-role="last-key" id="last-key-${instanceId}" style="font-weight: bold; color: #d11;">-</span>)
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="new-item-input" placeholder="New item label">
-                    <button data-role="add-btn">Add Item</button>
+                    <input type="text" data-role="new-item-input" id="new-item-input-${instanceId}" placeholder="New item label">
+                    <button data-role="add-btn" id="add-btn-${instanceId}">Add Item</button>
                 </div>
 
                 <div class="controls">
-                    <label><input type="checkbox" data-role="error-cb"> Error State</label>
-                    <label><input type="checkbox" data-role="disabled-cb"> Disabled State</label>
-                    <label><input type="checkbox" data-role="loading-cb"> Loading State</label>
-                    <label><input type="checkbox" data-role="input-field-cb" checked> Show Input Field</label>
+                    <label><input type="checkbox" data-role="error-cb" id="error-cb-${instanceId}"> Error State</label>
+                    <label><input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}"> Disabled State</label>
+                    <label><input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}"> Loading State</label>
+                    <label><input type="checkbox" data-role="input-field-cb" id="input-field-cb-${instanceId}" checked> Show Input Field</label>
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="inject-input-value" placeholder="Inject input value">
-                    <button data-role="inject-btn">Set Input Value</button>
+                    <input type="text" data-role="inject-input-value" id="inject-input-value-${instanceId}" placeholder="Inject input value">
+                    <button data-role="inject-btn" id="inject-btn-${instanceId}">Set Input Value</button>
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="inject-label-value" placeholder="Inject label value">
-                    <button data-role="inject-label-btn">Set Label Value</button>
+                    <input type="text" data-role="inject-label-value" id="inject-label-value-${instanceId}" placeholder="Inject label value">
+                    <button data-role="inject-label-btn" id="inject-label-btn-${instanceId}">Set Label Value</button>
                 </div>
             `;
 
@@ -205,6 +212,11 @@
           manager.setLabel(injectLabelInput.value);
           injectLabelInput.value = "";
         });
+
+        // Watch resizer changes
+        const resizer = group.querySelector("center-resizer");
+        resizer.addEventListener("onLeft", () => syncUrl());
+        resizer.addEventListener("onCenter", () => syncUrl());
       };
 
       document.getElementById("init-btn").addEventListener("click", () => init());
@@ -212,30 +224,41 @@
       // Initial populate from GET
       const urlParams = new URLSearchParams(window.location.search);
       const groups = {};
+      const resizerData = {};
+
       for (const [key, value] of urlParams.entries()) {
-        if (/^v\d+$/.test(key)) {
-          if (!groups[key]) groups[key] = [];
-          groups[key].push(value);
+        const match = key.match(/^([vlc])(\d+)$/);
+        if (match) {
+          const [, type, id] = match;
+          if (type === "v") {
+            if (!groups[id]) groups[id] = [];
+            groups[id].push(value);
+          } else {
+            if (!resizerData[id]) resizerData[id] = {};
+            resizerData[id][type === "l" ? "left" : "center"] = value;
+          }
         }
       }
 
-      Object.keys(groups)
-        .sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)))
-        .forEach((key) => {
-          const initialList = groups[key].map((v) => {
-            const parts = v.split("|");
-            if (parts.length === 3) {
-              return {
-                id: globalIdCounter++,
-                color: parts[0] || undefined,
-                img: parts[1] || undefined,
-                label: parts[2],
-              };
-            }
-            return { id: globalIdCounter++, label: v };
-          });
-          init(initialList);
+      const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(resizerData)])).sort((a, b) => parseInt(a) - parseInt(b));
+
+      allIds.forEach((id) => {
+        const list = (groups[id] || []).map((v) => {
+          const parts = v.split("|");
+          if (parts.length === 3) {
+            return {
+              id: globalIdCounter++,
+              color: parts[0] || undefined,
+              img: parts[1] || undefined,
+              label: parts[2],
+            };
+          }
+          return { id: globalIdCounter++, label: v };
         });
+        const left = resizerData[id]?.left || "50px";
+        const center = resizerData[id]?.center || "350px";
+        init(list, left, center);
+      });
     </script>
   </body>
 </html>

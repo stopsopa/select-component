@@ -1,11 +1,17 @@
+/**
+ *   <center-resizer left="50px" center="350px">
+ *      <div>Content</div>
+ *   </center-resizer>
+ *
+ *   const resizer = document.querySelector('center-resizer');
+ *   resizer.addEventListener('onLeft', e => console.log(e.detail.width));
+ *   resizer.addEventListener('onCenter', e => console.log(e.detail.width));
+ */
 class CenterResizer extends HTMLElement {
   leftDiv;
-  centerDiv;
   rightDiv;
   resizerLeft;
   resizerRight;
-  storageKeyLeft;
-  storageKeyCenter;
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
@@ -21,18 +27,14 @@ class CenterResizer extends HTMLElement {
           align-items: stretch;
         }
         .center-div {
-          flex-shrink: 0;
+          flex-grow: 1;
+          min-width: 0;
           padding-left: 15px;
           padding-right: 15px;
           box-sizing: border-box;
         }
-        .left-div {
+        .side-div {
           flex-shrink: 0;
-          box-sizing: border-box;
-        }
-        .right-div {
-          flex-grow: 1;
-          min-width: 0;
           box-sizing: border-box;
         }
         .resizer {
@@ -65,41 +67,33 @@ class CenterResizer extends HTMLElement {
         }
       </style>
       <div class="flex">
-        <div class="left-div" id="left-div"></div>
+        <div class="side-div" id="left-div"></div>
         <div class="resizer" id="resizer-left"></div>
-        <div class="center-div" id="center-div">
+        <div class="center-div">
           <slot></slot>
         </div>
         <div class="resizer" id="resizer-right"></div>
-        <div class="right-div" id="right-div"></div>
+        <div class="side-div" id="right-div"></div>
       </div>
     `;
   }
   connectedCallback() {
     this.leftDiv = this.shadowRoot.getElementById("left-div");
-    this.centerDiv = this.shadowRoot.getElementById("center-div");
     this.rightDiv = this.shadowRoot.getElementById("right-div");
     this.resizerLeft = this.shadowRoot.getElementById("resizer-left");
     this.resizerRight = this.shadowRoot.getElementById("resizer-right");
-    this.storageKeyLeft = this.getAttribute("storage-key-left") || "choice-width-px-left";
-    this.storageKeyCenter = this.getAttribute("storage-key-center") || "choice-width-px-center";
-    
-    const initialLeft = this.getAttribute("left");
-    const initialCenter = this.getAttribute("center");
-    
-    if (initialLeft) this.leftDiv.style.width = initialLeft;
-    if (initialCenter) this.centerDiv.style.width = initialCenter;
-    
-    const savedLeft = localStorage.getItem(this.storageKeyLeft);
-    const savedCenter = localStorage.getItem(this.storageKeyCenter);
-    
-    if (savedLeft) this.leftDiv.style.width = savedLeft + "px";
-    if (savedCenter) this.centerDiv.style.width = savedCenter + "px";
-    
-    this.setupResizer(this.resizerLeft, this.leftDiv, this.storageKeyLeft);
-    this.setupResizer(this.resizerRight, this.centerDiv, this.storageKeyCenter);
+    const attrLeft = this.getAttribute("left");
+    const attrRight = this.getAttribute("center");
+    if (attrLeft) {
+      this.leftDiv.style.width = attrLeft;
+    }
+    if (attrRight) {
+      this.rightDiv.style.width = attrRight;
+    }
+    this.setupResizer(this.resizerLeft, this.leftDiv, false);
+    this.setupResizer(this.resizerRight, this.rightDiv, true);
   }
-  setupResizer(handle, target, storageKey) {
+  setupResizer(handle, target, isRightSide) {
     handle.addEventListener("mousedown", (e) => {
       e.preventDefault();
       handle.classList.add("active");
@@ -107,10 +101,17 @@ class CenterResizer extends HTMLElement {
       const startWidth = target.offsetWidth;
       const onMouseMove = (moveEvent) => {
         let diff = moveEvent.clientX - startX;
+        if (isRightSide) diff = -diff;
         let newWidth = startWidth + diff;
         newWidth = Math.max(0, newWidth);
         target.style.width = newWidth + "px";
-        localStorage.setItem(storageKey, newWidth.toString());
+        if (isRightSide) {
+          this.setAttribute("center", newWidth + "px");
+          this.dispatchEvent(new CustomEvent("onCenter", { detail: { width: newWidth } }));
+        } else {
+          this.setAttribute("left", newWidth + "px");
+          this.dispatchEvent(new CustomEvent("onLeft", { detail: { width: newWidth } }));
+        }
       };
       const onMouseUp = () => {
         handle.classList.remove("active");
