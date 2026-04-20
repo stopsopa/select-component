@@ -105,6 +105,8 @@
                         ${states.disabled ? "disabled" : ""}
                         ${states.loading ? "loading" : ""}
                         show-input="${states.showInput !== false}"
+                        onFocus="this.handleDemoFocus(event)"
+                        onClear="this.handleDemoClear(event)"
                     ></selected-list>
                 </center-resizer>
 
@@ -184,12 +186,12 @@
           updateDump();
         });
 
-        sl.addEventListener("onClear", () => {
+        sl.handleDemoClear = () => {
           localList = [];
           sl.setAttribute("list", JSON.stringify(localList));
           syncUrl();
           updateDump();
-        });
+        };
 
         sl.addEventListener("onChange", (e) => {
           inputValueOut.textContent = e.detail.value;
@@ -216,10 +218,9 @@
             }
           }
         });
- 
-        sl.addEventListener("onFocus", (e) => {
+        sl.handleDemoFocus = (e) => {
           onFocusCounter.textContent = ++focusCounter;
-        });
+        };
 
         updateDump();
 

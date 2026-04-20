@@ -3,9 +3,10 @@ import { SelectedListManager, ListElement, SelectedListManagerOptions } from "./
 export class SelectedList extends HTMLElement {
   private _manager: SelectedListManager<ListElement> | null = null;
   private _options: SelectedListManagerOptions<ListElement> = {};
+  private _attributeEvents: Record<string, any> = {};
 
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "list"];
+    return ["label", "show-input", "value", "disabled", "error", "loading", "list", "onFocus", "onClear", "onChange", "onDelete"];
   }
 
   constructor() {
@@ -47,6 +48,11 @@ export class SelectedList extends HTMLElement {
       },
     };
 
+    ["onFocus", "onClear", "onChange", "onDelete"].forEach((attr) => {
+      const val = this.getAttribute(attr);
+      if (val) this._setupAttributeEvent(attr, val);
+    });
+
     this._manager = new SelectedListManager(this, this._options);
   }
 
@@ -80,6 +86,31 @@ export class SelectedList extends HTMLElement {
           console.error("Invalid JSON in list attribute", newValue);
         }
         break;
+      case "onFocus":
+      case "onClear":
+      case "onChange":
+      case "onDelete":
+        this._setupAttributeEvent(name, newValue);
+        break;
+    }
+  }
+ 
+  private _setupAttributeEvent(name: string, value: string) {
+    const eventName = name.slice(2).toLowerCase(); // onFocus -> focus
+    // Actually, our internal events are dispatched with names like "onFocus"
+    // Let's use the exact name for now.
+    const internalEventName = name;
+ 
+    if (this._attributeEvents[name]) {
+      this.removeEventListener(internalEventName, this._attributeEvents[name]);
+      delete this._attributeEvents[name];
+    }
+ 
+    if (value) {
+      this._attributeEvents[name] = (e: any) => {
+        new Function("event", value).call(this, e);
+      };
+      this.addEventListener(internalEventName, this._attributeEvents[name]);
     }
   }
 
