@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SelectedListManager WebComponent Demo</title>
+    <title>SelectedListManager WebComponent Attributes Demo</title>
     <link rel="stylesheet" href="SelectedListManager.css" />
     <style>
       body {
@@ -31,7 +31,11 @@
     </style>
   </head>
   <body>
-    <h1>SelectedListManager WebComponent Demo</h1>
+    <h1>SelectedListManager WebComponent Attributes Demo</h1>
+    <p>
+      This demo interacts with the component exclusively via <code>setAttribute</code>, <code>removeAttribute</code>,
+      and <code>getAttribute</code>.
+    </p>
     <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
 
     <div id="instances-area"></div>
@@ -96,7 +100,6 @@
                 <center-resizer id="resizer-${instanceId}" left="${resizerLeft}" center="${resizerCenter}">
                     <selected-list 
                         id="sl-${instanceId}" 
-                        data-test="example"
                         label="Select options"
                         ${states.error ? "error" : ""}
                         ${states.disabled ? "disabled" : ""}
@@ -158,7 +161,8 @@
         let counter = 0;
 
         const updateDump = () => {
-          const list = sl.list;
+          const listAttr = sl.getAttribute("list");
+          const list = listAttr ? JSON.parse(listAttr) : [];
           if (list.length === 0) {
             listDump.textContent = "[]";
             return;
@@ -166,20 +170,20 @@
           listDump.textContent = "[\n" + list.map((item) => "  " + JSON.stringify(item)).join(",\n") + "\n]";
         };
 
-        // Initialize list
-        sl.list = localList;
+        // Initialize list via attribute
+        sl.setAttribute("list", JSON.stringify(localList));
 
         // Register events
         sl.addEventListener("onDelete", (e) => {
           localList = localList.filter((item) => String(item.id) !== String(e.detail.id));
-          sl.updateList(localList);
+          sl.setAttribute("list", JSON.stringify(localList));
           syncUrl();
           updateDump();
         });
 
         sl.addEventListener("onClear", () => {
           localList = [];
-          sl.updateList(localList);
+          sl.setAttribute("list", JSON.stringify(localList));
           syncUrl();
           updateDump();
         });
@@ -192,8 +196,8 @@
           const originalEvent = e.detail.originalEvent;
           if (originalEvent.type === "keydown" && originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
             localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
-            sl.setValue("");
-            sl.updateList(localList);
+            sl.setAttribute("value", ""); // Clear internal input
+            sl.setAttribute("list", JSON.stringify(localList));
             syncUrl();
             updateDump();
           }
@@ -218,8 +222,14 @@
           let val = newItemInput.value.trim();
           let usedInternal = false;
 
-          if (!val && sl.value) {
-            val = sl.value.trim();
+          // Note: In a real 'pure attribute' scenario, getting current input value
+          // might require tracking it via onChange because the attribute
+          // doesn't automatically sync with user typing.
+          // For this demo part, we'll use the tracked inputValueOut text as a proxy
+          // or just rely on the sl.value property for this specific check if needed,
+          // but let's try to be as attribute-heavy as possible.
+          if (!val) {
+            val = inputValueOut.textContent.trim();
             usedInternal = true;
           }
 
@@ -227,44 +237,44 @@
 
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
-            sl.updateList(localList);
+            sl.setAttribute("list", JSON.stringify(localList));
             syncUrl();
             updateDump();
 
             if (usedInternal) {
-              sl.setValue("");
+              sl.setAttribute("value", "");
               inputValueOut.textContent = "";
             }
           }
         });
 
         errorCb.addEventListener("change", (e) => {
-          sl.setErrorState(e.target.checked);
+          sl.toggleAttribute("error", e.target.checked);
           syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
-          sl.setDisabled(e.target.checked);
+          sl.toggleAttribute("disabled", e.target.checked);
           syncUrl();
         });
 
         loadingCb.addEventListener("change", (e) => {
-          sl.setLoading(e.target.checked);
+          sl.toggleAttribute("loading", e.target.checked);
           syncUrl();
         });
 
         inputFieldCb.addEventListener("change", (e) => {
-          sl.setShowInput(e.target.checked);
+          sl.setAttribute("show-input", e.target.checked ? "true" : "false");
           syncUrl();
         });
 
         injectBtn.addEventListener("click", () => {
-          sl.setValue(injectInput.value);
+          sl.setAttribute("value", injectInput.value);
           injectInput.value = "";
         });
 
         injectLabelBtn.addEventListener("click", () => {
-          sl.setLabel(injectLabelInput.value);
+          sl.setAttribute("label", injectLabelInput.value);
           injectLabelInput.value = "";
         });
 
