@@ -29,14 +29,14 @@
         cursor: pointer;
       }
       .template-btn {
-          padding: 5px 10px;
-          cursor: pointer;
-          border: 1px solid #ccc;
-          background: #fff;
-          border-radius: 4px;
+        padding: 5px 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        background: #fff;
+        border-radius: 4px;
       }
       .template-btn:hover {
-          background: #f0f0f0;
+        background: #f0f0f0;
       }
     </style>
   </head>
@@ -57,7 +57,7 @@
       let globalIdCounter = 1;
       let instanceCounter = 0;
 
-      const imgData = await fetch('img/img.json').then(r => r.json());
+      const imgData = await fetch("img/img.json").then((r) => r.json());
 
       const init = (initialList = [], resizerLeft = "50px", resizerCenter = "350px", states = {}) => {
         instanceCounter++;
@@ -102,11 +102,11 @@
         const group = document.createElement("div");
         group.className = "demo-container";
 
-        let templateButtonsHtml = '';
+        let templateButtonsHtml = "";
         for (const [color, images] of Object.entries(imgData)) {
-            images.forEach(img => {
-                templateButtonsHtml += `<button class="template-btn" data-role="template-btn" data-color="${color}" data-img="${img}" style="color: ${color}">${img}</button>`;
-            });
+          images.forEach((img) => {
+            templateButtonsHtml += `<button class="template-btn" data-role="template-btn" data-color="${color}" data-img="${img}" style="color: ${color}">${img}</button>`;
+          });
         }
 
         group.innerHTML = `
@@ -197,12 +197,21 @@
             onChangeCounter.textContent = ++counter;
             lastKeyOut.textContent = e.key || e.data || e.type;
 
-            if (e.type === "keydown" && e.key === "Enter" && e.target.value.trim() !== "") {
-              localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
-              e.target.value = "";
-              this.updateList(localList);
-              syncUrl();
-              updateDump();
+            if (e.type === "keydown") {
+              if (e.key === "Enter" && e.target.value.trim() !== "") {
+                localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
+                e.target.value = "";
+                this.updateList(localList);
+                syncUrl();
+                updateDump();
+              }
+
+              if (e.key === "Backspace" && e.target.value === "" && localList.length > 0) {
+                localList.pop();
+                this.updateList(localList);
+                syncUrl();
+                updateDump();
+              }
             }
           },
           renderItem: function (item) {
@@ -237,18 +246,18 @@
             return el;
           },
           renderList: function (list) {
-            const elements = list.map(item => this.propOptions.renderItem.call(this, item));
+            const elements = list.map((item) => this.propOptions.renderItem.call(this, item));
             const groups = [];
             for (let i = 0; i < elements.length; i += 3) {
-              const groupDiv = document.createElement('div');
-              groupDiv.style.border = '2px solid gray';
-              groupDiv.style.padding = '3px';
-              groupDiv.style.margin = '2px';
-              groupDiv.style.display = 'flex';
-              groupDiv.style.gap = '5px';
-              groupDiv.style.flexWrap = 'wrap';
+              const groupDiv = document.createElement("div");
+              groupDiv.style.border = "2px solid gray";
+              groupDiv.style.padding = "3px";
+              groupDiv.style.margin = "2px";
+              groupDiv.style.display = "flex";
+              groupDiv.style.gap = "5px";
+              groupDiv.style.flexWrap = "wrap";
               const chunk = elements.slice(i, i + 3);
-              chunk.forEach(el => groupDiv.appendChild(el));
+              chunk.forEach((el) => groupDiv.appendChild(el));
               groups.push(groupDiv);
             }
             return groups;
@@ -271,25 +280,33 @@
           manager.setShowInput(false);
         }
 
-        if ((localList.length > 0 || resizerLeft !== "50px" || resizerCenter !== "350px" || states.error || states.disabled || states.showInput === false) && instanceId > 0) {
+        if (
+          (localList.length > 0 ||
+            resizerLeft !== "50px" ||
+            resizerCenter !== "350px" ||
+            states.error ||
+            states.disabled ||
+            states.showInput === false) &&
+          instanceId > 0
+        ) {
           syncUrl();
         }
 
         // Template button handlers
-        group.querySelectorAll('[data-role="template-btn"]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const color = btn.dataset.color;
-                const img = btn.dataset.img;
-                localList.push({
-                    id: globalIdCounter++,
-                    label: img.split('.')[0],
-                    color: color,
-                    img: img
-                });
-                manager.updateList(localList);
-                syncUrl();
-                updateDump();
+        group.querySelectorAll('[data-role="template-btn"]').forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const color = btn.dataset.color;
+            const img = btn.dataset.img;
+            localList.push({
+              id: globalIdCounter++,
+              label: img.split(".")[0],
+              color: color,
+              img: img,
             });
+            manager.updateList(localList);
+            syncUrl();
+            updateDump();
+          });
         });
 
         addBtn.addEventListener("click", () => {
@@ -373,7 +390,9 @@
         }
       }
 
-      const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)])).sort((a, b) => parseInt(a) - parseInt(b));
+      const allIds = Array.from(
+        new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)]),
+      ).sort((a, b) => parseInt(a) - parseInt(b));
 
       allIds.forEach((id) => {
         const list = (groups[id] || []).map((v) => {

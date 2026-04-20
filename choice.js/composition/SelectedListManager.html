@@ -57,7 +57,8 @@
           const url = new URL(window.location);
           url.searchParams.delete(`v${instanceId}`);
           localList.forEach((item) => {
-            const val = item.color || item.img ? [item.color || "", item.img || "", item.label || ""].join("|") : item.label;
+            const val =
+              item.color || item.img ? [item.color || "", item.img || "", item.label || ""].join("|") : item.label;
             url.searchParams.append(`v${instanceId}`, val);
           });
 
@@ -176,12 +177,21 @@
             onChangeCounter.textContent = ++counter;
             lastKeyOut.textContent = e.key || e.data || e.type;
 
-            if (e.type === "keydown" && e.key === "Enter" && e.target.value.trim() !== "") {
-              localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
-              e.target.value = "";
-              this.updateList(localList);
-              syncUrl();
-              updateDump();
+            if (e.type === "keydown") {
+              if (e.key === "Enter" && e.target.value.trim() !== "") {
+                localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
+                e.target.value = "";
+                this.updateList(localList);
+                syncUrl();
+                updateDump();
+              }
+
+              if (e.key === "Backspace" && e.target.value === "" && localList.length > 0) {
+                localList.pop();
+                this.updateList(localList);
+                syncUrl();
+                updateDump();
+              }
             }
           },
         });
@@ -206,7 +216,16 @@
           manager.setShowInput(false);
         }
 
-        if ((localList.length > 0 || resizerLeft !== "50px" || resizerCenter !== "350px" || states.error || states.disabled || states.loading || states.showInput === false) && instanceId > 0) {
+        if (
+          (localList.length > 0 ||
+            resizerLeft !== "50px" ||
+            resizerCenter !== "350px" ||
+            states.error ||
+            states.disabled ||
+            states.loading ||
+            states.showInput === false) &&
+          instanceId > 0
+        ) {
           syncUrl();
         }
 
@@ -296,7 +315,9 @@
         }
       }
 
-      const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)])).sort((a, b) => parseInt(a) - parseInt(b));
+      const allIds = Array.from(
+        new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)]),
+      ).sort((a, b) => parseInt(a) - parseInt(b));
 
       allIds.forEach((id) => {
         const list = (groups[id] || []).map((v) => {

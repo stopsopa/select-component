@@ -194,12 +194,21 @@
           lastKeyOut.textContent = e.detail.key || "-";
 
           const originalEvent = e.detail.originalEvent;
-          if (originalEvent.type === "keydown" && originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
-            localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
-            sl.setAttribute("value", ""); // Clear internal input
-            sl.setAttribute("list", JSON.stringify(localList));
-            syncUrl();
-            updateDump();
+          if (originalEvent.type === "keydown") {
+            if (originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
+              localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
+              sl.setAttribute("value", ""); // Clear internal input
+              sl.setAttribute("list", JSON.stringify(localList));
+              syncUrl();
+              updateDump();
+            }
+
+            if (originalEvent.key === "Backspace" && e.detail.value === "" && localList.length > 0) {
+              localList.pop();
+              sl.setAttribute("list", JSON.stringify(localList));
+              syncUrl();
+              updateDump();
+            }
           }
         });
 
