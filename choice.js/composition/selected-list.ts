@@ -42,6 +42,9 @@ export class SelectedList extends HTMLElement {
       onChange: (e) => {
         this.dispatchEvent(new CustomEvent("onChange", { detail: { originalEvent: e, value: (e.target as HTMLInputElement).value, key: (e as KeyboardEvent).key } }));
       },
+      onFocus: (e) => {
+        this.dispatchEvent(new CustomEvent("onFocus", { detail: { originalEvent: e } }));
+      },
     };
 
     this._manager = new SelectedListManager(this, this._options);

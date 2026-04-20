@@ -89,6 +89,12 @@ class SelectedListManager {
         this.propOptions.onChange.call(this, e);
       }
     });
+    this.propParentElement.addEventListener("focusin", (e) => {
+      const target = e.target;
+      if (target === this.propInputElement) {
+        this.propOptions.onFocus?.call(this, e);
+      }
+    });
     this.propParentElement.addEventListener("keydown", (e) => {
       const target = e.target;
       if (target === this.propInputElement) {

@@ -117,6 +117,7 @@
                 <div style="margin-top: 10px;">
                     Input Value: <pre data-role="input-value-out" id="input-value-out-${instanceId}" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
                     (onChange triggers: <span data-role="onchange-counter" id="onchange-counter-${instanceId}" style="font-weight: bold;">0</span>,
+                    onFocus triggers: <span data-role="onfocus-counter" id="onfocus-counter-${instanceId}" style="font-weight: bold;">0</span>,
                     last key: <span data-role="last-key" id="last-key-${instanceId}" style="font-weight: bold; color: #d11;">-</span>)
                 </div>
 
@@ -165,9 +166,11 @@
         const injectLabelInput = group.querySelector('[data-role="inject-label-value"]');
         const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
         const onChangeCounter = group.querySelector('[data-role="onchange-counter"]');
+        const onFocusCounter = group.querySelector('[data-role="onfocus-counter"]');
         const lastKeyOut = group.querySelector('[data-role="last-key"]');
         const listDump = group.querySelector('[data-role="list-dump"]');
         let counter = 0;
+        let focusCounter = 0;
 
         const updateDump = () => {
           if (localList.length === 0) {
@@ -216,6 +219,9 @@
                 return;
               }
             }
+          },
+          onFocus: function (e) {
+            onFocusCounter.textContent = ++focusCounter;
           },
           renderItem: function (item) {
             const el = document.createElement("div");

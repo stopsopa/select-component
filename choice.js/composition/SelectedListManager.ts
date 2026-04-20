@@ -14,6 +14,7 @@ export type SelectedListManagerOptions<T extends ListElement> = {
   onDelete?: (id: string) => void;
   onClear?: () => void;
   onChange?: (e: Event) => void;
+  onFocus?: (e: FocusEvent) => void;
   label?: string;
   disabled?: boolean;
   error?: boolean;
@@ -121,6 +122,13 @@ export class SelectedListManager<T extends ListElement> {
       const target = e.target as HTMLElement;
       if (target === this.propInputElement) {
         this.propOptions.onChange!.call(this, e);
+      }
+    });
+
+    this.propParentElement.addEventListener("focusin", (e) => {
+      const target = e.target as HTMLElement;
+      if (target === this.propInputElement) {
+        this.propOptions.onFocus?.call(this, e as FocusEvent);
       }
     });
 
