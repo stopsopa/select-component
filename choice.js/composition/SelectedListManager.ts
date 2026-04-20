@@ -13,7 +13,7 @@ export type SelectedListManagerOptions<T extends ListElement> = {
   renderList?: (list: T[]) => HTMLElement[];
   onDelete?: (id: string) => void;
   onClear?: () => void;
-  onChange?: (value: string) => void;
+  onChange?: (e: Event) => void;
   label?: string;
   disabled?: boolean;
   error?: boolean;
@@ -66,7 +66,7 @@ export class SelectedListManager<T extends ListElement> {
       },
       onDelete: (id: string) => {},
       onClear: () => {},
-      onChange: (value: string) => {},
+      onChange: (e: Event) => {},
       disabled: false,
       error: false,
       label: "",
@@ -117,7 +117,7 @@ export class SelectedListManager<T extends ListElement> {
     this.propParentElement.addEventListener("input", (e) => {
       const target = e.target as HTMLElement;
       if (target === this.propInputElement) {
-        this.propOptions.onChange!((target as HTMLInputElement).value);
+        this.propOptions.onChange!(e);
       }
     });
   }

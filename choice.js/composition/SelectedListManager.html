@@ -60,6 +60,7 @@
 
                 <div style="margin-top: 10px;">
                     Input Value: <pre data-role="input-value-out" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
+                    (onChange triggers: <span data-role="onchange-counter" style="font-weight: bold;">0</span>)
                 </div>
 
                 <div class="controls">
@@ -97,6 +98,8 @@
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
         const injectLabelInput = group.querySelector('[data-role="inject-label-value"]');
         const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
+        const onChangeCounter = group.querySelector('[data-role="onchange-counter"]');
+        let counter = 0;
 
         manager = new SelectedListManager(parentElement, {
           list: localList,
@@ -109,8 +112,9 @@
             localList = [];
             manager.updateList(localList);
           },
-          onChange: (value) => {
-            inputValueOut.textContent = value;
+          onChange: (e) => {
+            inputValueOut.textContent = e.target.value;
+            onChangeCounter.textContent = ++counter;
           },
         });
 

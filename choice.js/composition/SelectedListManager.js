@@ -41,7 +41,7 @@ class SelectedListManager {
       },
       onClear: () => {
       },
-      onChange: (value) => {
+      onChange: (e) => {
       },
       disabled: false,
       error: false,
@@ -85,7 +85,7 @@ class SelectedListManager {
     this.propParentElement.addEventListener("input", (e) => {
       const target = e.target;
       if (target === this.propInputElement) {
-        this.propOptions.onChange(target.value);
+        this.propOptions.onChange(e);
       }
     });
   }
