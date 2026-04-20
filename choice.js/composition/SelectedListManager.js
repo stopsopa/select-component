@@ -91,8 +91,12 @@ class SelectedListManager {
     });
     this.propParentElement.addEventListener("keydown", (e) => {
       const target = e.target;
-      if (target === this.propInputElement && (e.key === "Backspace" || e.key === "Enter")) {
-        this.propOptions.onChange.call(this, e);
+      if (target === this.propInputElement) {
+        const isBackspaceOnEmpty = e.key === "Backspace" && this.propInputElement.value === "";
+        const isEnter = e.key === "Enter";
+        if (isEnter || isBackspaceOnEmpty) {
+          this.propOptions.onChange.call(this, e);
+        }
       }
     });
   }
