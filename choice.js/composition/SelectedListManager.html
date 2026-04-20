@@ -72,6 +72,7 @@
                 <div class="controls">
                     <label><input type="checkbox" data-role="error-cb"> Error State</label>
                     <label><input type="checkbox" data-role="disabled-cb"> Disabled State</label>
+                    <label><input type="checkbox" data-role="loading-cb"> Loading State</label>
                     <label><input type="checkbox" data-role="input-field-cb" checked> Show Input Field</label>
                 </div>
 
@@ -94,6 +95,7 @@
         const addBtn = group.querySelector('[data-role="add-btn"]');
         const errorCb = group.querySelector('[data-role="error-cb"]');
         const disabledCb = group.querySelector('[data-role="disabled-cb"]');
+        const loadingCb = group.querySelector('[data-role="loading-cb"]');
         const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
         const injectInput = group.querySelector('[data-role="inject-input-value"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
@@ -127,8 +129,6 @@
           },
         });
 
-
-
         addBtn.addEventListener("click", () => {
           let val = newItemInput.value.trim();
           let usedInternal = false;
@@ -157,6 +157,10 @@
 
         disabledCb.addEventListener("change", (e) => {
           manager.setDisabled(e.target.checked);
+        });
+
+        loadingCb.addEventListener("change", (e) => {
+          manager.setLoading(e.target.checked);
         });
 
         inputFieldCb.addEventListener("change", (e) => {

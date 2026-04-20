@@ -3,12 +3,11 @@
 import path from "node:path";
 import fs from "fs";
 import express from "express";
-import template from "lodash/template.js";
-import shuffle from "lodash/shuffle.js";
 import { fileURLToPath } from "url";
 import { z } from "zod";
 import render, { setDirectory, enableCache } from "./js/cacheTemplate.ts";
 import { simplifyErrors } from "./js/simplifyErrors.ts";
+import produceRender from "./produceRender.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,44 +37,7 @@ app.post("/formData", (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
   res.json(req.body);
 });
-/**
- * http://0.0.0.0:5678/choice.js/html/index.html
- */
-function produceRender(parentFile, permaData = {}) {
-  return function (file, data) {
-    try {
-      const filePath = path.resolve(path.dirname(parentFile), file);
 
-      const content = fs.readFileSync(filePath, "utf8");
-
-      return template(content, {
-        variable: "d",
-        interpolate: /<%=([\s\S]+?)%>/g, // this somehow stops template from processing `${i}` which is what I want
-        // to see exactly what is going on put debugger in file node_modules/lodash/template.js
-        // in place: https://github.com/lodash/lodash/blob/4.18.1/dist/lodash.js#L14928
-        // you will see before setting here interpolate: /<%=([\s\S]+?)%>/g,
-        // value of sourceURL will be
-        // /<%-([\s\S]+?)%>|<%=([\s\S]+?)%>|\$\{([^\\}]*(?:\\.[^\\}]*)*)\}|<%([\s\S]+?)%>|$/g
-        // but when set:
-        // /<%-([\s\S]+?)%>|<%=([\s\S]+?)%>|($^)|<%([\s\S]+?)%>|$/g
-      })({
-        ...permaData,
-        ...data,
-        template: {
-          file: filePath,
-          dir: path.dirname(filePath),
-        },
-        fs,
-        path,
-        render: produceRender(filePath, permaData),
-      });
-    } catch (e) {
-      console.error(`_.template() error in produceRender() for ${file}`, e);
-
-      throw new Error(`_.template() error in produceRender() for ${file}`);
-    }
-  };
-}
 app.get(/^(.*)$/, async (req, res, next) => {
   let reqPath = req.path;
   if (reqPath.endsWith("/")) {
@@ -96,6 +58,8 @@ app.get(/^(.*)$/, async (req, res, next) => {
        * WARNING: This method is not safe because it forwards get and post without validation to template
        */
       const render = produceRender(filePath, {
+        fs,
+        path,
         req,
         res,
         ...req.query,

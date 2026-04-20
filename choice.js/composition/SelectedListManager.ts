@@ -17,6 +17,7 @@ export type SelectedListManagerOptions<T extends ListElement> = {
   label?: string;
   disabled?: boolean;
   error?: boolean;
+  loading?: boolean;
 };
 
 export class SelectedListManager<T extends ListElement> {
@@ -28,6 +29,7 @@ export class SelectedListManager<T extends ListElement> {
   public propList: T[];
   public propInputElement: HTMLInputElement | null = null;
   public propClearButton!: HTMLButtonElement;
+  public propLoaderElement: HTMLElement | null = null;
   public propLabelElement: HTMLLabelElement | null = null;
 
   constructor(parentElement: HTMLElement, options: SelectedListManagerOptions<T> = {}) {
@@ -69,6 +71,7 @@ export class SelectedListManager<T extends ListElement> {
       onChange: (e: Event) => {},
       disabled: false,
       error: false,
+      loading: false,
       label: "",
       ...options,
     };
@@ -207,6 +210,23 @@ export class SelectedListManager<T extends ListElement> {
     this.propContainer.classList.toggle("disabled", disabled);
   }
 
+  setLoading(loading: boolean) {
+    this.propOptions.loading = loading;
+    if (loading) {
+      if (!this.propLoaderElement) {
+        this.propLoaderElement = document.createElement("div");
+        this.propLoaderElement.className = "loader";
+      }
+      if (this.propClearButton.parentNode) {
+        this.propButtonsContainer.replaceChild(this.propLoaderElement, this.propClearButton);
+      }
+    } else {
+      if (this.propLoaderElement && this.propLoaderElement.parentNode) {
+        this.propButtonsContainer.replaceChild(this.propClearButton, this.propLoaderElement);
+      }
+    }
+  }
+
   render() {
     if (!this.propContainer) {
       this.propContainer = document.createElement("div");
@@ -231,6 +251,8 @@ export class SelectedListManager<T extends ListElement> {
     this.setErrorState(Boolean(this.propOptions.error));
 
     this.setDisabled(Boolean(this.propOptions.disabled));
+
+    this.setLoading(Boolean(this.propOptions.loading));
 
     this.setShowInput(Boolean(this.propOptions.showInput));
 

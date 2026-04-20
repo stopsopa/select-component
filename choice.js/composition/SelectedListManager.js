@@ -7,6 +7,7 @@ class SelectedListManager {
   propList;
   propInputElement = null;
   propClearButton;
+  propLoaderElement = null;
   propLabelElement = null;
   constructor(parentElement, options = {}) {
     this.propParentElement = parentElement;
@@ -45,6 +46,7 @@ class SelectedListManager {
       },
       disabled: false,
       error: false,
+      loading: false,
       label: "",
       ...options
     };
@@ -159,6 +161,22 @@ class SelectedListManager {
     this.propClearButton.disabled = disabled;
     this.propContainer.classList.toggle("disabled", disabled);
   }
+  setLoading(loading) {
+    this.propOptions.loading = loading;
+    if (loading) {
+      if (!this.propLoaderElement) {
+        this.propLoaderElement = document.createElement("div");
+        this.propLoaderElement.className = "loader";
+      }
+      if (this.propClearButton.parentNode) {
+        this.propButtonsContainer.replaceChild(this.propLoaderElement, this.propClearButton);
+      }
+    } else {
+      if (this.propLoaderElement && this.propLoaderElement.parentNode) {
+        this.propButtonsContainer.replaceChild(this.propClearButton, this.propLoaderElement);
+      }
+    }
+  }
   render() {
     if (!this.propContainer) {
       this.propContainer = document.createElement("div");
@@ -177,6 +195,7 @@ class SelectedListManager {
     }
     this.setErrorState(Boolean(this.propOptions.error));
     this.setDisabled(Boolean(this.propOptions.disabled));
+    this.setLoading(Boolean(this.propOptions.loading));
     this.setShowInput(Boolean(this.propOptions.showInput));
     const elements = this.propOptions.renderList(this.propList);
     if (!Array.isArray(elements)) {
