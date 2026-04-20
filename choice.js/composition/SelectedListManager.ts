@@ -120,6 +120,13 @@ export class SelectedListManager<T extends ListElement> {
         this.propOptions.onChange!(e);
       }
     });
+
+    this.propParentElement.addEventListener("keydown", (e) => {
+      const target = e.target as HTMLElement;
+      if (target === this.propInputElement && e.key === "Backspace") {
+        this.propOptions.onChange!(e);
+      }
+    });
   }
 
   updateList(list: T[]) {
