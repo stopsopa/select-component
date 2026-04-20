@@ -35,8 +35,8 @@ class SelectedListManager {
         el.appendChild(del);
         return el;
       },
-      renderList: (list) => {
-        return list.map((item) => this.propOptions.renderItem(item));
+      renderList: function(list) {
+        return list.map((item) => this.propOptions.renderItem.call(this, item));
       },
       onDelete: (id) => {
       },
@@ -61,16 +61,15 @@ class SelectedListManager {
       const clearBtn = target.closest(".clear-btn");
       if (clearBtn && this.propParentElement.contains(clearBtn)) {
         e.preventDefault();
-        this.propOptions.onClear();
+        this.propOptions.onClear.call(this);
         return;
       }
       // Handle Delete Item
       const delBtn = target.closest("[data-remove]");
       if (delBtn && this.propParentElement.contains(delBtn)) {
+        e.preventDefault();
         const id = delBtn.getAttribute("data-remove");
-        if (id) {
-          this.propOptions.onDelete(id);
-        }
+        this.propOptions.onDelete.call(this, id);
         return;
       }
       // Handle Focus Input
@@ -87,13 +86,13 @@ class SelectedListManager {
     this.propParentElement.addEventListener("input", (e) => {
       const target = e.target;
       if (target === this.propInputElement) {
-        this.propOptions.onChange(e);
+        this.propOptions.onChange.call(this, e);
       }
     });
     this.propParentElement.addEventListener("keydown", (e) => {
       const target = e.target;
       if (target === this.propInputElement && (e.key === "Backspace" || e.key === "Enter")) {
-        this.propOptions.onChange(e);
+        this.propOptions.onChange.call(this, e);
       }
     });
   }
@@ -190,7 +189,7 @@ class SelectedListManager {
     this.setLoading(Boolean(this.propOptions.loading));
     this.setLabel(this.propOptions.label || "");
     this.setShowInput(Boolean(this.propOptions.showInput));
-    const elements = this.propOptions.renderList(this.propList);
+    const elements = this.propOptions.renderList.call(this, this.propList);
     if (!Array.isArray(elements)) {
       throw new Error("renderList must return an array of HTMLElements");
     }

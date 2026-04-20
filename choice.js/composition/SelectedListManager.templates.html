@@ -170,25 +170,29 @@
         let counter = 0;
 
         const updateDump = () => {
-          listDump.textContent = JSON.stringify(localList, null, 2);
+          if (localList.length === 0) {
+            listDump.textContent = "[]";
+            return;
+          }
+          listDump.textContent = "[\n" + localList.map((item) => "  " + JSON.stringify(item)).join(",\n") + "\n]";
         };
 
         manager = new SelectedListManager(parentElement, {
           list: localList,
           label: "Select options",
-          onDelete: (id) => {
+          onDelete: function (id) {
             localList = localList.filter((item) => String(item.id) !== String(id));
-            manager.updateList(localList);
+            this.updateList(localList);
             syncUrl();
             updateDump();
           },
-          onClear: () => {
+          onClear: function () {
             localList = [];
-            manager.updateList(localList);
+            this.updateList(localList);
             syncUrl();
             updateDump();
           },
-          onChange: (e) => {
+          onChange: function (e) {
             inputValueOut.textContent = e.target.value;
             onChangeCounter.textContent = ++counter;
             lastKeyOut.textContent = e.key || e.data || e.type;
@@ -196,32 +200,33 @@
             if (e.type === "keydown" && e.key === "Enter" && e.target.value.trim() !== "") {
               localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
               e.target.value = "";
-              manager.updateList(localList);
+              this.updateList(localList);
               syncUrl();
               updateDump();
             }
           },
-          renderItem: (item) => {
+          renderItem: function (item) {
             const el = document.createElement("div");
             el.className = "element";
             el.dataset.id = String(item.id);
-            if (item.color) {
-                el.style.color = item.color;
+            el.style.border = `2px solid ${item.color || "black"}`;
+            el.style.display = "flex";
+            el.style.alignItems = "center";
+            el.style.gap = "5px";
+            el.style.padding = "5px";
+            el.style.background = "#fff";
+
+            if (item.img) {
+              const img = document.createElement("img");
+              img.src = `img/${item.img}`;
+              img.style.width = "20px";
+              img.style.height = "20px";
+              img.style.objectFit = "contain";
+              el.appendChild(img);
             }
 
             const label = document.createElement("label");
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            label.style.gap = '5px';
-
-            if (item.img) {
-                const img = document.createElement('img');
-                img.src = 'img/' + item.img;
-                img.style.width = '16px';
-                img.style.height = '16px';
-                label.appendChild(img);
-            }
-            label.appendChild(document.createTextNode(item.label));
+            label.textContent = item.label;
 
             const del = document.createElement("div");
             del.dataset.remove = String(item.id);
@@ -231,8 +236,8 @@
 
             return el;
           },
-          renderList: (list) => {
-            const elements = list.map(item => manager.propOptions.renderItem(item));
+          renderList: function (list) {
+            const elements = list.map(item => this.propOptions.renderItem.call(this, item));
             const groups = [];
             for (let i = 0; i < elements.length; i += 3) {
               const groupDiv = document.createElement('div');

@@ -159,19 +159,19 @@
         manager = new SelectedListManager(parentElement, {
           list: localList,
           label: "Select options",
-          onDelete: (id) => {
+          onDelete: function (id) {
             localList = localList.filter((item) => String(item.id) !== String(id));
-            manager.updateList(localList);
+            this.updateList(localList);
             syncUrl();
             updateDump();
           },
-          onClear: () => {
+          onClear: function () {
             localList = [];
-            manager.updateList(localList);
+            this.updateList(localList);
             syncUrl();
             updateDump();
           },
-          onChange: (e) => {
+          onChange: function (e) {
             inputValueOut.textContent = e.target.value;
             onChangeCounter.textContent = ++counter;
             lastKeyOut.textContent = e.key || e.data || e.type;
@@ -179,7 +179,7 @@
             if (e.type === "keydown" && e.key === "Enter" && e.target.value.trim() !== "") {
               localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
               e.target.value = "";
-              manager.updateList(localList);
+              this.updateList(localList);
               syncUrl();
               updateDump();
             }

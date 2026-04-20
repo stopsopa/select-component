@@ -63,8 +63,8 @@ export class SelectedListManager<T extends ListElement> {
 
         return el;
       },
-      renderList: (list: T[]) => {
-        return list.map((item) => this.propOptions.renderItem!(item));
+      renderList: function (list: T[]) {
+        return list.map((item) => this.propOptions.renderItem!.call(this, item));
       },
       onDelete: (id: string) => {},
       onClear: () => {},
@@ -91,17 +91,16 @@ export class SelectedListManager<T extends ListElement> {
       const clearBtn = target.closest(".clear-btn");
       if (clearBtn && this.propParentElement.contains(clearBtn)) {
         e.preventDefault();
-        this.propOptions.onClear!();
+        this.propOptions.onClear!.call(this);
         return;
       }
 
       // Handle Delete Item
       const delBtn = target.closest("[data-remove]");
       if (delBtn && this.propParentElement.contains(delBtn)) {
-        const id = delBtn.getAttribute("data-remove");
-        if (id) {
-          this.propOptions.onDelete!(id);
-        }
+        e.preventDefault();
+        const id = delBtn.getAttribute("data-remove")!;
+        this.propOptions.onDelete!.call(this, id);
         return;
       }
 
@@ -121,14 +120,14 @@ export class SelectedListManager<T extends ListElement> {
     this.propParentElement.addEventListener("input", (e) => {
       const target = e.target as HTMLElement;
       if (target === this.propInputElement) {
-        this.propOptions.onChange!(e);
+        this.propOptions.onChange!.call(this, e);
       }
     });
 
     this.propParentElement.addEventListener("keydown", (e) => {
       const target = e.target as HTMLElement;
       if (target === this.propInputElement && (e.key === "Backspace" || e.key === "Enter")) {
-        this.propOptions.onChange!(e);
+        this.propOptions.onChange!.call(this, e);
       }
     });
   }
@@ -250,7 +249,7 @@ export class SelectedListManager<T extends ListElement> {
 
     this.setShowInput(Boolean(this.propOptions.showInput));
 
-    const elements = this.propOptions.renderList!(this.propList);
+    const elements = this.propOptions.renderList!.call(this, this.propList);
 
     if (!Array.isArray(elements)) {
       throw new Error("renderList must return an array of HTMLElements");
