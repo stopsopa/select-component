@@ -123,7 +123,7 @@ export class SelectedListManager<T extends ListElement> {
 
     this.propParentElement.addEventListener("keydown", (e) => {
       const target = e.target as HTMLElement;
-      if (target === this.propInputElement && e.key === "Backspace") {
+      if (target === this.propInputElement && (e.key === "Backspace" || e.key === "Enter")) {
         this.propOptions.onChange!(e);
       }
     });

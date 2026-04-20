@@ -143,6 +143,12 @@
             inputValueOut.textContent = e.target.value;
             onChangeCounter.textContent = ++counter;
             lastKeyOut.textContent = e.key || e.data || e.type;
+
+            if (e.type === "keydown" && e.key === "Enter" && e.target.value.trim() !== "") {
+              localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
+              e.target.value = "";
+              manager.updateList(localList);
+            }
           },
           renderItem: (item) => {
             const el = document.createElement("div");
@@ -208,14 +214,7 @@
             });
         });
 
-        // Enter key on internal input adds item
-        parentElement.addEventListener("keydown", (e) => {
-          if (e.target.tagName.toLowerCase() === "input" && e.key === "Enter" && e.target.value.trim() !== "") {
-            localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
-            e.target.value = "";
-            manager.updateList(localList);
-          }
-        });
+
 
         addBtn.addEventListener("click", () => {
           let val = newItemInput.value.trim();

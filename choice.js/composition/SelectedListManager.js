@@ -90,7 +90,7 @@ class SelectedListManager {
     });
     this.propParentElement.addEventListener("keydown", (e) => {
       const target = e.target;
-      if (target === this.propInputElement && e.key === "Backspace") {
+      if (target === this.propInputElement && (e.key === "Backspace" || e.key === "Enter")) {
         this.propOptions.onChange(e);
       }
     });
