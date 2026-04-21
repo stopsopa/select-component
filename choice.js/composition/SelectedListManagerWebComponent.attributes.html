@@ -336,51 +336,60 @@
 
       document.getElementById("init-btn").addEventListener("click", () => init());
 
-      // Initial populate from GET
-      const urlParams = new URLSearchParams(window.location.search);
-      const groups = {};
-      const resizerData = {};
-      const statesData = {};
+      const loadFromUrl = () => {
+        const instancesArea = document.getElementById("instances-area");
+        instancesArea.innerHTML = "";
+        instanceCounter = 0;
+        globalIdCounter = 1;
 
-      for (const [key, value] of urlParams.entries()) {
-        const match = key.match(/^([vlcdeoi])(\d+)$/);
-        if (match) {
-          const [, type, id] = match;
-          if (type === "v") {
-            if (!groups[id]) groups[id] = [];
-            groups[id].push(value);
-          } else if (type === "l" || type === "c") {
-            if (!resizerData[id]) resizerData[id] = {};
-            resizerData[id][type === "l" ? "left" : "center"] = value;
-          } else {
-            if (!statesData[id]) statesData[id] = {};
-            const map = { e: "error", d: "disabled", o: "loading", i: "showInput" };
-            statesData[id][map[type]] = value === "1";
+        const urlParams = new URLSearchParams(window.location.search);
+        const groups = {};
+        const resizerData = {};
+        const statesData = {};
+
+        for (const [key, value] of urlParams.entries()) {
+          const match = key.match(/^([vlcdeoi])(\d+)$/);
+          if (match) {
+            const [, type, id] = match;
+            if (type === "v") {
+              if (!groups[id]) groups[id] = [];
+              groups[id].push(value);
+            } else if (type === "l" || type === "c") {
+              if (!resizerData[id]) resizerData[id] = {};
+              resizerData[id][type === "l" ? "left" : "center"] = value;
+            } else {
+              if (!statesData[id]) statesData[id] = {};
+              const map = { e: "error", d: "disabled", o: "loading", i: "showInput" };
+              statesData[id][map[type]] = value === "1";
+            }
           }
         }
-      }
 
-      const allIds = Array.from(
-        new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)]),
-      ).sort((a, b) => parseInt(a) - parseInt(b));
+        const allIds = Array.from(
+          new Set([...Object.keys(groups), ...Object.keys(resizerData), ...Object.keys(statesData)]),
+        ).sort((a, b) => parseInt(a) - parseInt(b));
 
-      allIds.forEach((id) => {
-        const list = (groups[id] || []).map((v) => {
-          const parts = v.split("|");
-          if (parts.length === 3) {
-            return {
-              id: globalIdCounter++,
-              color: parts[0] || undefined,
-              img: parts[1] || undefined,
-              label: parts[2],
-            };
-          }
-          return { id: globalIdCounter++, label: v };
+        allIds.forEach((id) => {
+          const list = (groups[id] || []).map((v) => {
+            const parts = v.split("|");
+            if (parts.length === 3) {
+              return {
+                id: globalIdCounter++,
+                color: parts[0] || undefined,
+                img: parts[1] || undefined,
+                label: parts[2],
+              };
+            }
+            return { id: globalIdCounter++, label: v };
+          });
+          const left = resizerData[id]?.left || "50px";
+          const center = resizerData[id]?.center || "350px";
+          init(list, left, center, statesData[id] || {});
         });
-        const left = resizerData[id]?.left || "50px";
-        const center = resizerData[id]?.center || "350px";
-        init(list, left, center, statesData[id] || {});
-      });
+      };
+
+      window.addEventListener("popstate", loadFromUrl);
+      loadFromUrl();
     </script>
   </body>
 </html>
