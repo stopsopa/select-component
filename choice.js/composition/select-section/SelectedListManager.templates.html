@@ -44,15 +44,48 @@
     <h1>SelectedListManager Templates</h1>
     <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
 
-    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
-        <span id="history-time" style="font-family: monospace; opacity: 0.8;">No history entry</span>
-        <button id="push-btn" style="cursor: pointer; background: #444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; transition: background 0.2s;">Push State</button>
+    <div
+      id="history-indicator"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+      "
+    >
+      <span id="history-time" style="font-family: monospace; opacity: 0.8">No history entry</span>
+      <button
+        id="push-btn"
+        style="
+          cursor: pointer;
+          background: #444;
+          color: #fff;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+          transition: background 0.2s;
+        "
+      >
+        Push State
+      </button>
     </div>
 
     <div id="instances-area"></div>
 
     <script type="module">
-      import "../../js/CenterResizer.js";
+      import "../../../js/CenterResizer.js";
       import { SelectedListManager } from "./SelectedListManager.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
@@ -87,7 +120,7 @@
       let globalIdCounter = 1;
       let instanceCounter = 0;
 
-      const imgData = await fetch("img/img.json").then((r) => r.json());
+      const imgData = await fetch("../img/img.json").then((r) => r.json());
 
       const init = (initialList = [], resizerLeft = "50px", resizerCenter = "350px", states = {}) => {
         instanceCounter++;
@@ -267,7 +300,7 @@
 
             if (item.img) {
               const img = document.createElement("img");
-              img.src = `img/${item.img}`;
+              img.src = `../img/${item.img}`;
               img.style.width = "20px";
               img.style.height = "20px";
               img.style.objectFit = "contain";

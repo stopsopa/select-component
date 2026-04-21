@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SelectedListManager WebComponent Demo</title>
+    <title>SelectedListManager Demo</title>
     <link rel="stylesheet" href="SelectedListManager.css" />
     <style>
       body {
@@ -31,7 +31,6 @@
     </style>
   </head>
   <body>
-    <h1>SelectedListManager WebComponent Demo</h1>
     <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
 
     <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
@@ -42,8 +41,8 @@
     <div id="instances-area"></div>
 
     <script type="module">
-      import "../../js/CenterResizer.js";
-      import "./selected-list.js";
+      import "../../../js/CenterResizer.js";
+      import { SelectedListManager } from "./SelectedListManager.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
 
@@ -82,6 +81,7 @@
         const instanceId = instanceCounter;
 
         let localList = initialList;
+        let manager = null;
 
         const syncUrl = () => {
           const url = new URL(window.location);
@@ -125,15 +125,7 @@
 
         group.innerHTML = `
                 <center-resizer id="resizer-${instanceId}" left="${resizerLeft}" center="${resizerCenter}">
-                    <selected-list 
-                        id="sl-${instanceId}" 
-                        data-test="example"
-                        label="Select options"
-                        ${states.error ? "error" : ""}
-                        ${states.disabled ? "disabled" : ""}
-                        ${states.loading ? "loading" : ""}
-                        show-input="${states.showInput !== false}"
-                    ></selected-list>
+                    <div data-role="list-parent" id="list-parent-${instanceId}"></div>
                 </center-resizer>
 
                 <div style="margin-top: 10px;">
@@ -149,10 +141,10 @@
                 </div>
 
                 <div class="controls">
-                    <label><input type="checkbox" data-role="error-cb" id="error-cb-${instanceId}" ${states.error ? "checked" : ""}> Error State</label>
-                    <label><input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}" ${states.disabled ? "checked" : ""}> Disabled State</label>
-                    <label><input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}" ${states.loading ? "checked" : ""}> Loading State</label>
-                    <label><input type="checkbox" data-role="input-field-cb" id="input-field-cb-${instanceId}" ${states.showInput !== false ? "checked" : ""}> Show Input Field</label>
+                    <label><input type="checkbox" data-role="error-cb" id="error-cb-${instanceId}"> Error State</label>
+                    <label><input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}"> Disabled State</label>
+                    <label><input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}"> Loading State</label>
+                    <label><input type="checkbox" data-role="input-field-cb" id="input-field-cb-${instanceId}" checked> Show Input Field</label>
                 </div>
 
                 <div class="controls">
@@ -172,7 +164,7 @@
 
         document.getElementById("instances-area").appendChild(group);
 
-        const sl = group.querySelector("selected-list");
+        const parentElement = group.querySelector('[data-role="list-parent"]');
         const inputValueOut = group.querySelector('[data-role="input-value-out"]');
         const newItemInput = group.querySelector('[data-role="new-item-input"]');
         const addBtn = group.querySelector('[data-role="add-btn"]');
@@ -192,64 +184,77 @@
         let focusCounter = 0;
 
         const updateDump = () => {
-          const list = sl.list;
-          if (list.length === 0) {
+          if (localList.length === 0) {
             listDump.textContent = "[]";
             return;
           }
-          listDump.textContent = "[\n" + list.map((item) => "  " + JSON.stringify(item)).join(",\n") + "\n]";
+          listDump.textContent = "[\n" + localList.map((item) => "  " + JSON.stringify(item)).join(",\n") + "\n]";
         };
 
-        // Initialize list
-        sl.list = localList;
+        manager = new SelectedListManager(parentElement, {
+          list: localList,
+          label: "Select options",
+          onDelete: function (id) {
+            localList = localList.filter((item) => String(item.id) !== String(id));
+            this.updateList(localList);
+            syncUrl();
+            updateDump();
+          },
+          onClear: function () {
+            localList = [];
+            this.updateList(localList);
+            syncUrl();
+            updateDump();
+          },
+          onChange: function (e) {
+            inputValueOut.textContent = e.target.value;
+            onChangeCounter.textContent = ++counter;
+            // lastKeyOut.textContent = e.key || e.data || e.type;
+            lastKeyOut.textContent = e.key || typeof e.key;
 
-        // Register events
-        sl.addEventListener("onDelete", (e) => {
-          localList = localList.filter((item) => String(item.id) !== String(e.detail.id));
-          sl.updateList(localList);
-          syncUrl();
-          updateDump();
-        });
+            if (e.type === "keydown") {
+              if (e.key === "Enter" && e.target.value.trim() !== "") {
+                localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
+                e.target.value = "";
+                this.updateList(localList);
+                syncUrl();
+                updateDump();
+                return;
+              }
 
-        sl.addEventListener("onClear", () => {
-          localList = [];
-          sl.updateList(localList);
-          syncUrl();
-          updateDump();
-        });
-
-        sl.addEventListener("onChange", (e) => {
-          inputValueOut.textContent = e.detail.value;
-          onChangeCounter.textContent = ++counter;
-          // lastKeyOut.textContent = e.detail.key || "-";
-          lastKeyOut.textContent = e.detail.key || (typeof e.detail.key);
-
-          const originalEvent = e.detail.originalEvent;
-          if (originalEvent.type === "keydown") {
-            if (originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
-              localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
-              sl.setValue("");
-              sl.updateList(localList);
-              syncUrl();
-              updateDump();
-              return;
+              if (e.key === "Backspace" && e.target.value === "" && localList.length > 0) {
+                localList.pop();
+                this.updateList(localList);
+                syncUrl();
+                updateDump();
+                return;
+              }
             }
-
-            if (originalEvent.key === "Backspace" && e.detail.value === "" && localList.length > 0) {
-              localList.pop();
-              sl.updateList(localList);
-              syncUrl();
-              updateDump();
-              return;
-            }
-          }
-        });
- 
-        sl.addEventListener("onFocus", (e) => {
-          onFocusCounter.textContent = ++focusCounter;
+          },
+          onFocus: function (e) {
+            onFocusCounter.textContent = ++focusCounter;
+          },
         });
 
         updateDump();
+
+        // Apply states
+        if (states.error) {
+          errorCb.checked = true;
+          manager.setErrorState(true);
+        }
+        if (states.disabled) {
+          disabledCb.checked = true;
+          manager.setDisabled(true);
+        }
+        if (states.loading) {
+          loadingCb.checked = true;
+          manager.setLoading(true);
+        }
+        if (states.showInput === false) {
+          inputFieldCb.checked = false;
+          manager.setShowInput(false);
+        }
 
         if (
           (localList.length > 0 ||
@@ -268,8 +273,8 @@
           let val = newItemInput.value.trim();
           let usedInternal = false;
 
-          if (!val && sl.value) {
-            val = sl.value.trim();
+          if (!val && manager.propInputElement) {
+            val = manager.propInputElement.value.trim();
             usedInternal = true;
           }
 
@@ -277,44 +282,44 @@
 
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
-            sl.updateList(localList);
+            manager.updateList(localList);
             syncUrl();
             updateDump();
 
             if (usedInternal) {
-              sl.setValue("");
+              manager.setValue("");
               inputValueOut.textContent = "";
             }
           }
         });
 
         errorCb.addEventListener("change", (e) => {
-          sl.setErrorState(e.target.checked);
+          manager.setErrorState(e.target.checked);
           syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
-          sl.setDisabled(e.target.checked);
+          manager.setDisabled(e.target.checked);
           syncUrl();
         });
 
         loadingCb.addEventListener("change", (e) => {
-          sl.setLoading(e.target.checked);
+          manager.setLoading(e.target.checked);
           syncUrl();
         });
 
         inputFieldCb.addEventListener("change", (e) => {
-          sl.setShowInput(e.target.checked);
+          manager.setShowInput(e.target.checked);
           syncUrl();
         });
 
         injectBtn.addEventListener("click", () => {
-          sl.setValue(injectInput.value);
+          manager.setValue(injectInput.value);
           injectInput.value = "";
         });
 
         injectLabelBtn.addEventListener("click", () => {
-          sl.setLabel(injectLabelInput.value);
+          manager.setLabel(injectLabelInput.value);
           injectLabelInput.value = "";
         });
 

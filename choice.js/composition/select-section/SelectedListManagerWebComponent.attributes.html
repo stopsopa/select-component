@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SelectedListManager WebComponent Templates Demo</title>
+    <title>SelectedListManager WebComponent Attributes Demo</title>
     <link rel="stylesheet" href="SelectedListManager.css" />
     <style>
       body {
@@ -28,23 +28,13 @@
         gap: 5px;
         cursor: pointer;
       }
-      .template-btn {
-        padding: 5px 10px;
-        cursor: pointer;
-        border: 1px solid #ccc;
-        background: #fff;
-        border-radius: 4px;
-      }
-      .template-btn:hover {
-        background: #f0f0f0;
-      }
     </style>
   </head>
   <body>
-    <h1>SelectedListManager WebComponent Templates</h1>
+    <h1>SelectedListManager WebComponent Attributes Demo</h1>
     <p>
-        This demo uses <code>&lt;selected-list&gt;</code> web component with custom templates provided via 
-        <code>render-item</code> and <code>render-list</code> attributes.
+      This demo interacts with the component exclusively via <code>setAttribute</code>, <code>removeAttribute</code>,
+      and <code>getAttribute</code>.
     </p>
     <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
 
@@ -56,7 +46,7 @@
     <div id="instances-area"></div>
 
     <script type="module">
-      import "../../js/CenterResizer.js";
+      import "../../../js/CenterResizer.js";
       import "./selected-list.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
@@ -91,8 +81,6 @@
       let globalIdCounter = 1;
       let instanceCounter = 0;
 
-      const imgData = await fetch("img/img.json").then((r) => r.json());
-
       const init = (initialList = [], resizerLeft = "50px", resizerCenter = "350px", states = {}) => {
         instanceCounter++;
         const instanceId = instanceCounter;
@@ -103,7 +91,8 @@
           const url = new URL(window.location);
           url.searchParams.delete(`v${instanceId}`);
           localList.forEach((item) => {
-            const val = [item.color || "", item.img || "", item.label || ""].join("|");
+            const val =
+              item.color || item.img ? [item.color || "", item.img || "", item.label || ""].join("|") : item.label;
             url.searchParams.append(`v${instanceId}`, val);
           });
 
@@ -115,10 +104,12 @@
 
           const errorCb = group.querySelector('[data-role="error-cb"]');
           const disabledCb = group.querySelector('[data-role="disabled-cb"]');
+          const loadingCb = group.querySelector('[data-role="loading-cb"]');
           const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
 
           if (errorCb) url.searchParams.set(`e${instanceId}`, errorCb.checked ? "1" : "0");
           if (disabledCb) url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
+          if (loadingCb) url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
           if (inputFieldCb) url.searchParams.set(`i${instanceId}`, inputFieldCb.checked ? "1" : "0");
 
           window.history.replaceState({}, "", url);
@@ -136,13 +127,6 @@
         const group = document.createElement("div");
         group.className = "demo-container";
 
-        let templateButtonsHtml = "";
-        for (const [color, images] of Object.entries(imgData)) {
-          images.forEach((img) => {
-            templateButtonsHtml += `<button class="template-btn" data-role="template-btn" data-color="${color}" data-img="${img}" style="color: ${color}">${img}</button>`;
-          });
-        }
-
         group.innerHTML = `
                 <center-resizer id="resizer-${instanceId}" left="${resizerLeft}" center="${resizerCenter}">
                     <selected-list 
@@ -150,57 +134,10 @@
                         label="Select options"
                         ${states.error ? "error" : ""}
                         ${states.disabled ? "disabled" : ""}
+                        ${states.loading ? "loading" : ""}
                         show-input="${states.showInput !== false}"
                         onFocus="this.handleDemoFocus(event)"
                         onClear="this.handleDemoClear(event)"
-                        render-item="
-                            const el = document.createElement('div');
-                            el.className = 'element';
-                            el.dataset.id = String(item.id);
-                            el.style.border = '2px solid ' + (item.color || 'black');
-                            el.style.display = 'flex';
-                            el.style.alignItems = 'center';
-                            el.style.gap = '5px';
-                            el.style.padding = '5px';
-                            el.style.background = '#fff';
-
-                            if (item.img) {
-                                const img = document.createElement('img');
-                                img.src = 'img/' + item.img;
-                                img.style.width = '20px';
-                                img.style.height = '20px';
-                                img.style.objectFit = 'contain';
-                                el.appendChild(img);
-                            }
-
-                            const label = document.createElement('label');
-                            label.textContent = item.label;
-
-                            const del = document.createElement('div');
-                            del.dataset.remove = String(item.id);
-
-                            el.appendChild(label);
-                            el.appendChild(del);
-
-                            return el;
-                        "
-                        render-list="
-                            const elements = list.map(item => manager.propOptions.renderItem.call(manager, item));
-                            const groups = [];
-                            for (let i = 0; i < elements.length; i += 3) {
-                                const groupDiv = document.createElement('div');
-                                groupDiv.style.border = '2px solid gray';
-                                groupDiv.style.padding = '3px';
-                                groupDiv.style.margin = '2px';
-                                groupDiv.style.display = 'flex';
-                                groupDiv.style.gap = '5px';
-                                groupDiv.style.flexWrap = 'wrap';
-                                const chunk = elements.slice(i, i + 3);
-                                chunk.forEach(el => groupDiv.appendChild(el));
-                                groups.push(groupDiv);
-                            }
-                            return groups;
-                        "
                     ></selected-list>
                 </center-resizer>
 
@@ -212,11 +149,6 @@
                 </div>
 
                 <div class="controls">
-                    <strong>Templates:</strong>
-                    ${templateButtonsHtml}
-                </div>
-
-                <div class="controls">
                     <input type="text" data-role="new-item-input" id="new-item-input-${instanceId}" placeholder="New item label">
                     <button data-role="add-btn" id="add-btn-${instanceId}">Add Item</button>
                 </div>
@@ -224,6 +156,7 @@
                 <div class="controls">
                     <label><input type="checkbox" data-role="error-cb" id="error-cb-${instanceId}" ${states.error ? "checked" : ""}> Error State</label>
                     <label><input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}" ${states.disabled ? "checked" : ""}> Disabled State</label>
+                    <label><input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}" ${states.loading ? "checked" : ""}> Loading State</label>
                     <label><input type="checkbox" data-role="input-field-cb" id="input-field-cb-${instanceId}" ${states.showInput !== false ? "checked" : ""}> Show Input Field</label>
                 </div>
 
@@ -250,6 +183,7 @@
         const addBtn = group.querySelector('[data-role="add-btn"]');
         const errorCb = group.querySelector('[data-role="error-cb"]');
         const disabledCb = group.querySelector('[data-role="disabled-cb"]');
+        const loadingCb = group.querySelector('[data-role="loading-cb"]');
         const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
         const injectInput = group.querySelector('[data-role="inject-input-value"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
@@ -315,34 +249,35 @@
             }
           }
         });
-
         sl.handleDemoFocus = (e) => {
           onFocusCounter.textContent = ++focusCounter;
         };
 
         updateDump();
 
-        // Template button handlers
-        group.querySelectorAll('[data-role="template-btn"]').forEach((btn) => {
-          btn.addEventListener("click", () => {
-            const color = btn.dataset.color;
-            const img = btn.dataset.img;
-            localList.push({
-              id: globalIdCounter++,
-              label: img.split(".")[0],
-              color: color,
-              img: img,
-            });
-            sl.setAttribute("list", JSON.stringify(localList));
-            syncUrl();
-            updateDump();
-          });
-        });
+        if (
+          (localList.length > 0 ||
+            resizerLeft !== "50px" ||
+            resizerCenter !== "350px" ||
+            states.error ||
+            states.disabled ||
+            states.loading ||
+            states.showInput === false) &&
+          instanceId > 0
+        ) {
+          syncUrl();
+        }
 
         addBtn.addEventListener("click", () => {
           let val = newItemInput.value.trim();
           let usedInternal = false;
 
+          // Note: In a real 'pure attribute' scenario, getting current input value
+          // might require tracking it via onChange because the attribute
+          // doesn't automatically sync with user typing.
+          // For this demo part, we'll use the tracked inputValueOut text as a proxy
+          // or just rely on the sl.value property for this specific check if needed,
+          // but let's try to be as attribute-heavy as possible.
           if (!val) {
             val = inputValueOut.textContent.trim();
             usedInternal = true;
@@ -370,6 +305,11 @@
 
         disabledCb.addEventListener("change", (e) => {
           sl.toggleAttribute("disabled", e.target.checked);
+          syncUrl();
+        });
+
+        loadingCb.addEventListener("change", (e) => {
+          sl.toggleAttribute("loading", e.target.checked);
           syncUrl();
         });
 
