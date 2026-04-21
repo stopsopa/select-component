@@ -91,6 +91,9 @@
         margin-top: 0;
         transform: translateY(-50%);
         font-size: 12px;
+      }
+
+      &:focus + label {
         color: var(--gcp-css-primary, #1a73e8);
       }
     }

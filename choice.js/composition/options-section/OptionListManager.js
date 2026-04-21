@@ -7,6 +7,7 @@ class OptionListManager {
   propFooterContainer;
   propInputElement = null;
   propSpinnerElement = null;
+  propLabelElement = null;
   propOkButton;
   propCancelButton;
   constructor(parentElement, options = {}) {
@@ -33,6 +34,12 @@ class OptionListManager {
       this.propInputElement.value = value;
     }
   }
+  setLabel(label) {
+    this.propOptions.label = label;
+    if (this.propLabelElement) {
+      this.propLabelElement.textContent = label || "";
+    }
+  }
   setFocus() {
     if (this.propInputElement) {
       this.propInputElement.focus();
@@ -51,11 +58,11 @@ class OptionListManager {
       this.propInputElement.id = "search-input-" + Math.random().toString(36).substr(2, 9);
       this.propInputElement.placeholder = " ";
       this.propInputElement.autocomplete = "off";
-      const label = document.createElement("label");
-      label.setAttribute("for", this.propInputElement.id);
-      label.textContent = "Search...";
+      this.propLabelElement = document.createElement("label");
+      this.propLabelElement.setAttribute("for", this.propInputElement.id);
+      this.propLabelElement.textContent = this.propOptions.label || "Search...";
       inputWrapper.appendChild(this.propInputElement);
-      inputWrapper.appendChild(label);
+      inputWrapper.appendChild(this.propLabelElement);
       this.propSpinnerElement = document.createElement("div");
       this.propSpinnerElement.className = "spinner";
       inputWrapper.appendChild(this.propSpinnerElement);

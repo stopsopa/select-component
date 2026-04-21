@@ -9,6 +9,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   options?: T[];
   loading?: boolean;
   value?: string;
+  label?: string;
   onItemClick?: (item: T) => void;
   onChange?: (value: string) => void;
   onCancel?: () => void;
@@ -24,6 +25,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
   public propFooterContainer!: HTMLElement;
   public propInputElement: HTMLInputElement | null = null;
   public propSpinnerElement: HTMLElement | null = null;
+  public propLabelElement: HTMLLabelElement | null = null;
   public propOkButton!: HTMLButtonElement;
   public propCancelButton!: HTMLButtonElement;
 
@@ -56,6 +58,13 @@ export class OptionListManager<T extends ListElement = ListElement> {
     }
   }
 
+  public setLabel(label: string) {
+    this.propOptions.label = label;
+    if (this.propLabelElement) {
+      this.propLabelElement.textContent = label || "";
+    }
+  }
+
   public setFocus() {
     if (this.propInputElement) {
       this.propInputElement.focus();
@@ -79,12 +88,12 @@ export class OptionListManager<T extends ListElement = ListElement> {
       this.propInputElement.placeholder = " ";
       this.propInputElement.autocomplete = "off";
 
-      const label = document.createElement("label");
-      label.setAttribute("for", this.propInputElement.id);
-      label.textContent = "Search...";
+      this.propLabelElement = document.createElement("label");
+      this.propLabelElement.setAttribute("for", this.propInputElement.id);
+      this.propLabelElement.textContent = this.propOptions.label || "Search...";
 
       inputWrapper.appendChild(this.propInputElement);
-      inputWrapper.appendChild(label);
+      inputWrapper.appendChild(this.propLabelElement);
 
       this.propSpinnerElement = document.createElement("div");
       this.propSpinnerElement.className = "spinner";

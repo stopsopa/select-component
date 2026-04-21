@@ -106,7 +106,8 @@
                 <div class="controls">
                     <strong>Search Value:</strong> 
                     <pre data-role="search-val-out" style="display: inline; padding: 2px 5px; margin: 0; background: #eee; width: auto; max-height: none;">-</pre>
-                    (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>)
+                    (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
+                    onCancel triggers: <span data-role="oncancel-count" style="font-weight: bold;">0</span>)
                 </div>
 
                 <div class="controls">
@@ -121,6 +122,11 @@
                 <div class="controls">
                     <input type="text" data-role="inject-input" placeholder="Value to inject..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
                     <button class="gcp-css" data-role="inject-btn">Set Value</button>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="inject-label" placeholder="Label to inject..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                    <button class="gcp-css" data-role="inject-label-btn">Set Label</button>
                 </div>
 
                 <div class="controls">
@@ -201,8 +207,12 @@
                 const val = injectInput.value;
                 manager.setValue(val);
                 searchValOut.textContent = val || "-";
-                // Trigger change counter manually since setValue doesn't trigger event by default in standard patterns
-                // but our implementation might. Let's see.
+            };
+
+            const injectLabelInput = group.querySelector('[data-role="inject-label"]');
+            const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
+            injectLabelBtn.onclick = () => {
+                manager.setLabel(injectLabelInput.value);
             };
 
             updateDump();
