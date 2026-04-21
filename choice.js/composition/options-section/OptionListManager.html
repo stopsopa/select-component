@@ -140,6 +140,7 @@
             const parent = group.querySelector('[data-role="manager-parent"]');
             const searchValOut = group.querySelector('[data-role="search-val-out"]');
             const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
+            const onCancelCountOut = group.querySelector('[data-role="oncancel-count"]');
             const optionsDump = group.querySelector('[data-role="options-dump"]');
             
             const addBtn = group.querySelector('[data-role="add-btn"]');
@@ -150,6 +151,7 @@
             const injectBtn = group.querySelector('[data-role="inject-btn"]');
 
             let onChangeCounter = 0;
+            let onCancelCounter = 0;
 
             const updateDump = () => {
                 optionsDump.textContent = JSON.stringify(localOptions, null, 2);
@@ -180,6 +182,8 @@
                 },
                 onCancel: () => {
                     console.log('Cancel clicked for instance', instanceId);
+                    onCancelCounter++;
+                    onCancelCountOut.textContent = onCancelCounter;
                 }
             });
 
