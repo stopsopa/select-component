@@ -48,15 +48,45 @@
     </p>
     <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
 
-    <div id="instances-area"></div>
+    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
+        <span id="history-time" style="font-family: monospace; opacity: 0.8;">No history entry</span>
+        <button id="push-btn" style="cursor: pointer; background: #444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; transition: background 0.2s;">Push State</button>
+    </div>
 
-    <script>
-      document.getElementById("reload-link").href = window.location.pathname;
-    </script>
+    <div id="instances-area"></div>
 
     <script type="module">
       import "../../js/CenterResizer.js";
       import "./selected-list.js";
+
+      document.getElementById("reload-link").href = window.location.pathname;
+
+      // Global history logic
+      let pushTimeout = null;
+      const historyTime = document.getElementById("history-time");
+      const pushBtn = document.getElementById("push-btn");
+      const updateHistoryIndicator = () => {
+        const now = new Date();
+        historyTime.textContent =
+          "Last push: " +
+          now.getHours().toString().padStart(2, "0") +
+          ":" +
+          now.getMinutes().toString().padStart(2, "0") +
+          ":" +
+          now.getSeconds().toString().padStart(2, "0");
+        pushBtn.style.background = "#28a745";
+        setTimeout(() => (pushBtn.style.background = "#444"), 500);
+      };
+      const pushHistory = () => {
+        if (pushTimeout) clearTimeout(pushTimeout);
+        window.history.pushState({}, "", window.location.href);
+        updateHistoryIndicator();
+      };
+      const debouncedPush = () => {
+        if (pushTimeout) clearTimeout(pushTimeout);
+        pushTimeout = setTimeout(pushHistory, 3000);
+      };
+      pushBtn.addEventListener("click", pushHistory);
 
       let globalIdCounter = 1;
       let instanceCounter = 0;
@@ -92,6 +122,7 @@
           if (inputFieldCb) url.searchParams.set(`i${instanceId}`, inputFieldCb.checked ? "1" : "0");
 
           window.history.replaceState({}, "", url);
+          debouncedPush();
         };
 
         // Update globalIdCounter based on loaded list
