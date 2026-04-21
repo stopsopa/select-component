@@ -55,7 +55,8 @@ cat <<EEE
 
 /bin/bash transpile.sh \${S}
   choice.js/select.ts \${S}
-  choice.js/composition/SelectedListManager.ts \${S}
+  choice.js/composition/select-section/SelectedListManager.ts \${S}
+  choice.js/composition/options-section/OptionListManager.ts \${S}
   choice.js/composition/selected-list.ts \${S}
   js/CenterResizer.ts \${S}
   js/CenterAndHeightResizer.ts

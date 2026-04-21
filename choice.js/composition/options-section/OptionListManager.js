@@ -1,163 +1,118 @@
-export type ListElement = {
-  id: number | string;
-  label: string;
-  selected?: boolean;
-  [key: string]: any;
-};
-
-export type OptionListManagerOptions<T extends ListElement> = {
-  options?: T[];
-  loading?: boolean;
-  value?: string;
-  onItemClick?: (item: T) => void;
-  onChange?: (value: string) => void;
-  onCancel?: () => void;
-  onOk?: () => void;
-};
-
-export class OptionListManager<T extends ListElement = ListElement> {
-  public propParentElement: HTMLElement;
-  public propOptions: OptionListManagerOptions<T>;
-  public propContainer!: HTMLElement;
-  public propFilterContainer!: HTMLElement;
-  public propOptionsContainer!: HTMLElement;
-  public propFooterContainer!: HTMLElement;
-  public propInputElement: HTMLInputElement | null = null;
-  public propSpinnerElement: HTMLElement | null = null;
-  public propOkButton!: HTMLButtonElement;
-  public propCancelButton!: HTMLButtonElement;
-
-  constructor(parentElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
+class OptionListManager {
+  propParentElement;
+  propOptions;
+  propContainer;
+  propFilterContainer;
+  propOptionsContainer;
+  propFooterContainer;
+  propInputElement = null;
+  propSpinnerElement = null;
+  propOkButton;
+  propCancelButton;
+  constructor(parentElement, options = {}) {
     this.propParentElement = parentElement;
     this.propOptions = {
       options: [],
       loading: false,
       value: "",
-      ...options,
+      ...options
     };
-
     this.render();
   }
-
-  public setOptions(options: T[]) {
+  setOptions(options) {
     this.propOptions.options = options;
     this._updateOptionsDisplay();
   }
-
-  public setLoading(loading: boolean) {
+  setLoading(loading) {
     this.propOptions.loading = loading;
     this._updateLoadingDisplay();
   }
-
-  public setValue(value: string) {
+  setValue(value) {
     this.propOptions.value = value;
     if (this.propInputElement) {
       this.propInputElement.value = value;
     }
   }
-
-  public setFocus() {
+  setFocus() {
     if (this.propInputElement) {
       this.propInputElement.focus();
     }
   }
-
-  public render() {
+  render() {
     if (!this.propContainer) {
       this.propContainer = document.createElement("div");
       this.propContainer.className = "option-list-manager";
-
       this.propFilterContainer = document.createElement("div");
       this.propFilterContainer.className = "filter";
-
       const inputWrapper = document.createElement("div");
       inputWrapper.className = "input-wrapper";
-
       this.propInputElement = document.createElement("input");
       this.propInputElement.type = "text";
       this.propInputElement.id = "search-input-" + Math.random().toString(36).substr(2, 9);
       this.propInputElement.placeholder = " ";
       this.propInputElement.autocomplete = "off";
-
       const label = document.createElement("label");
       label.setAttribute("for", this.propInputElement.id);
       label.textContent = "Search...";
-
       inputWrapper.appendChild(this.propInputElement);
       inputWrapper.appendChild(label);
-
       this.propSpinnerElement = document.createElement("div");
       this.propSpinnerElement.className = "spinner";
-
       this.propFilterContainer.appendChild(inputWrapper);
       this.propFilterContainer.appendChild(this.propSpinnerElement);
-
       this.propOptionsContainer = document.createElement("div");
       this.propOptionsContainer.className = "options";
-
       this.propFooterContainer = document.createElement("div");
       this.propFooterContainer.className = "footer";
-
       this.propCancelButton = document.createElement("button");
       this.propCancelButton.type = "button";
       this.propCancelButton.className = "gcp-css white";
       this.propCancelButton.textContent = "Cancel";
-
       this.propOkButton = document.createElement("button");
       this.propOkButton.type = "button";
       this.propOkButton.className = "gcp-css";
       this.propOkButton.textContent = "OK";
-
       this.propFooterContainer.appendChild(this.propCancelButton);
       this.propFooterContainer.appendChild(this.propOkButton);
-
       this.propContainer.appendChild(this.propFilterContainer);
       this.propContainer.appendChild(this.propOptionsContainer);
       this.propContainer.appendChild(this.propFooterContainer);
-
       this.propParentElement.appendChild(this.propContainer);
-
       this._bindEvents();
     }
-
     this._updateOptionsDisplay();
     this._updateLoadingDisplay();
     this.setValue(this.propOptions.value || "");
   }
-
-  private _bindEvents() {
+  _bindEvents() {
     if (this.propInputElement) {
       this.propInputElement.addEventListener("input", () => {
-        this.propOptions.value = this.propInputElement!.value;
+        this.propOptions.value = this.propInputElement.value;
         if (this.propOptions.onChange) {
           this.propOptions.onChange(this.propOptions.value);
         }
       });
-
       this.propInputElement.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || (e.key === "Backspace" && this.propInputElement!.value === "")) {
+        if (e.key === "Enter" || e.key === "Backspace" && this.propInputElement.value === "") {
           if (this.propOptions.onChange) {
-            this.propOptions.onChange(this.propInputElement!.value);
+            this.propOptions.onChange(this.propInputElement.value);
           }
         }
       });
     }
-
     this.propOkButton.addEventListener("click", () => {
       if (this.propOptions.onOk) {
         this.propOptions.onOk();
       }
     });
-
     this.propCancelButton.addEventListener("click", () => {
       if (this.propOptions.onCancel) {
         this.propOptions.onCancel();
       }
     });
-
     this.propOptionsContainer.addEventListener("click", (e) => {
-      const target = e.target as HTMLElement;
-      const element = target.closest(".element") as HTMLElement;
+      const target = e.target;
+      const element = target.closest(".element");
       if (element) {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
@@ -167,36 +122,32 @@ export class OptionListManager<T extends ListElement = ListElement> {
       }
     });
   }
-
-  private _updateOptionsDisplay() {
+  _updateOptionsDisplay() {
     const container = this.propOptionsContainer;
     if (!container) return;
-
     const options = this.propOptions.options || [];
-
     if (options.length === 0) {
       container.innerHTML = `<div class="empty-msg">No options to display</div>`;
       return;
     }
-
     container.innerHTML = "";
     options.forEach((item) => {
       const el = document.createElement("div");
       el.className = "element";
       if (item.selected) el.classList.add("selected");
       el.dataset.id = String(item.id);
-
       const label = document.createElement("label");
       label.textContent = item.label;
       el.appendChild(label);
-
       container.appendChild(el);
     });
   }
-
-  private _updateLoadingDisplay() {
+  _updateLoadingDisplay() {
     if (this.propSpinnerElement) {
       this.propSpinnerElement.classList.toggle("loading", !!this.propOptions.loading);
     }
   }
 }
+export {
+  OptionListManager
+};

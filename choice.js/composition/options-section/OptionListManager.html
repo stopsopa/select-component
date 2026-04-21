@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptionListManager Demo</title>
+    <link rel="stylesheet" href="../../floating-label-pattern.css">
+    <link rel="stylesheet" href="OptionListManager.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: #f0f2f5;
+            color: #333;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        #instances-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .demo-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #ddd;
+        }
+        .resizer-container {
+            height: 350px;
+            border: 1px dashed #ccc;
+            margin-bottom: 15px;
+            position: relative;
+            background: #fafafa;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .controls strong {
+            font-size: 14px;
+            color: #666;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            font-size: 12px;
+            max-height: 150px;
+            overflow: auto;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+        .gcp-css {
+            font-size: 13px !important;
+            height: 32px !important;
+        }
+        #init-btn {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>OptionListManager Demo</h1>
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | 
+    <a href="" id="reload-link">reload</a> | 
+    <a href=".">up ..</a>
+
+    <div id="instances-area"></div>
+
+    <script type="module">
+        // Using CenterAndHeightResizer if available, falling back to div if not
+        try {
+            await import("../../../js/CenterAndHeightResizer.js");
+        } catch (e) {
+            console.warn("CenterAndHeightResizer.js not found, rendering without it.");
+        }
+        
+        import { OptionListManager } from "./OptionListManager.js";
+
+        document.getElementById("reload-link").href = window.location.pathname;
+
+        let instanceCounter = 0;
+
+        const init = (initialOptions = [], states = {}) => {
+            instanceCounter++;
+            const instanceId = instanceCounter;
+
+            let localOptions = [...initialOptions];
+            let manager = null;
+
+            const group = document.createElement("div");
+            group.className = "demo-container";
+
+            group.innerHTML = `
+                <h3>Instance #${instanceId}</h3>
+                <div class="resizer-container">
+                    <center-and-height-resizer id="resizer-${instanceId}" style="display: block; height: 100%;">
+                        <div data-role="manager-parent" style="height: 100%;"></div>
+                    </center-and-height-resizer>
+                </div>
+
+                <div class="controls">
+                    <strong>Search Value:</strong> 
+                    <pre data-role="search-val-out" style="display: inline; padding: 2px 5px; margin: 0; background: #eee; width: auto; max-height: none;">-</pre>
+                    (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>)
+                </div>
+
+                <div class="controls">
+                    <button class="gcp-css" data-role="add-btn">Add Random Option</button>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" data-role="loading-cb"> Loading Spinner
+                    </label>
+                    <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
+                    <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="inject-input" placeholder="Value to inject..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
+                    <button class="gcp-css" data-role="inject-btn">Set Value</button>
+                </div>
+
+                <div class="controls">
+                    <strong>Options State Dump:</strong>
+                    <pre data-role="options-dump"></pre>
+                </div>
+            `;
+
+            document.getElementById("instances-area").appendChild(group);
+
+            const parent = group.querySelector('[data-role="manager-parent"]');
+            const searchValOut = group.querySelector('[data-role="search-val-out"]');
+            const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
+            const optionsDump = group.querySelector('[data-role="options-dump"]');
+            
+            const addBtn = group.querySelector('[data-role="add-btn"]');
+            const loadingCb = group.querySelector('[data-role="loading-cb"]');
+            const focusBtn = group.querySelector('[data-role="focus-btn"]');
+            const clearBtn = group.querySelector('[data-role="clear-btn"]');
+            const injectInput = group.querySelector('[data-role="inject-input"]');
+            const injectBtn = group.querySelector('[data-role="inject-btn"]');
+
+            let onChangeCounter = 0;
+
+            const updateDump = () => {
+                optionsDump.textContent = JSON.stringify(localOptions, null, 2);
+            };
+
+            // Initialize Manager
+            manager = new OptionListManager(parent, {
+                options: localOptions,
+                loading: states.loading || false,
+                value: states.value || "",
+                onChange: (val) => {
+                    onChangeCounter++;
+                    onChangeCountOut.textContent = onChangeCounter;
+                    searchValOut.textContent = val || "-";
+                },
+                onItemClick: (item) => {
+                    console.log('Item clicked:', item);
+                    localOptions = localOptions.map(opt => {
+                        if (opt.id === item.id) return { ...opt, selected: !opt.selected };
+                        return opt;
+                    });
+                    manager.setOptions(localOptions);
+                    updateDump();
+                },
+                onOk: () => {
+                    console.log('OK clicked for instance', instanceId);
+                    alert('OK clicked!');
+                },
+                onCancel: () => {
+                    console.log('Cancel clicked for instance', instanceId);
+                }
+            });
+
+            // Handlers
+            addBtn.onclick = () => {
+                const id = Math.floor(Math.random() * 100000);
+                localOptions.push({ id, label: 'Dynamic Option ' + id });
+                manager.setOptions([...localOptions]);
+                updateDump();
+            };
+
+            loadingCb.onchange = (e) => {
+                manager.setLoading(e.target.checked);
+            };
+
+            focusBtn.onclick = () => manager.setFocus();
+
+            clearBtn.onclick = () => {
+                localOptions = [];
+                manager.setOptions([]);
+                updateDump();
+            };
+
+            injectBtn.onclick = () => {
+                const val = injectInput.value;
+                manager.setValue(val);
+                searchValOut.textContent = val || "-";
+                // Trigger change counter manually since setValue doesn't trigger event by default in standard patterns
+                // but our implementation might. Let's see.
+            };
+
+            updateDump();
+            if (states.loading) loadingCb.checked = true;
+            if (states.value) searchValOut.textContent = states.value;
+        };
+
+        document.getElementById('init-btn').onclick = () => {
+            init([
+                { id: 101, label: 'Option A', selected: true },
+                { id: 102, label: 'Option B' }
+            ]);
+        };
+    </script>
+</body>
+</html>
