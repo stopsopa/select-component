@@ -28,6 +28,12 @@ More or less I'm after content represented by this div
 </div>
 ```
 
+we have to implement it in web component
+
+```html
+<options-section></options-section>
+```
+
 So I will need top section for serach input.
 
 in that input we will have to have similar spinner for indicating loading state as we have in SelectedListManager.
@@ -61,3 +67,14 @@ We will have to have some indicator that there is no options to display -> empty
 
 
 </plan>
+
+<demo>
+
+I need demo in choice.js/composition/options-section/OptionListManager.html keep it simple, just render our web component 
+wrapped with js/CenterAndHeightResizer.ts and see how it will work
+
+you can add controls to change or listen for changes from that component 
+
+generally handle it in groups and allow me to create multiple copies of that component and test it properly
+
+</demo>
