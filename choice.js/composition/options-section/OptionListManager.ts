@@ -88,9 +88,9 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
       this.propSpinnerElement = document.createElement("div");
       this.propSpinnerElement.className = "spinner";
+      inputWrapper.appendChild(this.propSpinnerElement);
 
       this.propFilterContainer.appendChild(inputWrapper);
-      this.propFilterContainer.appendChild(this.propSpinnerElement);
 
       this.propOptionsContainer = document.createElement("div");
       this.propOptionsContainer.className = "options";
