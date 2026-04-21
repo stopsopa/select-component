@@ -30,7 +30,6 @@
             border: 1px solid #ddd;
         }
         .resizer-container {
-            height: 350px;
             border: 1px dashed #ccc;
             margin-bottom: 15px;
             position: relative;
@@ -79,13 +78,7 @@
     <div id="instances-area"></div>
 
     <script type="module">
-        // Using CenterAndHeightResizer if available, falling back to div if not
-        try {
-            await import("../../../js/CenterAndHeightResizer.js");
-        } catch (e) {
-            console.warn("CenterAndHeightResizer.js not found, rendering without it.");
-        }
-        
+        import "../../../js/CenterAndHeightResizer.js";
         import { OptionListManager } from "./OptionListManager.js";
 
         document.getElementById("reload-link").href = window.location.pathname;
