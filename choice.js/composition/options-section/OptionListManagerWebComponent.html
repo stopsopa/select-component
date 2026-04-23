@@ -370,11 +370,13 @@
         focusBtn.addEventListener("click", () => ol.setFocus());
 
         emptyBtn.addEventListener("click", () => {
-          ol.setAttribute("render-empty", "return '<div style=\"padding: 30px; text-align: center; background: #f0fff4; border: 2px dashed #c6f6d5; border-radius: 8px; color: #2f855a; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🍃</div>Pure and empty...</div>'");
+          ol.setRenderEmpty("<div style=\"padding: 30px; text-align: center; background: #f0fff4; border: 2px dashed #c6f6d5; border-radius: 8px; color: #2f855a; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🍃</div>Pure and empty...</div>");
         });
 
         renderBtn.addEventListener("click", () => {
-          ol.setAttribute("render-item", "return `<div class=\"element ${item.selected ? 'selected' : ''}\" style=\"display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid ${item.selected ? '#38a169' : '#e2e8f0'}; background: ${item.selected ? '#f0fff4' : 'white'}; margin-bottom: 6px; border-radius: 8px; transition: all 0.2s;\"><span style=\"font-size: 20px;\">${item.selected ? '⭐' : '⚫'}</span><label style=\"flex-grow: 1; font-weight: ${item.selected ? 'bold' : 'normal'};\">${item.label}</label></div>` ");
+          ol.setRenderItem((item) => {
+            return `<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid ${item.selected ? '#38a169' : '#e2e8f0'}; background: ${item.selected ? '#f0fff4' : 'white'}; margin-bottom: 6px; border-radius: 8px; transition: all 0.2s;"><span style="font-size: 20px;">${item.selected ? '⭐' : '⚫'}</span><label style="flex-grow: 1; font-weight: ${item.selected ? 'bold' : 'normal'};">${item.label}</label></div>`;
+          });
         });
 
         clearBtn.addEventListener("click", () => {

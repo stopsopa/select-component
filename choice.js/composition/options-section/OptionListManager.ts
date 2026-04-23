@@ -268,16 +268,27 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
     container.innerHTML = "";
     const renderedItems = this.propOptions.renderList!.call(this.propOptions, options);
-    renderedItems.forEach((item) => {
+    renderedItems.forEach((item, index) => {
+      const dataItem = options[index];
+      let el: HTMLElement | null = null;
+
       if (typeof item === "string") {
         const temp = document.createElement("div");
         temp.innerHTML = item;
-        const el = temp.firstElementChild as HTMLElement;
-        if (el) {
-          container.appendChild(el);
-        }
+        el = temp.firstElementChild as HTMLElement;
       } else {
-        container.appendChild(item);
+        el = item;
+      }
+
+      if (el) {
+        el.classList.add("element");
+        el.dataset.id = String(dataItem.id);
+        if (dataItem.selected) {
+          el.classList.add("selected");
+        } else {
+          el.classList.remove("selected");
+        }
+        container.appendChild(el);
       }
     });
   }

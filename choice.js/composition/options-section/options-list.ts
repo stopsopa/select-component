@@ -19,9 +19,6 @@ export class OptionsList extends HTMLElement {
       "onInputChange",
       "onCancel",
       "onOk",
-      "render-empty",
-      "render-item",
-      "render-list",
     ];
   }
 
@@ -69,27 +66,6 @@ export class OptionsList extends HTMLElement {
       },
     };
 
-    const renderEmpty = this.getAttribute("render-empty");
-    if (renderEmpty) {
-      this._options.renderEmpty = () => {
-        return new Function("manager", renderEmpty).call(this, this._manager);
-      };
-    }
-
-    const renderItem = this.getAttribute("render-item");
-    if (renderItem) {
-      this._options.renderItem = (item) => {
-        return new Function("item", "manager", renderItem).call(this, item, this._manager);
-      };
-    }
-
-    const renderList = this.getAttribute("render-list");
-    if (renderList) {
-      this._options.renderList = (list) => {
-        return new Function("list", "manager", renderList).call(this, list, this._manager);
-      };
-    }
-
     ["onItemClick", "onInputChange", "onCancel", "onOk"].forEach((attr) => {
       const val = this.getAttribute(attr);
       if (val) this._setupAttributeEvent(attr, val);
@@ -129,30 +105,6 @@ export class OptionsList extends HTMLElement {
         break;
       case "show-filter":
         this._manager.showFilter(newValue !== "false");
-        break;
-      case "render-empty":
-        if (newValue) {
-          this._manager.propOptions.renderEmpty = () => {
-            return new Function("manager", newValue).call(this, this._manager);
-          };
-        }
-        this._manager.render();
-        break;
-      case "render-item":
-        if (newValue) {
-          this._manager.propOptions.renderItem = (item) => {
-            return new Function("item", "manager", newValue).call(this, item, this._manager);
-          };
-        }
-        this._manager.render();
-        break;
-      case "render-list":
-        if (newValue) {
-          this._manager.propOptions.renderList = (list) => {
-            return new Function("list", "manager", newValue).call(this, list, this._manager);
-          };
-        }
-        this._manager.render();
         break;
       case "onItemClick":
       case "onInputChange":
@@ -225,6 +177,18 @@ export class OptionsList extends HTMLElement {
   public setLabel(label: string) {
     this.setAttribute("label", label);
     this._manager?.setLabel(label);
+  }
+
+  public setRenderEmpty(renderer: () => string | HTMLElement) {
+    this._manager?.setRenderEmpty(renderer);
+  }
+
+  public setRenderItem(renderer: (item: ListElement) => string | HTMLElement) {
+    this._manager?.setRenderItem(renderer);
+  }
+
+  public setRenderList(renderer: (list: ListElement[]) => (string | HTMLElement)[]) {
+    this._manager?.setRenderList(renderer);
   }
 
   public setFocus() {
