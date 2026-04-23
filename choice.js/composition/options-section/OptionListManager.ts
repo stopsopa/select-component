@@ -132,11 +132,13 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
       this.propCancelButton = document.createElement("button");
       this.propCancelButton.type = "button";
+      this.propCancelButton.dataset.role = "cancel";
       this.propCancelButton.className = "gcp-css white";
       this.propCancelButton.textContent = "Cancel";
 
       this.propOkButton = document.createElement("button");
       this.propOkButton.type = "button";
+      this.propOkButton.dataset.role = "ok";
       this.propOkButton.className = "gcp-css";
       this.propOkButton.textContent = "OK";
 
