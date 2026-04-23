@@ -48,7 +48,6 @@ export class CenterAndHeightResizer extends HTMLElement {
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.1);
           background: #fff;
           border-radius: 6px;
-          padding: 15px;
           overflow: auto;
           min-height: 50px;
           border: 1px solid #eaeaea;
@@ -87,14 +86,14 @@ export class CenterAndHeightResizer extends HTMLElement {
           left: 50%;
           top: 0;
           bottom: 0;
-          width: 2px;
+          width: 14px;
           transform: translateX(-50%);
         }
         .resizer.vertical::after {
           top: 50%;
           left: 0;
           right: 0;
-          height: 2px;
+          height: 14px;
           transform: translateY(-50%);
         }
         .resizer:hover::after,
