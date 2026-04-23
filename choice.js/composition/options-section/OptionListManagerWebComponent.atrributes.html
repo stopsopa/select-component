@@ -211,7 +211,9 @@
                     </label>
                     <button class="gcp-css white" data-role="focus-btn">Focus Input (via Method)</button>
                     <button class="gcp-css white" data-role="empty-btn">Set Custom Empty (Attr)</button>
+                    <button class="gcp-css white" data-role="reset-empty-btn">Reset Empty</button>
                     <button class="gcp-css white" data-role="render-btn">Set Custom Render (Attr)</button>
+                    <button class="gcp-css white" data-role="reset-render-btn">Reset Render</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                 </div>
 
@@ -260,7 +262,9 @@
         const filterCb = group.querySelector('[data-role="filter-cb"]');
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
         const emptyBtn = group.querySelector('[data-role="empty-btn"]');
+        const resetEmptyBtn = group.querySelector('[data-role="reset-empty-btn"]');
         const renderBtn = group.querySelector('[data-role="render-btn"]');
+        const resetRenderBtn = group.querySelector('[data-role="reset-render-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
@@ -376,13 +380,21 @@
         focusBtn.addEventListener("click", () => ol.setFocus()); // Method is needed for focus
 
         emptyBtn.addEventListener("click", () => {
-          ol.setRenderEmpty("<div style=\"padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🏜️</div>Nothing found...</div>");
+          ol.setRenderEmpty(() => "<div style=\"padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🏜️</div>Nothing found...</div>");
+        });
+
+        resetEmptyBtn.addEventListener("click", () => {
+          ol.setRenderEmpty();
         });
 
         renderBtn.addEventListener("click", () => {
           ol.setRenderItem((item) => {
             return `<div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 4px solid ${item.selected ? '#3182ce' : 'transparent'}; background: ${item.selected ? '#ebf8ff' : 'white'}; margin-bottom: 4px; border-radius: 0 4px 4px 0;"><span style="font-size: 18px;">${item.selected ? '✅' : '⬜'}</span><label style="flex-grow: 1; cursor: pointer;">${item.label}</label>${item.selected ? '<span style="font-size: 12px; color: #3182ce; font-weight: bold;">SELECTED</span>' : ''}</div>`;
           });
+        });
+
+        resetRenderBtn.addEventListener("click", () => {
+          ol.setRenderItem();
         });
 
         clearBtn.addEventListener("click", () => {

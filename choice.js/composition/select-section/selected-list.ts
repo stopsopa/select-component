@@ -181,6 +181,14 @@ export class SelectedList extends HTMLElement {
     this._manager?.setShowInput(state);
   }
 
+  public setRenderItem(renderer?: (item: ListElement, defaultRender: (item: ListElement) => HTMLElement) => HTMLElement) {
+    this._manager?.setRenderItem(renderer);
+  }
+
+  public setRenderList(renderer?: (list: ListElement[], defaultRender: (list: ListElement[]) => HTMLElement[]) => HTMLElement[]) {
+    this._manager?.setRenderList(renderer);
+  }
+
   public render() {
     this._manager?.render();
   }

@@ -19,19 +19,9 @@ class OptionListManager {
       value: "",
       showFooter: true,
       showFilter: true,
-      renderItem: (item) => {
-        const el = document.createElement("div");
-        el.className = "element";
-        if (item.selected) el.classList.add("selected");
-        el.dataset.id = String(item.id);
-        const label = document.createElement("label");
-        label.textContent = item.label;
-        el.appendChild(label);
-        return el;
-      },
-      renderList: function(list) {
-        return list.map((item) => this.renderItem(item));
-      },
+      renderItem: (item, def) => def(item),
+      renderList: (list, def) => def(list),
+      renderEmpty: (def) => def(),
       ...options
     };
     if (this.propOptions.maxHeight) {
@@ -78,16 +68,32 @@ class OptionListManager {
     }
   }
   setRenderEmpty(renderEmpty) {
-    this.propOptions.renderEmpty = renderEmpty;
+    this.propOptions.renderEmpty = renderEmpty || ((def) => def());
     this._updateOptionsDisplay();
   }
   setRenderItem(renderItem) {
-    this.propOptions.renderItem = renderItem;
+    this.propOptions.renderItem = renderItem || ((item, def) => def(item));
     this._updateOptionsDisplay();
   }
   setRenderList(renderList) {
-    this.propOptions.renderList = renderList;
+    this.propOptions.renderList = renderList || ((list, def) => def(list));
     this._updateOptionsDisplay();
+  }
+  _defaultRenderEmpty() {
+    return `<div class="empty-msg">No options to display</div>`;
+  }
+  _defaultRenderItem(item) {
+    const el = document.createElement("div");
+    el.className = "element";
+    if (item.selected) el.classList.add("selected");
+    el.dataset.id = String(item.id);
+    const label = document.createElement("label");
+    label.textContent = item.label;
+    el.appendChild(label);
+    return el;
+  }
+  _defaultRenderList(list) {
+    return list.map((item) => this.propOptions.renderItem(item, this._defaultRenderItem.bind(this)));
   }
   setFocus() {
     if (this.propInputElement) {
@@ -186,21 +192,17 @@ class OptionListManager {
     if (!container) return;
     const options = this.propOptions.options || [];
     if (options.length === 0) {
-      if (this.propOptions.renderEmpty) {
-        const result = this.propOptions.renderEmpty();
-        if (typeof result === "string") {
-          container.innerHTML = result;
-        } else {
-          container.innerHTML = "";
-          container.appendChild(result);
-        }
+      const result = this.propOptions.renderEmpty(this._defaultRenderEmpty.bind(this));
+      if (typeof result === "string") {
+        container.innerHTML = result;
       } else {
-        container.innerHTML = `<div class="empty-msg">No options to display</div>`;
+        container.innerHTML = "";
+        container.appendChild(result);
       }
       return;
     }
     container.innerHTML = "";
-    const renderedItems = this.propOptions.renderList.call(this.propOptions, options);
+    const renderedItems = this.propOptions.renderList(options, this._defaultRenderList.bind(this));
     renderedItems.forEach((item, index) => {
       const dataItem = options[index];
       let el = null;

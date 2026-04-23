@@ -160,6 +160,12 @@ class SelectedList extends HTMLElement {
     this.setAttribute("show-input", String(state));
     this._manager?.setShowInput(state);
   }
+  setRenderItem(renderer) {
+    this._manager?.setRenderItem(renderer);
+  }
+  setRenderList(renderer) {
+    this._manager?.setRenderList(renderer);
+  }
   render() {
     this._manager?.render();
   }

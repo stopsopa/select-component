@@ -179,15 +179,15 @@ export class OptionsList extends HTMLElement {
     this._manager?.setLabel(label);
   }
 
-  public setRenderEmpty(renderer: () => string | HTMLElement) {
+  public setRenderEmpty(renderer?: (defaultRender: () => string | HTMLElement) => string | HTMLElement) {
     this._manager?.setRenderEmpty(renderer);
   }
 
-  public setRenderItem(renderer: (item: ListElement) => string | HTMLElement) {
+  public setRenderItem(renderer?: (item: ListElement, defaultRender: (item: ListElement) => string | HTMLElement) => string | HTMLElement) {
     this._manager?.setRenderItem(renderer);
   }
 
-  public setRenderList(renderer: (list: ListElement[]) => (string | HTMLElement)[]) {
+  public setRenderList(renderer?: (list: ListElement[], defaultRender: (list: ListElement[]) => (string | HTMLElement)[]) => (string | HTMLElement)[]) {
     this._manager?.setRenderList(renderer);
   }
 

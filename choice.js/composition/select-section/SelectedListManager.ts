@@ -9,8 +9,8 @@ export type SelectedListManagerOptions<T extends ListElement> = {
   showInput?: boolean;
   value?: string;
   inputFieldRender?: (value: string) => HTMLInputElement;
-  renderItem?: (item: T) => HTMLElement;
-  renderList?: (list: T[]) => HTMLElement[];
+  renderItem?: (item: T, defaultRender: (item: T) => HTMLElement) => HTMLElement;
+  renderList?: (list: T[], defaultRender: (list: T[]) => HTMLElement[]) => HTMLElement[];
   onDelete?: (id: string) => void;
   onClear?: () => void;
   onChange?: (e: Event) => void;
@@ -48,25 +48,8 @@ export class SelectedListManager<T extends ListElement> {
         input.size = 1;
         return input;
       },
-      renderItem: (item: T) => {
-        const el = document.createElement("div");
-        el.className = "element";
-        el.dataset.id = String(item.id);
-
-        const label = document.createElement("label");
-        label.textContent = item.label;
-
-        const del = document.createElement("div");
-        del.dataset.remove = String(item.id);
-
-        el.appendChild(label);
-        el.appendChild(del);
-
-        return el;
-      },
-      renderList: function (list: T[]) {
-        return list.map((item) => this.propOptions.renderItem!.call(this, item));
-      },
+      renderItem: (item, def) => def(item),
+      renderList: (list, def) => def(list),
       onDelete: (id: string) => {},
       onClear: () => {},
       onChange: (e: Event) => {},
@@ -231,6 +214,37 @@ export class SelectedListManager<T extends ListElement> {
     }
   }
 
+  setRenderItem(renderItem?: (item: T, defaultRender: (item: T) => HTMLElement) => HTMLElement) {
+    this.propOptions.renderItem = renderItem || ((item, def) => def(item));
+    this.render();
+  }
+
+  setRenderList(renderList?: (list: T[], defaultRender: (list: T[]) => HTMLElement[]) => HTMLElement[]) {
+    this.propOptions.renderList = renderList || ((list, def) => def(list));
+    this.render();
+  }
+
+  private _defaultRenderItem(item: T) {
+    const el = document.createElement("div");
+    el.className = "element";
+    el.dataset.id = String(item.id);
+
+    const label = document.createElement("label");
+    label.textContent = item.label;
+
+    const del = document.createElement("div");
+    del.dataset.remove = String(item.id);
+
+    el.appendChild(label);
+    el.appendChild(del);
+
+    return el;
+  }
+
+  private _defaultRenderList(list: T[]) {
+    return list.map((item) => this.propOptions.renderItem!(item, this._defaultRenderItem.bind(this)));
+  }
+
   render() {
     if (!this.propContainer) {
       this.propContainer = document.createElement("div");
@@ -262,7 +276,7 @@ export class SelectedListManager<T extends ListElement> {
 
     this.setShowInput(Boolean(this.propOptions.showInput));
 
-    const elements = this.propOptions.renderList!.call(this, this.propList);
+    const elements = this.propOptions.renderList!(this.propList, this._defaultRenderList.bind(this));
 
     if (!Array.isArray(elements)) {
       throw new Error("renderList must return an array of HTMLElements");
