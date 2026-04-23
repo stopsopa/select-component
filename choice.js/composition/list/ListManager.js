@@ -2,31 +2,43 @@ class ListManager {
   propOptions;
   propParentElement;
   propOptionsContainer;
+  propHighlightedId = null;
   constructor(bindElement, options = {}) {
     this.propParentElement = bindElement;
     this.propOptions = {
       options: [],
-      renderItem: (item, def) => def(item),
-      renderList: (list, def) => def(list),
-      renderEmpty: (def) => def(),
       ...options
     };
     this.render();
   }
+  setHighlightedId(id) {
+    this.propHighlightedId = id;
+    this._updateOptionsDisplay();
+    if (id !== null) {
+      this._scrollToHighlighted();
+    }
+  }
+  triggerItemPick() {
+    if (this.propHighlightedId === null) return;
+    const item = this.propOptions.options?.find((opt) => String(opt.id) === String(this.propHighlightedId));
+    if (item && this.propOptions.onItemPick) {
+      this.propOptions.onItemPick(item);
+    }
+  }
+  _scrollToHighlighted() {
+    if (this.propHighlightedId === null) return;
+    const el = this.propOptionsContainer.querySelector(`.element[data-id="${this.propHighlightedId}"]`);
+    if (el) {
+      el.scrollIntoView({ block: "nearest" });
+    }
+  }
+  setMaxHeight(maxHeight) {
+    if (this.propParentElement) {
+      this.propParentElement.style.maxHeight = maxHeight || "none";
+    }
+  }
   setOptions(options) {
     this.propOptions.options = options;
-    this._updateOptionsDisplay();
-  }
-  setRenderEmpty(renderEmpty) {
-    this.propOptions.renderEmpty = renderEmpty || ((def) => def());
-    this._updateOptionsDisplay();
-  }
-  setRenderItem(renderItem) {
-    this.propOptions.renderItem = renderItem || ((item, def) => def(item));
-    this._updateOptionsDisplay();
-  }
-  setRenderList(renderList) {
-    this.propOptions.renderList = renderList || ((list, def) => def(list));
     this._updateOptionsDisplay();
   }
   _defaultRenderEmpty() {
@@ -43,7 +55,7 @@ class ListManager {
     return el;
   }
   _defaultRenderList(list) {
-    return list.map((item) => this.propOptions.renderItem(item, this._defaultRenderItem.bind(this)));
+    return list.map((item) => this._defaultRenderItem(item));
   }
   render() {
     if (!this.propOptionsContainer) {
@@ -61,8 +73,8 @@ class ListManager {
       if (element) {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
-        if (item && this.propOptions.onItemClick) {
-          this.propOptions.onItemClick(item);
+        if (item && this.propOptions.onItemPick) {
+          this.propOptions.onItemPick(item);
         }
       }
     });
@@ -72,7 +84,7 @@ class ListManager {
     if (!container) return;
     const options = this.propOptions.options || [];
     if (options.length === 0) {
-      const result = this.propOptions.renderEmpty(this._defaultRenderEmpty.bind(this));
+      const result = this._defaultRenderEmpty();
       if (typeof result === "string") {
         container.innerHTML = result;
       } else {
@@ -82,7 +94,7 @@ class ListManager {
       return;
     }
     container.innerHTML = "";
-    const renderedItems = this.propOptions.renderList(options, this._defaultRenderList.bind(this));
+    const renderedItems = this._defaultRenderList(options);
     renderedItems.forEach((item, index) => {
       const dataItem = options[index];
       let el = null;
@@ -100,6 +112,11 @@ class ListManager {
           el.classList.add("selected");
         } else {
           el.classList.remove("selected");
+        }
+        if (this.propHighlightedId !== null && String(dataItem.id) === String(this.propHighlightedId)) {
+          el.classList.add("highlighted");
+        } else {
+          el.classList.remove("highlighted");
         }
         container.appendChild(el);
       }

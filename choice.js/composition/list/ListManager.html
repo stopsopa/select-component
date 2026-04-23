@@ -10,7 +10,10 @@
 <body>
     <button id="inject-a" class="gcp-css">List A</button>
     <button id="inject-b" class="gcp-css">List B</button>
+    <button id="inject-c" class="gcp-css">List C</button>
+    <button id="inject-d" class="gcp-css">List D</button>
     <button id="clear-list" class="gcp-css white">Clear</button>
+
 
     <center-and-height-resizer id="resizer" left="50px" center="350px" height="300px">
         <div id="list-container" style="height: 100%; display: flex; flex-direction: column;">
@@ -25,32 +28,22 @@
         </div>
     </center-and-height-resizer>
 
+    <div style="margin-top: 20px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="max-height-input" placeholder="e.g. 300px" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100px;">
+        <button id="set-max-height" class="gcp-css">Set</button>
+        <button class="gcp-css white mh-preset" data-value="200px">200px</button>
+        <button class="gcp-css white mh-preset" data-value="300px">300px</button>
+        <button class="gcp-css white mh-preset" data-value="400px">400px</button>
+        <button class="gcp-css white mh-preset" data-value="600px">600px</button>
+        <button class="gcp-css white mh-preset" data-value="">Reset</button>
+    </div>
+
     <script type="module">
         import "../../../js/CenterAndHeightResizer.js";
         import { ListManager } from "./ListManager.js";
 
         let currentList = [];
-        const manager = new ListManager(document.getElementById('options-list-target'), {
-            onItemClick: (item) => {
-                currentList = currentList.map(opt => {
-                    if (opt.id === item.id) return { ...opt, selected: !opt.selected };
-                    return opt;
-                });
-                applyFilter();
-            }
-        });
-
-        const filterInput = document.getElementById('filter-input');
-        const applyFilter = () => {
-            const query = filterInput.value.toLowerCase();
-            const filtered = currentList.filter(item => 
-                item.label.toLowerCase().includes(query)
-            );
-            manager.setOptions(filtered);
-        };
-
-        filterInput.addEventListener('input', applyFilter);
-
+        let activeListName = '';
 
         const fruits = [
             { id: 1, label: 'Apple' },
@@ -58,47 +51,177 @@
             { id: 3, label: 'Cherry' },
             { id: 4, label: 'Date' },
             { id: 5, label: 'Elderberry' },
-            { id: 6, label: 'Fig' },
-            { id: 7, label: 'Grape' },
-            { id: 8, label: 'Honeydew' },
-            { id: 9, label: 'Imbe' },
             { id: 10, label: 'Jackfruit' },
             { id: 11, label: 'Kiwi' },
-            { id: 12, label: 'Lemon' },
-            { id: 13, label: 'Mango' },
-            { id: 14, label: 'Nectarine' },
-            { id: 15, label: 'Orange' },
-            { id: 16, label: 'Papaya' },
-            { id: 17, label: 'Quince' },
-            { id: 18, label: 'Raspberry' },
-            { id: 19, label: 'Strawberry' },
-            { id: 20, label: 'Tangerine' }
+            { id: 12, label: 'Lemon' }
         ];
 
         const colors = [
-            { id: 'c1', label: 'Red' },
-            { id: 'c2', label: 'Green' },
-            { id: 'c3', label: 'Blue' },
-            { id: 'c4', label: 'Yellow' },
-            { id: 'c5', label: 'Magenta' },
-            { id: 'c6', label: 'Cyan' }
+            { id: 1, label: 'Red (ID 1)' },
+            { id: 2, label: 'Green (ID 2)' },
+            { id: 3, label: 'Blue (ID 3)' },
+            { id: 10, label: 'Yellow (ID 10)' },
+            { id: 'c1', label: 'Magenta (c1)' },
+            { id: 'c2', label: 'Cyan (c2)' },
+            { id: 'c3', label: 'Black (c3)' }
         ];
 
-        document.getElementById('inject-a').addEventListener('click', () => {
-            currentList = [...fruits];
-            applyFilter();
-        });
-        document.getElementById('inject-b').addEventListener('click', () => {
-            currentList = [...colors];
-            applyFilter();
-        });
-        document.getElementById('clear-list').addEventListener('click', () => {
-            currentList = [];
-            applyFilter();
+        const listC = [
+            { id: 22, label: 'Apple (22)' },
+            { id: 10, label: 'Jackfruit (10)' },
+            { id: 4, label: 'Date (4)' },
+            { id: 0, label: 'Orange' },
+            { id: 2, label: 'Banana (2)' },
+            { id: 12, label: 'Lemon (12)' },
+            { id: 1, label: 'Apple (1)' },
+            { id: 5, label: 'Date (4)' },
+            { id: 10, label: 'Yellow (10)' },
+            { id: 'c1', label: 'Magenta (c1)' },
+            { id: 'c2', label: 'Cyan (c2)' },
+            { id: 'x2', label: 'Unique X2 (x2)' }
+        ];
+
+        const listD = [
+            { id: 2, label: 'Banana (2)' },
+            { id: 5, label: 'Elderberry (5)' },
+            { id: 12, label: 'Lemon (12)' },
+            { id: 'c2', label: 'Cyan (c2)' },
+            { id: 'x1', label: 'Unique X1 (x1)' },
+            { id: 'y1', label: 'Unique Y1 (y1)' }
+        ];
+
+        const lists = { A: fruits, B: colors, C: listC, D: listD };
+
+        const filterInput = document.getElementById('filter-input');
+        const maxHeightInput = document.getElementById('max-height-input');
+
+        const syncUrl = () => {
+            const url = new URL(window.location);
+            url.searchParams.set('l', activeListName || '');
+            url.searchParams.set('f', filterInput.value || '');
+            url.searchParams.set('m', maxHeightInput.value || '');
+            url.searchParams.set('h', manager.propHighlightedId || '');
+            
+            const selectedIds = currentList.filter(i => i.selected).map(i => i.id);
+            if (selectedIds.length) {
+                url.searchParams.set('s', selectedIds.join(','));
+            } else {
+                url.searchParams.delete('s');
+            }
+            
+            window.history.replaceState({}, '', url);
+        };
+
+        const manager = new ListManager(document.getElementById('options-list-target'), {
+            onItemPick: (item) => {
+                currentList = currentList.map(opt => {
+                    if (opt.id === item.id) return { ...opt, selected: !opt.selected };
+                    return opt;
+                });
+                manager.setHighlightedId(item.id);
+                applyFilter();
+                syncUrl();
+                filterInput.focus();
+            }
         });
 
-        currentList = [...fruits];
-        applyFilter();
+        const applyFilter = () => {
+            manager.setOptions(currentList);
+            
+            if (manager.propHighlightedId !== null) {
+                const stillExists = currentList.some(item => String(item.id) === String(manager.propHighlightedId));
+                if (!stillExists) {
+                    manager.setHighlightedId(null);
+                } else {
+                    manager.setHighlightedId(manager.propHighlightedId);
+                }
+            }
+        };
+
+        filterInput.addEventListener('input', () => {
+            applyFilter();
+            syncUrl();
+        });
+
+        filterInput.addEventListener('keydown', (e) => {
+            const options = manager.propOptions.options || [];
+            if (options.length === 0) return;
+            const currentIndex = options.findIndex(item => String(item.id) === String(manager.propHighlightedId));
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (currentIndex === -1) manager.setHighlightedId(options[0].id);
+                else if (currentIndex < options.length - 1) manager.setHighlightedId(options[currentIndex + 1].id);
+                syncUrl();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentIndex === -1) manager.setHighlightedId(options[options.length - 1].id);
+                else if (currentIndex > 0) manager.setHighlightedId(options[currentIndex - 1].id);
+                syncUrl();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                manager.triggerItemPick();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                manager.setHighlightedId(null);
+                syncUrl();
+            }
+        });
+
+        const loadList = (name) => {
+            activeListName = name;
+            const baseList = lists[name] || [];
+            // Preserve selection if switching lists
+            const selectedMap = new Map(currentList.filter(i => i.selected).map(i => [String(i.id), true]));
+            currentList = baseList.map(i => ({ ...i, selected: selectedMap.has(String(i.id)) }));
+            applyFilter();
+            syncUrl();
+        };
+
+        document.getElementById('inject-a').addEventListener('click', () => loadList('A'));
+        document.getElementById('inject-b').addEventListener('click', () => loadList('B'));
+        document.getElementById('inject-c').addEventListener('click', () => loadList('C'));
+        document.getElementById('inject-d').addEventListener('click', () => loadList('D'));
+        document.getElementById('clear-list').addEventListener('click', () => {
+            activeListName = '';
+            currentList = [];
+            applyFilter();
+            syncUrl();
+        });
+
+        const setMaxHeight = (val) => {
+            manager.setMaxHeight(val);
+            maxHeightInput.value = val || '';
+            syncUrl();
+        };
+        document.getElementById('set-max-height').addEventListener('click', () => setMaxHeight(maxHeightInput.value));
+        document.querySelectorAll('.mh-preset').forEach(btn => {
+            btn.addEventListener('click', () => setMaxHeight(btn.dataset.value));
+        });
+
+        const loadFromUrl = () => {
+            const params = new URLSearchParams(window.location.search);
+            const listName = params.get('l');
+            const filter = params.get('f');
+            const maxHeight = params.get('m');
+            const selected = params.get('s');
+            const highlight = params.get('h');
+
+            if (maxHeight) setMaxHeight(maxHeight);
+            if (filter) filterInput.value = filter;
+            
+            if (listName && lists[listName]) {
+                activeListName = listName;
+                const baseList = lists[listName];
+                const selectedIds = new Set(selected ? selected.split(',') : []);
+                currentList = baseList.map(i => ({ ...i, selected: selectedIds.has(String(i.id)) }));
+            }
+
+            applyFilter();
+            if (highlight) manager.setHighlightedId(highlight);
+        };
+
+        loadFromUrl();
     </script>
 </body>
 </html>

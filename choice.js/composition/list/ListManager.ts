@@ -7,47 +7,57 @@ export type ListElement = {
 
 export type ListManagerOptions<T extends ListElement> = {
   options?: T[];
-  onItemClick?: (item: T) => void;
-  renderEmpty?: (defaultRender: () => string | HTMLElement) => string | HTMLElement;
-  renderItem?: (item: T, defaultRender: (item: T) => string | HTMLElement) => string | HTMLElement;
-  renderList?: (list: T[], defaultRender: (list: T[]) => (string | HTMLElement)[]) => (string | HTMLElement)[];
+  onItemPick?: (item: T) => void;
 };
 
 export class ListManager<T extends ListElement = ListElement> {
   public propOptions: ListManagerOptions<T>;
   public propParentElement: HTMLElement;
   public propOptionsContainer!: HTMLElement;
+  public propHighlightedId: string | number | null = null;
 
   constructor(bindElement: HTMLElement, options: ListManagerOptions<T> = {}) {
     this.propParentElement = bindElement;
     this.propOptions = {
       options: [],
-      renderItem: (item, def) => def(item),
-      renderList: (list, def) => def(list),
-      renderEmpty: (def) => def(),
       ...options,
     };
 
     this.render();
   }
 
+  public setHighlightedId(id: string | number | null) {
+    this.propHighlightedId = id;
+    this._updateOptionsDisplay();
+    if (id !== null) {
+      this._scrollToHighlighted();
+    }
+  }
+
+  public triggerItemPick() {
+    if (this.propHighlightedId === null) return;
+    const item = this.propOptions.options?.find((opt) => String(opt.id) === String(this.propHighlightedId));
+    if (item && this.propOptions.onItemPick) {
+      this.propOptions.onItemPick(item);
+    }
+  }
+
+  private _scrollToHighlighted() {
+    if (this.propHighlightedId === null) return;
+    const el = this.propOptionsContainer.querySelector(`.element[data-id="${this.propHighlightedId}"]`) as HTMLElement;
+    if (el) {
+      el.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  public setMaxHeight(maxHeight?: string) {
+    if (this.propParentElement) {
+      this.propParentElement.style.maxHeight = maxHeight || "none";
+    }
+  }
+
   public setOptions(options: T[]) {
     this.propOptions.options = options;
-    this._updateOptionsDisplay();
-  }
-
-  public setRenderEmpty(renderEmpty?: (defaultRender: () => string | HTMLElement) => string | HTMLElement) {
-    this.propOptions.renderEmpty = renderEmpty || ((def) => def());
-    this._updateOptionsDisplay();
-  }
-
-  public setRenderItem(renderItem?: (item: T, defaultRender: (item: T) => string | HTMLElement) => string | HTMLElement) {
-    this.propOptions.renderItem = renderItem || ((item, def) => def(item));
-    this._updateOptionsDisplay();
-  }
-
-  public setRenderList(renderList?: (list: T[], defaultRender: (list: T[]) => (string | HTMLElement)[]) => (string | HTMLElement)[]) {
-    this.propOptions.renderList = renderList || ((list, def) => def(list));
     this._updateOptionsDisplay();
   }
 
@@ -69,7 +79,7 @@ export class ListManager<T extends ListElement = ListElement> {
   }
 
   private _defaultRenderList(list: T[]) {
-    return list.map((item) => this.propOptions.renderItem!(item, this._defaultRenderItem.bind(this)));
+    return list.map((item) => this._defaultRenderItem(item));
   }
 
   public render() {
@@ -90,8 +100,8 @@ export class ListManager<T extends ListElement = ListElement> {
       if (element) {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
-        if (item && this.propOptions.onItemClick) {
-          this.propOptions.onItemClick(item);
+        if (item && this.propOptions.onItemPick) {
+          this.propOptions.onItemPick(item);
         }
       }
     });
@@ -104,7 +114,7 @@ export class ListManager<T extends ListElement = ListElement> {
     const options = this.propOptions.options || [];
 
     if (options.length === 0) {
-      const result = this.propOptions.renderEmpty!(this._defaultRenderEmpty.bind(this));
+      const result = this._defaultRenderEmpty();
       if (typeof result === "string") {
         container.innerHTML = result;
       } else {
@@ -115,7 +125,7 @@ export class ListManager<T extends ListElement = ListElement> {
     }
 
     container.innerHTML = "";
-    const renderedItems = this.propOptions.renderList!(options, this._defaultRenderList.bind(this));
+    const renderedItems = this._defaultRenderList(options);
     renderedItems.forEach((item, index) => {
       const dataItem = options[index];
       let el: HTMLElement | null = null;
@@ -136,6 +146,13 @@ export class ListManager<T extends ListElement = ListElement> {
         } else {
           el.classList.remove("selected");
         }
+
+        if (this.propHighlightedId !== null && String(dataItem.id) === String(this.propHighlightedId)) {
+          el.classList.add("highlighted");
+        } else {
+          el.classList.remove("highlighted");
+        }
+
         container.appendChild(el);
       }
     });
