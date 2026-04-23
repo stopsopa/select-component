@@ -283,7 +283,7 @@
           disabled: states.disabled || false,
           maxHeight: states.maxHeight || "",
           value: states.value || "",
-          onChange: (val) => {
+          onInputChange: (val) => {
             onChangeCounter++;
             onChangeCountOut.textContent = onChangeCounter;
             searchValOut.textContent = val || "-";

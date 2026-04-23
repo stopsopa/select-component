@@ -107,14 +107,14 @@ class OptionListManager {
     if (this.propInputElement) {
       this.propInputElement.addEventListener("input", () => {
         this.propOptions.value = this.propInputElement.value;
-        if (this.propOptions.onChange) {
-          this.propOptions.onChange(this.propOptions.value);
+        if (this.propOptions.onInputChange) {
+          this.propOptions.onInputChange(this.propOptions.value);
         }
       });
       this.propInputElement.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === "Backspace" && this.propInputElement.value === "") {
-          if (this.propOptions.onChange) {
-            this.propOptions.onChange(this.propInputElement.value);
+          if (this.propOptions.onInputChange) {
+            this.propOptions.onInputChange(this.propInputElement.value);
           }
         }
       });
