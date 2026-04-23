@@ -1,134 +1,172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OptionListManager Demo</title>
-    <link rel="stylesheet" href="../../floating-label-pattern.css">
-    <link rel="stylesheet" href="OptionListManager.css">
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
+    <link rel="stylesheet" href="OptionListManager.css" />
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            background: #f0f2f5;
-            color: #333;
-        }
-        h1 {
-            margin-bottom: 20px;
-            font-weight: 300;
-        }
-        #instances-area {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-        }
-        .demo-container {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 1px solid #ddd;
-        }
-        .resizer-container {
-            border: 1px dashed #ccc;
-            margin-bottom: 15px;
-            position: relative;
-            background: #fafafa;
-        }
-        .controls {
-            margin-top: 15px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-        .controls strong {
-            font-size: 14px;
-            color: #666;
-        }
-        pre {
-            background: #f8f8f8;
-            padding: 12px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            font-size: 12px;
-            max-height: 150px;
-            overflow: auto;
-            width: 100%;
-            box-sizing: border-box;
-            margin-top: 10px;
-        }
-        .gcp-css {
-            font-size: 13px !important;
-            height: 32px !important;
-        }
-        #init-btn {
-            margin-bottom: 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        padding: 20px;
+        background: #f0f2f5;
+        color: #333;
+      }
+      h1 {
+        margin-bottom: 20px;
+        font-weight: 300;
+      }
+      #instances-area {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+      }
+      .demo-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ddd;
+      }
+      .resizer-container {
+        border: 1px dashed #ccc;
+        margin-bottom: 15px;
+        position: relative;
+        background: #fafafa;
+      }
+      .controls {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+      .controls strong {
+        font-size: 14px;
+        color: #666;
+      }
+      pre {
+        background: #f8f8f8;
+        padding: 12px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        font-size: 12px;
+        max-height: 150px;
+        overflow: auto;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 10px;
+      }
+      .gcp-css {
+        font-size: 13px !important;
+        height: 32px !important;
+      }
+      #init-btn {
+        margin-bottom: 20px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>OptionListManager Demo</h1>
-    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | 
-    <a href="" id="reload-link">reload</a> | 
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
-    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
-        <span id="history-time" style="font-family: monospace; opacity: 0.8;">No history entry</span>
-        <button id="push-btn" style="cursor: pointer; background: #444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; transition: background 0.2s;">Push State</button>
+    <div
+      id="history-indicator"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+      "
+    >
+      <span id="history-time" style="font-family: monospace; opacity: 0.8">No history entry</span>
+      <button
+        id="push-btn"
+        style="
+          cursor: pointer;
+          background: #444;
+          color: #fff;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+          transition: background 0.2s;
+        "
+      >
+        Push State
+      </button>
     </div>
 
     <div id="instances-area"></div>
 
     <script type="module">
-        import "../../../js/CenterAndHeightResizer.js";
-        import { OptionListManager } from "./OptionListManager.js";
+      import "../../../js/CenterAndHeightResizer.js";
+      import { OptionListManager } from "./OptionListManager.js";
 
-        document.getElementById("reload-link").href = window.location.pathname;
+      document.getElementById("reload-link").href = window.location.pathname;
 
-        // Global history logic
-        let pushTimeout = null;
-        const historyTime = document.getElementById("history-time");
-        const pushBtn = document.getElementById("push-btn");
-        const updateHistoryIndicator = () => {
-            const now = new Date();
-            historyTime.textContent = "Last push: " + now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
-            pushBtn.style.background = "#28a745";
-            setTimeout(() => pushBtn.style.background = "#444", 500);
-        };
-        const pushHistory = () => {
-            if (pushTimeout) clearTimeout(pushTimeout);
-            window.history.pushState({}, '', window.location.href);
-            updateHistoryIndicator();
-        };
-        const debouncedPush = () => {
-            if (pushTimeout) clearTimeout(pushTimeout);
-            pushTimeout = setTimeout(pushHistory, 3000);
-        };
-        pushBtn.addEventListener('click', pushHistory);
+      // Global history logic
+      let pushTimeout = null;
+      const historyTime = document.getElementById("history-time");
+      const pushBtn = document.getElementById("push-btn");
+      const updateHistoryIndicator = () => {
+        const now = new Date();
+        historyTime.textContent =
+          "Last push: " +
+          now.getHours().toString().padStart(2, "0") +
+          ":" +
+          now.getMinutes().toString().padStart(2, "0") +
+          ":" +
+          now.getSeconds().toString().padStart(2, "0");
+        pushBtn.style.background = "#28a745";
+        setTimeout(() => (pushBtn.style.background = "#444"), 500);
+      };
+      const pushHistory = () => {
+        if (pushTimeout) clearTimeout(pushTimeout);
+        window.history.pushState({}, "", window.location.href);
+        updateHistoryIndicator();
+      };
+      const debouncedPush = () => {
+        if (pushTimeout) clearTimeout(pushTimeout);
+        pushTimeout = setTimeout(pushHistory, 3000);
+      };
+      pushBtn.addEventListener("click", pushHistory);
 
-        let instanceCounter = 0;
+      let instanceCounter = 0;
 
-        const init = (initialOptions = [], states = {}) => {
-            instanceCounter++;
-            const instanceId = instanceCounter;
+      const init = (initialOptions = [], states = {}) => {
+        instanceCounter++;
+        const instanceId = instanceCounter;
 
-            let localOptions = [...initialOptions];
-            let manager = null;
+        let localOptions = [...initialOptions];
+        let manager = null;
 
-            const group = document.createElement("div");
-            group.className = "demo-container";
+        const group = document.createElement("div");
+        group.className = "demo-container";
 
-            group.innerHTML = `
+        group.innerHTML = `
                 <h3>Instance #${instanceId}</h3>
                 <div class="resizer-container">
                     <center-and-height-resizer 
                         id="resizer-${instanceId}" 
-                        left="${states.left || '50px'}" 
-                        center="${states.center || '350px'}" 
-                        style="display: block; height: ${states.height || '100%'};"
+                        left="${states.left || "50px"}" 
+                        center="${states.center || "350px"}" 
+                        ${states.height ? `height="${states.height}"` : ""}
                     >
                         <div data-role="manager-parent" style="height: 100%;"></div>
                     </center-and-height-resizer>
@@ -167,177 +205,200 @@
                 </div>
             `;
 
-            document.getElementById("instances-area").appendChild(group);
+        document.getElementById("instances-area").appendChild(group);
 
-            const parent = group.querySelector('[data-role="manager-parent"]');
-            const searchValOut = group.querySelector('[data-role="search-val-out"]');
-            const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
-            const onOkCountOut = group.querySelector('[data-role="onok-count"]');
-            const onCancelCountOut = group.querySelector('[data-role="oncancel-count"]');
-            const optionsDump = group.querySelector('[data-role="options-dump"]');
-            
-            const addBtn = group.querySelector('[data-role="add-btn"]');
-            const loadingCb = group.querySelector('[data-role="loading-cb"]');
-            const focusBtn = group.querySelector('[data-role="focus-btn"]');
-            const clearBtn = group.querySelector('[data-role="clear-btn"]');
-            const injectInput = group.querySelector('[data-role="inject-input"]');
-            const injectBtn = group.querySelector('[data-role="inject-btn"]');
+        const parent = group.querySelector('[data-role="manager-parent"]');
+        const searchValOut = group.querySelector('[data-role="search-val-out"]');
+        const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
+        const onOkCountOut = group.querySelector('[data-role="onok-count"]');
+        const onCancelCountOut = group.querySelector('[data-role="oncancel-count"]');
+        const optionsDump = group.querySelector('[data-role="options-dump"]');
 
-            let onChangeCounter = 0;
-            let onOkCounter = 0;
-            let onCancelCounter = 0;
+        const addBtn = group.querySelector('[data-role="add-btn"]');
+        const loadingCb = group.querySelector('[data-role="loading-cb"]');
+        const focusBtn = group.querySelector('[data-role="focus-btn"]');
+        const clearBtn = group.querySelector('[data-role="clear-btn"]');
+        const injectInput = group.querySelector('[data-role="inject-input"]');
+        const injectBtn = group.querySelector('[data-role="inject-btn"]');
 
-            const syncUrl = () => {
-                const url = new URL(window.location);
-                url.searchParams.delete(`v${instanceId}`);
-                localOptions.forEach(item => {
-                    const val = [item.id, item.label, item.selected ? '1' : '0'].join('|');
-                    url.searchParams.append(`v${instanceId}`, val);
-                });
+        let onChangeCounter = 0;
+        let onOkCounter = 0;
+        let onCancelCounter = 0;
 
-                const resizer = group.querySelector("center-and-height-resizer");
-                if (resizer) {
-                    url.searchParams.set(`l${instanceId}`, resizer.getAttribute("left") || "50px");
-                    url.searchParams.set(`c${instanceId}`, resizer.getAttribute("center") || "350px");
-                    url.searchParams.set(`h${instanceId}`, resizer.getAttribute("height") || "100%");
-                }
+        const syncUrl = () => {
+          const url = new URL(window.location);
+          url.searchParams.delete(`v${instanceId}`);
+          localOptions.forEach((item) => {
+            const val = [item.id, item.label, item.selected ? "1" : "0"].join("|");
+            url.searchParams.append(`v${instanceId}`, val);
+          });
 
-                url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
-                url.searchParams.set(`s${instanceId}`, searchValOut.textContent === '-' ? '' : searchValOut.textContent);
+          const resizer = group.querySelector("center-and-height-resizer");
+          if (resizer) {
+            url.searchParams.set(`l${instanceId}`, resizer.getAttribute("left") || "50px");
+            url.searchParams.set(`c${instanceId}`, resizer.getAttribute("center") || "350px");
+            const h = resizer.getAttribute("height");
+            if (h) {
+              url.searchParams.set(`h${instanceId}`, h);
+            } else {
+              url.searchParams.delete(`h${instanceId}`);
+            }
+          }
 
-                window.history.replaceState({}, '', url);
-                debouncedPush();
-            };
+          url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
+          url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
 
-            const updateDump = () => {
-                optionsDump.textContent = JSON.stringify(localOptions, null, 2);
-            };
+          window.history.replaceState({}, "", url);
+          debouncedPush();
+        };
 
-            // Initialize Manager
-            manager = new OptionListManager(parent, {
-                options: localOptions,
-                loading: states.loading || false,
-                value: states.value || "",
-                onChange: (val) => {
-                    onChangeCounter++;
-                    onChangeCountOut.textContent = onChangeCounter;
-                    searchValOut.textContent = val || "-";
-                    syncUrl();
-                },
-                onItemClick: (item) => {
-                    console.log('Item clicked:', item);
-                    localOptions = localOptions.map(opt => {
-                        if (opt.id === item.id) return { ...opt, selected: !opt.selected };
-                        return opt;
-                    });
-                    manager.setOptions(localOptions);
-                    updateDump();
-                    syncUrl();
-                },
-                onOk: () => {
-                    onOkCounter++;
-                    onOkCountOut.textContent = onOkCounter;
-                },
-                onCancel: () => {
-                    onCancelCounter++;
-                    onCancelCountOut.textContent = onCancelCounter;
-                }
+        const updateDump = () => {
+          optionsDump.textContent = JSON.stringify(localOptions, null, 2);
+        };
+
+        // Initialize Manager
+        manager = new OptionListManager(parent, {
+          options: localOptions,
+          loading: states.loading || false,
+          value: states.value || "",
+          onChange: (val) => {
+            onChangeCounter++;
+            onChangeCountOut.textContent = onChangeCounter;
+            searchValOut.textContent = val || "-";
+            syncUrl();
+          },
+          onItemClick: (item) => {
+            console.log("Item clicked:", item);
+            localOptions = localOptions.map((opt) => {
+              if (opt.id === item.id) return { ...opt, selected: !opt.selected };
+              return opt;
             });
-
-            // Handlers
-            addBtn.addEventListener('click', () => {
-                const id = Math.floor(Math.random() * 100000);
-                localOptions.push({ id, label: 'Dynamic Option ' + id });
-                manager.setOptions([...localOptions]);
-                updateDump();
-                syncUrl();
-            });
-
-            loadingCb.addEventListener('change', (e) => {
-                manager.setLoading(e.target.checked);
-                syncUrl();
-            });
-
-            focusBtn.addEventListener('click', () => manager.setFocus());
-
-            clearBtn.addEventListener('click', () => {
-                localOptions = [];
-                manager.setOptions([]);
-                updateDump();
-                syncUrl();
-            });
-
-            injectBtn.addEventListener('click', () => {
-                const val = injectInput.value;
-                manager.setValue(val);
-                searchValOut.textContent = val || "-";
-                syncUrl();
-            });
-
-            const injectLabelInput = group.querySelector('[data-role="inject-label"]');
-            const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
-            injectLabelBtn.addEventListener('click', () => {
-                manager.setLabel(injectLabelInput.value);
-                syncUrl();
-            });
-
-            // Watch resizer changes
-            const resizer = group.querySelector("center-and-height-resizer");
-            resizer.addEventListener("onLeft", () => syncUrl());
-            resizer.addEventListener("onCenter", () => syncUrl());
-            resizer.addEventListener("onHeight", () => syncUrl());
-
+            manager.setOptions(localOptions);
             updateDump();
-            if (states.loading) loadingCb.checked = true;
-            if (states.value) searchValOut.textContent = states.value;
+            syncUrl();
+          },
+          onOk: () => {
+            onOkCounter++;
+            onOkCountOut.textContent = onOkCounter;
+          },
+          onCancel: () => {
+            onCancelCounter++;
+            onCancelCountOut.textContent = onCancelCounter;
+          },
+        });
 
-            if ((localOptions.length > 0 || states.loading || states.value || states.height || states.left || states.center) && instanceId > 0) {
-                syncUrl();
+        // Handlers
+        addBtn.addEventListener("click", () => {
+          const id = Math.floor(Math.random() * 100000);
+          localOptions.push({ id, label: "Dynamic Option " + id });
+          manager.setOptions([...localOptions]);
+          updateDump();
+          syncUrl();
+        });
+
+        loadingCb.addEventListener("change", (e) => {
+          manager.setLoading(e.target.checked);
+          syncUrl();
+        });
+
+        focusBtn.addEventListener("click", () => manager.setFocus());
+
+        clearBtn.addEventListener("click", () => {
+          localOptions = [];
+          manager.setOptions([]);
+          updateDump();
+          syncUrl();
+        });
+
+        injectBtn.addEventListener("click", () => {
+          const val = injectInput.value;
+          manager.setValue(val);
+          searchValOut.textContent = val || "-";
+          syncUrl();
+        });
+
+        const injectLabelInput = group.querySelector('[data-role="inject-label"]');
+        const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
+        injectLabelBtn.addEventListener("click", () => {
+          manager.setLabel(injectLabelInput.value);
+          syncUrl();
+        });
+
+        // Watch resizer changes
+        const resizer = group.querySelector("center-and-height-resizer");
+        resizer.addEventListener("onLeft", () => syncUrl());
+        resizer.addEventListener("onCenter", () => syncUrl());
+        resizer.addEventListener("onHeight", () => syncUrl());
+
+        updateDump();
+        if (states.loading) loadingCb.checked = true;
+        if (states.value) searchValOut.textContent = states.value;
+
+        if (
+          (localOptions.length > 0 ||
+            states.loading ||
+            states.value ||
+            states.height ||
+            states.left ||
+            states.center) &&
+          instanceId > 0
+        ) {
+          syncUrl();
+        }
+      };
+
+      document.getElementById("init-btn").addEventListener("click", () => {
+        init([
+          { id: 101, label: "Option A" },
+          { id: 102, label: "Option B", selected: true },
+          { id: 103, label: "Option C", selected: true },
+          { id: 104, label: "Option D" },
+          { id: 105, label: "Option E" },
+        ]);
+      });
+
+      const loadFromUrl = () => {
+        const instancesArea = document.getElementById("instances-area");
+        instancesArea.innerHTML = "";
+        instanceCounter = 0;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const groups = {};
+        const statesData = {};
+
+        for (const [key, value] of urlParams.entries()) {
+          const match = key.match(/^([voshlc])(\d+)$/);
+          if (match) {
+            const [, type, id] = match;
+            if (type === "v") {
+              if (!groups[id]) groups[id] = [];
+              groups[id].push(value);
+            } else {
+              if (!statesData[id]) statesData[id] = {};
+              const map = { o: "loading", s: "value", h: "height", l: "left", c: "center" };
+              statesData[id][map[type]] = type === "o" ? value === "1" : value;
             }
-        };
+          }
+        }
 
-        document.getElementById('init-btn').addEventListener('click', () => init());
+        const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(statesData)])).sort(
+          (a, b) => parseInt(a) - parseInt(b),
+        );
 
-        const loadFromUrl = () => {
-            const instancesArea = document.getElementById("instances-area");
-            instancesArea.innerHTML = "";
-            instanceCounter = 0;
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const groups = {};
-            const statesData = {};
-
-            for (const [key, value] of urlParams.entries()) {
-                const match = key.match(/^([voshlc])(\d+)$/);
-                if (match) {
-                    const [, type, id] = match;
-                    if (type === 'v') {
-                        if (!groups[id]) groups[id] = [];
-                        groups[id].push(value);
-                    } else {
-                        if (!statesData[id]) statesData[id] = {};
-                        const map = { o: 'loading', s: 'value', h: 'height', l: 'left', c: 'center' };
-                        statesData[id][map[type]] = type === 'o' ? value === '1' : value;
-                    }
-                }
+        allIds.forEach((id) => {
+          const options = (groups[id] || []).map((v) => {
+            const parts = v.split("|");
+            if (parts.length === 3) {
+              return { id: parts[0], label: parts[1], selected: parts[2] === "1" };
             }
+            return { id: Math.random().toString(36).substr(2, 9), label: v };
+          });
+          init(options, statesData[id] || {});
+        });
+      };
 
-            const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(statesData)])).sort((a, b) => parseInt(a) - parseInt(b));
-
-            allIds.forEach(id => {
-                const options = (groups[id] || []).map(v => {
-                    const parts = v.split('|');
-                    if (parts.length === 3) {
-                        return { id: parts[0], label: parts[1], selected: parts[2] === '1' };
-                    }
-                    return { id: Math.random().toString(36).substr(2, 9), label: v };
-                });
-                init(options, statesData[id] || {});
-            });
-        };
-
-        window.addEventListener("popstate", loadFromUrl);
-        loadFromUrl();
+      window.addEventListener("popstate", loadFromUrl);
+      loadFromUrl();
     </script>
-</body>
+  </body>
 </html>
