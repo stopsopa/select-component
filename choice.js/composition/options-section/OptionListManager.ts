@@ -16,6 +16,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   onOk?: () => void;
   disabled?: boolean;
   maxHeight?: string;
+  showFooter?: boolean;
 };
 
 export class OptionListManager<T extends ListElement = ListElement> {
@@ -38,6 +39,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
       loading: false,
       disabled: false,
       value: "",
+      showFooter: true,
       ...options,
     };
 
@@ -58,6 +60,11 @@ export class OptionListManager<T extends ListElement = ListElement> {
   public setDisabled(disabled: boolean) {
     this.propOptions.disabled = disabled;
     this._updateDisabledDisplay();
+  }
+
+  public showFooter(show: boolean) {
+    this.propOptions.showFooter = show;
+    this._updateFooterDisplay();
   }
 
   public setOptions(options: T[]) {
@@ -146,6 +153,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
     this._updateOptionsDisplay();
     this._updateLoadingDisplay();
     this._updateDisabledDisplay();
+    this._updateFooterDisplay();
     this.setValue(this.propOptions.value || "");
   }
 
@@ -228,6 +236,12 @@ export class OptionListManager<T extends ListElement = ListElement> {
   private _updateDisabledDisplay() {
     if (this.propOptionsContainer) {
       this.propOptionsContainer.classList.toggle("disabled", !!this.propOptions.disabled);
+    }
+  }
+
+  private _updateFooterDisplay() {
+    if (this.propFooterContainer) {
+      this.propFooterContainer.style.display = this.propOptions.showFooter !== false ? "flex" : "none";
     }
   }
 }

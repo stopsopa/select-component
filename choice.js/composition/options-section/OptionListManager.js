@@ -17,6 +17,7 @@ class OptionListManager {
       loading: false,
       disabled: false,
       value: "",
+      showFooter: true,
       ...options
     };
     if (this.propOptions.maxHeight) {
@@ -33,6 +34,10 @@ class OptionListManager {
   setDisabled(disabled) {
     this.propOptions.disabled = disabled;
     this._updateDisabledDisplay();
+  }
+  showFooter(show) {
+    this.propOptions.showFooter = show;
+    this._updateFooterDisplay();
   }
   setOptions(options) {
     this.propOptions.options = options;
@@ -101,6 +106,7 @@ class OptionListManager {
     this._updateOptionsDisplay();
     this._updateLoadingDisplay();
     this._updateDisabledDisplay();
+    this._updateFooterDisplay();
     this.setValue(this.propOptions.value || "");
   }
   _bindEvents() {
@@ -170,6 +176,11 @@ class OptionListManager {
   _updateDisabledDisplay() {
     if (this.propOptionsContainer) {
       this.propOptionsContainer.classList.toggle("disabled", !!this.propOptions.disabled);
+    }
+  }
+  _updateFooterDisplay() {
+    if (this.propFooterContainer) {
+      this.propFooterContainer.style.display = this.propOptions.showFooter !== false ? "flex" : "none";
     }
   }
 }
