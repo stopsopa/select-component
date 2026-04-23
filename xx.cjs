@@ -57,7 +57,8 @@ cat <<EEE
   choice.js/select.ts \${S}
   choice.js/composition/select-section/SelectedListManager.ts \${S}
   choice.js/composition/options-section/OptionListManager.ts \${S}
-  choice.js/composition/selected-list.ts \${S}
+  choice.js/composition/select-section/selected-list.ts \${S}
+  choice.js/composition/options-section/options-list.ts \${S}
   js/CenterResizer.ts \${S}
   js/CenterAndHeightResizer.ts
 

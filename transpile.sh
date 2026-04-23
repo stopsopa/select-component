@@ -15,6 +15,6 @@ while true; do
     node bash/fs/watch.cjs "${FILES[@]}"
     STATUS=$?
     if [ $STATUS -eq 130 ]; then
-        exit 0
+        exit $STATUS
     fi
 done
