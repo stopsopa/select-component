@@ -196,6 +196,8 @@
                     </label>
                     <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
                     <button class="gcp-css white" data-role="empty-btn">Set Custom Empty</button>
+                    <button class="gcp-css white" data-role="render-btn">Set Custom Render</button>
+                    <button class="gcp-css white" data-role="string-render-btn">Set String Render</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                 </div>
 
@@ -246,6 +248,8 @@
         const filterCb = group.querySelector('[data-role="filter-cb"]');
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
         const emptyBtn = group.querySelector('[data-role="empty-btn"]');
+        const renderBtn = group.querySelector('[data-role="render-btn"]');
+        const stringRenderBtn = group.querySelector('[data-role="string-render-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
@@ -356,6 +360,38 @@
         
         emptyBtn.addEventListener("click", () => {
           manager.setRenderEmpty(() => `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`);
+        });
+
+        renderBtn.addEventListener("click", () => {
+          manager.setRenderItem((item) => {
+            const el = document.createElement("div");
+            el.className = "element";
+            el.style.padding = "12px";
+            el.style.background = item.selected ? "#fff3e0" : "transparent";
+            el.style.color = item.selected ? "#e65100" : "inherit";
+            el.dataset.id = String(item.id);
+            
+            const icon = document.createElement("span");
+            icon.textContent = item.selected ? "🔥 " : "❄️ ";
+            icon.style.marginRight = "10px";
+            
+            const label = document.createElement("label");
+            label.textContent = item.label;
+            
+            el.appendChild(icon);
+            el.appendChild(label);
+            return el;
+          });
+        });
+
+        stringRenderBtn.addEventListener("click", () => {
+          manager.setRenderItem((item) => `
+            <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? '#e8f5e9' : 'white'}; color: ${item.selected ? '#2e7d32' : '#333'};">
+              <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? '✅' : '⬜'}</span>
+              <strong style="margin-left: 10px;">${item.label}</strong>
+              <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
+            </div>
+          `);
         });
 
         clearBtn.addEventListener("click", () => {

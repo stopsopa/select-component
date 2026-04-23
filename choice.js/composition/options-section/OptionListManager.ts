@@ -19,6 +19,8 @@ export type OptionListManagerOptions<T extends ListElement> = {
   showFooter?: boolean;
   showFilter?: boolean;
   renderEmpty?: () => string | HTMLElement;
+  renderItem?: (item: T) => string | HTMLElement;
+  renderList?: (list: T[]) => (string | HTMLElement)[];
 };
 
 export class OptionListManager<T extends ListElement = ListElement> {
@@ -43,6 +45,21 @@ export class OptionListManager<T extends ListElement = ListElement> {
       value: "",
       showFooter: true,
       showFilter: true,
+      renderItem: (item: T) => {
+        const el = document.createElement("div");
+        el.className = "element";
+        if (item.selected) el.classList.add("selected");
+        el.dataset.id = String(item.id);
+
+        const label = document.createElement("label");
+        label.textContent = item.label;
+        el.appendChild(label);
+
+        return el;
+      },
+      renderList: function (list: T[]) {
+        return list.map((item) => this.renderItem!(item));
+      },
       ...options,
     };
 
@@ -101,6 +118,16 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
   public setRenderEmpty(renderEmpty: () => string | HTMLElement) {
     this.propOptions.renderEmpty = renderEmpty;
+    this._updateOptionsDisplay();
+  }
+
+  public setRenderItem(renderItem: (item: T) => string | HTMLElement) {
+    this.propOptions.renderItem = renderItem;
+    this._updateOptionsDisplay();
+  }
+
+  public setRenderList(renderList: (list: T[]) => (string | HTMLElement)[]) {
+    this.propOptions.renderList = renderList;
     this._updateOptionsDisplay();
   }
 
@@ -239,17 +266,18 @@ export class OptionListManager<T extends ListElement = ListElement> {
     }
 
     container.innerHTML = "";
-    options.forEach((item) => {
-      const el = document.createElement("div");
-      el.className = "element";
-      if (item.selected) el.classList.add("selected");
-      el.dataset.id = String(item.id);
-
-      const label = document.createElement("label");
-      label.textContent = item.label;
-      el.appendChild(label);
-
-      container.appendChild(el);
+    const renderedItems = this.propOptions.renderList!.call(this.propOptions, options);
+    renderedItems.forEach((item) => {
+      if (typeof item === "string") {
+        const temp = document.createElement("div");
+        temp.innerHTML = item;
+        const el = temp.firstElementChild as HTMLElement;
+        if (el) {
+          container.appendChild(el);
+        }
+      } else {
+        container.appendChild(item);
+      }
     });
   }
 

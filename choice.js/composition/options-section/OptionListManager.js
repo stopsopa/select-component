@@ -19,6 +19,19 @@ class OptionListManager {
       value: "",
       showFooter: true,
       showFilter: true,
+      renderItem: (item) => {
+        const el = document.createElement("div");
+        el.className = "element";
+        if (item.selected) el.classList.add("selected");
+        el.dataset.id = String(item.id);
+        const label = document.createElement("label");
+        label.textContent = item.label;
+        el.appendChild(label);
+        return el;
+      },
+      renderList: function(list) {
+        return list.map((item) => this.renderItem(item));
+      },
       ...options
     };
     if (this.propOptions.maxHeight) {
@@ -66,6 +79,14 @@ class OptionListManager {
   }
   setRenderEmpty(renderEmpty) {
     this.propOptions.renderEmpty = renderEmpty;
+    this._updateOptionsDisplay();
+  }
+  setRenderItem(renderItem) {
+    this.propOptions.renderItem = renderItem;
+    this._updateOptionsDisplay();
+  }
+  setRenderList(renderList) {
+    this.propOptions.renderList = renderList;
     this._updateOptionsDisplay();
   }
   setFocus() {
@@ -179,15 +200,18 @@ class OptionListManager {
       return;
     }
     container.innerHTML = "";
-    options.forEach((item) => {
-      const el = document.createElement("div");
-      el.className = "element";
-      if (item.selected) el.classList.add("selected");
-      el.dataset.id = String(item.id);
-      const label = document.createElement("label");
-      label.textContent = item.label;
-      el.appendChild(label);
-      container.appendChild(el);
+    const renderedItems = this.propOptions.renderList.call(this.propOptions, options);
+    renderedItems.forEach((item) => {
+      if (typeof item === "string") {
+        const temp = document.createElement("div");
+        temp.innerHTML = item;
+        const el = temp.firstElementChild;
+        if (el) {
+          container.appendChild(el);
+        }
+      } else {
+        container.appendChild(item);
+      }
     });
   }
   _updateLoadingDisplay() {
