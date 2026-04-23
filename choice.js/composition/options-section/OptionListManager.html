@@ -301,7 +301,8 @@
           showFilter: states.showFilter !== false,
           maxHeight: states.maxHeight || "",
           value: states.value || "",
-          onInputChange: (val) => {
+          onInputChange: (e) => {
+            const val = e.target.value;
             onChangeCounter++;
             onChangeCountOut.textContent = onChangeCounter;
             searchValOut.textContent = val || "-";

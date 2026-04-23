@@ -11,7 +11,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   value?: string;
   label?: string;
   onItemClick?: (item: T) => void;
-  onInputChange?: (value: string) => void;
+  onInputChange?: (e: Event) => void;
   onCancel?: () => void;
   onOk?: () => void;
   disabled?: boolean;
@@ -22,6 +22,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   renderItem?: (item: T) => string | HTMLElement;
   renderList?: (list: T[]) => (string | HTMLElement)[];
 };
+
 
 export class OptionListManager<T extends ListElement = ListElement> {
   public propOptions: OptionListManagerOptions<T>;
@@ -202,17 +203,17 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
   private _bindEvents() {
     if (this.propInputElement) {
-      this.propInputElement.addEventListener("input", () => {
+      this.propInputElement.addEventListener("input", (e) => {
         this.propOptions.value = this.propInputElement!.value;
         if (this.propOptions.onInputChange) {
-          this.propOptions.onInputChange(this.propOptions.value);
+          this.propOptions.onInputChange(e);
         }
       });
 
       this.propInputElement.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || (e.key === "Backspace" && this.propInputElement!.value === "")) {
           if (this.propOptions.onInputChange) {
-            this.propOptions.onInputChange(this.propInputElement!.value);
+            this.propOptions.onInputChange(e);
           }
         }
       });
