@@ -376,11 +376,11 @@
         focusBtn.addEventListener("click", () => ol.setFocus()); // Method is needed for focus
 
         emptyBtn.addEventListener("click", () => {
-          ol.setAttribute("render-empty", "return '<div style=\"padding: 10px; border: 1px solid red;\">Empty Attr!</div>'");
+          ol.setAttribute("render-empty", "return '<div style=\"padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🏜️</div>Nothing found...</div>'");
         });
 
         renderBtn.addEventListener("click", () => {
-          ol.setAttribute("render-item", "return `<div class=\"element\" style=\"border: 1px solid green;\">${item.label}</div>` ");
+          ol.setAttribute("render-item", "return `<div class=\"element ${item.selected ? 'selected' : ''}\" style=\"display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 4px solid ${item.selected ? '#3182ce' : 'transparent'}; background: ${item.selected ? '#ebf8ff' : 'white'}; margin-bottom: 4px; border-radius: 0 4px 4px 0;\"><span style=\"font-size: 18px;\">${item.selected ? '✅' : '⬜'}</span><label style=\"flex-grow: 1; cursor: pointer;\">${item.label}</label>${item.selected ? '<span style=\"font-size: 12px; color: #3182ce; font-weight: bold;\">SELECTED</span>' : ''}</div>` ");
         });
 
         clearBtn.addEventListener("click", () => {
