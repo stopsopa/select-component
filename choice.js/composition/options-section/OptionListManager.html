@@ -195,6 +195,7 @@
                         <input type="checkbox" data-role="filter-cb" checked> Show Filter
                     </label>
                     <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
+                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                 </div>
 
@@ -244,6 +245,7 @@
         const footerCb = group.querySelector('[data-role="footer-cb"]');
         const filterCb = group.querySelector('[data-role="filter-cb"]');
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
+        const emptyBtn = group.querySelector('[data-role="empty-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
@@ -351,6 +353,10 @@
         });
 
         focusBtn.addEventListener("click", () => manager.setFocus());
+        
+        emptyBtn.addEventListener("click", () => {
+          manager.setRenderEmpty(() => `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`);
+        });
 
         clearBtn.addEventListener("click", () => {
           localOptions = [];

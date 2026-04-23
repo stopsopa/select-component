@@ -18,6 +18,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   maxHeight?: string;
   showFooter?: boolean;
   showFilter?: boolean;
+  renderEmpty?: () => string | HTMLElement;
 };
 
 export class OptionListManager<T extends ListElement = ListElement> {
@@ -96,6 +97,11 @@ export class OptionListManager<T extends ListElement = ListElement> {
     if (this.propLabelElement) {
       this.propLabelElement.textContent = label || "";
     }
+  }
+
+  public setRenderEmpty(renderEmpty: () => string | HTMLElement) {
+    this.propOptions.renderEmpty = renderEmpty;
+    this._updateOptionsDisplay();
   }
 
   public setFocus() {
@@ -218,7 +224,17 @@ export class OptionListManager<T extends ListElement = ListElement> {
     const options = this.propOptions.options || [];
 
     if (options.length === 0) {
-      container.innerHTML = `<div class="empty-msg">No options to display</div>`;
+      if (this.propOptions.renderEmpty) {
+        const result = this.propOptions.renderEmpty();
+        if (typeof result === "string") {
+          container.innerHTML = result;
+        } else {
+          container.innerHTML = "";
+          container.appendChild(result);
+        }
+      } else {
+        container.innerHTML = `<div class="empty-msg">No options to display</div>`;
+      }
       return;
     }
 

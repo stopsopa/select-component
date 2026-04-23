@@ -64,6 +64,10 @@ class OptionListManager {
       this.propLabelElement.textContent = label || "";
     }
   }
+  setRenderEmpty(renderEmpty) {
+    this.propOptions.renderEmpty = renderEmpty;
+    this._updateOptionsDisplay();
+  }
   setFocus() {
     if (this.propInputElement) {
       this.propInputElement.focus();
@@ -161,7 +165,17 @@ class OptionListManager {
     if (!container) return;
     const options = this.propOptions.options || [];
     if (options.length === 0) {
-      container.innerHTML = `<div class="empty-msg">No options to display</div>`;
+      if (this.propOptions.renderEmpty) {
+        const result = this.propOptions.renderEmpty();
+        if (typeof result === "string") {
+          container.innerHTML = result;
+        } else {
+          container.innerHTML = "";
+          container.appendChild(result);
+        }
+      } else {
+        container.innerHTML = `<div class="empty-msg">No options to display</div>`;
+      }
       return;
     }
     container.innerHTML = "";
