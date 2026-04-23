@@ -149,6 +149,10 @@
       font-size: 14px;
       color: var(--gcp-css-text, #3c4043);
 
+      & > * {
+        pointer-events: none;
+      }
+
       &:hover {
         background: rgba(0, 0, 0, 0.04);
       }
