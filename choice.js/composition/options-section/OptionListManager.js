@@ -18,6 +18,7 @@ class OptionListManager {
       disabled: false,
       value: "",
       showFooter: true,
+      showFilter: true,
       ...options
     };
     if (this.propOptions.maxHeight) {
@@ -38,6 +39,10 @@ class OptionListManager {
   showFooter(show) {
     this.propOptions.showFooter = show;
     this._updateFooterDisplay();
+  }
+  showFilter(show) {
+    this.propOptions.showFilter = show;
+    this._updateFilterDisplay();
   }
   setOptions(options) {
     this.propOptions.options = options;
@@ -109,6 +114,7 @@ class OptionListManager {
     this._updateLoadingDisplay();
     this._updateDisabledDisplay();
     this._updateFooterDisplay();
+    this._updateFilterDisplay();
     this.setValue(this.propOptions.value || "");
   }
   _bindEvents() {
@@ -183,6 +189,11 @@ class OptionListManager {
   _updateFooterDisplay() {
     if (this.propFooterContainer) {
       this.propFooterContainer.style.display = this.propOptions.showFooter !== false ? "flex" : "none";
+    }
+  }
+  _updateFilterDisplay() {
+    if (this.propFilterContainer) {
+      this.propFilterContainer.style.display = this.propOptions.showFilter !== false ? "flex" : "none";
     }
   }
 }

@@ -191,6 +191,9 @@
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
                         <input type="checkbox" data-role="footer-cb" checked> Show Footer
                     </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" data-role="filter-cb" checked> Show Filter
+                    </label>
                     <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                 </div>
@@ -239,6 +242,7 @@
         const loadingCb = group.querySelector('[data-role="loading-cb"]');
         const disabledCb = group.querySelector('[data-role="disabled-cb"]');
         const footerCb = group.querySelector('[data-role="footer-cb"]');
+        const filterCb = group.querySelector('[data-role="filter-cb"]');
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
@@ -270,6 +274,7 @@
           url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
           url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
           url.searchParams.set(`f${instanceId}`, footerCb.checked ? "1" : "0");
+          url.searchParams.set(`e${instanceId}`, filterCb.checked ? "1" : "0");
           url.searchParams.set(`m${instanceId}`, states.maxHeight || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
 
@@ -287,6 +292,7 @@
           loading: states.loading || false,
           disabled: states.disabled || false,
           showFooter: states.showFooter !== false,
+          showFilter: states.showFilter !== false,
           maxHeight: states.maxHeight || "",
           value: states.value || "",
           onInputChange: (val) => {
@@ -336,6 +342,11 @@
 
         footerCb.addEventListener("change", (e) => {
           manager.showFooter(e.target.checked);
+          syncUrl();
+        });
+
+        filterCb.addEventListener("change", (e) => {
+          manager.showFilter(e.target.checked);
           syncUrl();
         });
 
@@ -397,6 +408,7 @@
         if (states.loading) loadingCb.checked = true;
         if (states.disabled) disabledCb.checked = true;
         footerCb.checked = states.showFooter !== false;
+        filterCb.checked = states.showFilter !== false;
         if (states.value) searchValOut.textContent = states.value;
 
         if (
@@ -404,6 +416,7 @@
             states.loading ||
             states.disabled ||
             states.showFooter === false ||
+            states.showFilter === false ||
             states.value ||
             states.height ||
             states.left ||
@@ -447,12 +460,13 @@
                 d: "disabled",
                 m: "maxHeight",
                 f: "showFooter",
+                e: "showFilter",
                 s: "value",
                 h: "height",
                 l: "left",
                 c: "center",
               };
-              statesData[id][map[type]] = type === "o" || type === "d" || type === "f" ? value === "1" : value;
+              statesData[id][map[type]] = type === "o" || type === "d" || type === "f" || type === "e" ? value === "1" : value;
             }
           }
         }
