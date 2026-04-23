@@ -10,7 +10,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   loading?: boolean;
   value?: string;
   label?: string;
-  onItemClick?: (item: T) => void;
+  onItemPick?: (item: T) => void;
   onInputChange?: (e: Event) => void;
   onCancel?: () => void;
   onOk?: () => void;
@@ -247,8 +247,8 @@ export class OptionListManager<T extends ListElement = ListElement> {
       if (element) {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
-        if (item && this.propOptions.onItemClick) {
-          this.propOptions.onItemClick(item);
+        if (item && this.propOptions.onItemPick) {
+          this.propOptions.onItemPick(item);
         }
       }
     });

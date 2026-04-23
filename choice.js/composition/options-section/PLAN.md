@@ -58,7 +58,7 @@ From parameters we will have to control we will have to support in our class met
 - setFocus() - sets the focus to the input field
 
 from events:
-- onItemClick(item: T) - triggered when an item is clicked
+- onItemPick(item: T) - triggered when an item is clicked
 - onChange(value: string) - triggered when input value changes (that will have to have similar behaviour regarding backspace and enter like in SelectedListManager)
 - onCancel() - triggered when Cancel button is clicked
 - onOk() - triggered when OK button is clicked

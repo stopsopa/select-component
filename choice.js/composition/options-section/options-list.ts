@@ -15,7 +15,7 @@ export class OptionsList extends HTMLElement {
       "max-height",
       "show-footer",
       "show-filter",
-      "onItemClick",
+      "onItemPick",
       "onInputChange",
       "onCancel",
       "onOk",
@@ -48,8 +48,8 @@ export class OptionsList extends HTMLElement {
       maxHeight: this.getAttribute("max-height") || "",
       showFooter: this.hasAttribute("show-footer") ? this.getAttribute("show-footer") !== "false" : true,
       showFilter: this.hasAttribute("show-filter") ? this.getAttribute("show-filter") !== "false" : true,
-      onItemClick: (item) => {
-        this.dispatchEvent(new CustomEvent("onItemClick", { detail: { item } }));
+      onItemPick: (item) => {
+        this.dispatchEvent(new CustomEvent("onItemPick", { detail: { item } }));
       },
       onInputChange: (e) => {
         this.dispatchEvent(
@@ -66,7 +66,7 @@ export class OptionsList extends HTMLElement {
       },
     };
 
-    ["onItemClick", "onInputChange", "onCancel", "onOk"].forEach((attr) => {
+    ["onItemPick", "onInputChange", "onCancel", "onOk"].forEach((attr) => {
       const val = this.getAttribute(attr);
       if (val) this._setupAttributeEvent(attr, val);
     });
@@ -106,7 +106,7 @@ export class OptionsList extends HTMLElement {
       case "show-filter":
         this._manager.showFilter(newValue !== "false");
         break;
-      case "onItemClick":
+      case "onItemPick":
       case "onInputChange":
       case "onCancel":
       case "onOk":

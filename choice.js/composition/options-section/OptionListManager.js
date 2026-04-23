@@ -181,8 +181,8 @@ class OptionListManager {
       if (element) {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
-        if (item && this.propOptions.onItemClick) {
-          this.propOptions.onItemClick(item);
+        if (item && this.propOptions.onItemPick) {
+          this.propOptions.onItemPick(item);
         }
       }
     });

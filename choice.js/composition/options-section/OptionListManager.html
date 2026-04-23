@@ -313,7 +313,7 @@
             searchValOut.textContent = val || "-";
             syncUrl();
           },
-          onItemClick: (item) => {
+          onItemPick: (item) => {
             console.log("Item clicked:", item);
             localOptions = localOptions.map((opt) => {
               if (opt.id === item.id) return { ...opt, selected: !opt.selected };
