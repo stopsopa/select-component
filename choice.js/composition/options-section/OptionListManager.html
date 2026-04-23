@@ -75,6 +75,11 @@
     <a href="" id="reload-link">reload</a> | 
     <a href=".">up ..</a>
 
+    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
+        <span id="history-time" style="font-family: monospace; opacity: 0.8;">No history entry</span>
+        <button id="push-btn" style="cursor: pointer; background: #444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; transition: background 0.2s;">Push State</button>
+    </div>
+
     <div id="instances-area"></div>
 
     <script type="module">
@@ -82,6 +87,27 @@
         import { OptionListManager } from "./OptionListManager.js";
 
         document.getElementById("reload-link").href = window.location.pathname;
+
+        // Global history logic
+        let pushTimeout = null;
+        const historyTime = document.getElementById("history-time");
+        const pushBtn = document.getElementById("push-btn");
+        const updateHistoryIndicator = () => {
+            const now = new Date();
+            historyTime.textContent = "Last push: " + now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0') + ":" + now.getSeconds().toString().padStart(2, '0');
+            pushBtn.style.background = "#28a745";
+            setTimeout(() => pushBtn.style.background = "#444", 500);
+        };
+        const pushHistory = () => {
+            if (pushTimeout) clearTimeout(pushTimeout);
+            window.history.pushState({}, '', window.location.href);
+            updateHistoryIndicator();
+        };
+        const debouncedPush = () => {
+            if (pushTimeout) clearTimeout(pushTimeout);
+            pushTimeout = setTimeout(pushHistory, 3000);
+        };
+        pushBtn.addEventListener('click', pushHistory);
 
         let instanceCounter = 0;
 
@@ -98,7 +124,12 @@
             group.innerHTML = `
                 <h3>Instance #${instanceId}</h3>
                 <div class="resizer-container">
-                    <center-and-height-resizer id="resizer-${instanceId}" style="display: block; height: 100%;">
+                    <center-and-height-resizer 
+                        id="resizer-${instanceId}" 
+                        left="${states.left || '50px'}" 
+                        center="${states.center || '350px'}" 
+                        style="display: block; height: ${states.height || '100%'};"
+                    >
                         <div data-role="manager-parent" style="height: 100%;"></div>
                     </center-and-height-resizer>
                 </div>
@@ -107,6 +138,7 @@
                     <strong>Search Value:</strong> 
                     <pre data-role="search-val-out" style="display: inline; padding: 2px 5px; margin: 0; background: #eee; width: auto; max-height: none;">-</pre>
                     (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
+                    onOk triggers: <span data-role="onok-count" style="font-weight: bold;">0</span>,
                     onCancel triggers: <span data-role="oncancel-count" style="font-weight: bold;">0</span>)
                 </div>
 
@@ -140,6 +172,7 @@
             const parent = group.querySelector('[data-role="manager-parent"]');
             const searchValOut = group.querySelector('[data-role="search-val-out"]');
             const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
+            const onOkCountOut = group.querySelector('[data-role="onok-count"]');
             const onCancelCountOut = group.querySelector('[data-role="oncancel-count"]');
             const optionsDump = group.querySelector('[data-role="options-dump"]');
             
@@ -151,7 +184,30 @@
             const injectBtn = group.querySelector('[data-role="inject-btn"]');
 
             let onChangeCounter = 0;
+            let onOkCounter = 0;
             let onCancelCounter = 0;
+
+            const syncUrl = () => {
+                const url = new URL(window.location);
+                url.searchParams.delete(`v${instanceId}`);
+                localOptions.forEach(item => {
+                    const val = [item.id, item.label, item.selected ? '1' : '0'].join('|');
+                    url.searchParams.append(`v${instanceId}`, val);
+                });
+
+                const resizer = group.querySelector("center-and-height-resizer");
+                if (resizer) {
+                    url.searchParams.set(`l${instanceId}`, resizer.getAttribute("left") || "50px");
+                    url.searchParams.set(`c${instanceId}`, resizer.getAttribute("center") || "350px");
+                    url.searchParams.set(`h${instanceId}`, resizer.getAttribute("height") || "100%");
+                }
+
+                url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
+                url.searchParams.set(`s${instanceId}`, searchValOut.textContent === '-' ? '' : searchValOut.textContent);
+
+                window.history.replaceState({}, '', url);
+                debouncedPush();
+            };
 
             const updateDump = () => {
                 optionsDump.textContent = JSON.stringify(localOptions, null, 2);
@@ -166,6 +222,7 @@
                     onChangeCounter++;
                     onChangeCountOut.textContent = onChangeCounter;
                     searchValOut.textContent = val || "-";
+                    syncUrl();
                 },
                 onItemClick: (item) => {
                     console.log('Item clicked:', item);
@@ -175,61 +232,112 @@
                     });
                     manager.setOptions(localOptions);
                     updateDump();
+                    syncUrl();
                 },
                 onOk: () => {
-                    console.log('OK clicked for instance', instanceId);
-                    alert('OK clicked!');
+                    onOkCounter++;
+                    onOkCountOut.textContent = onOkCounter;
                 },
                 onCancel: () => {
-                    console.log('Cancel clicked for instance', instanceId);
                     onCancelCounter++;
                     onCancelCountOut.textContent = onCancelCounter;
                 }
             });
 
             // Handlers
-            addBtn.onclick = () => {
+            addBtn.addEventListener('click', () => {
                 const id = Math.floor(Math.random() * 100000);
                 localOptions.push({ id, label: 'Dynamic Option ' + id });
                 manager.setOptions([...localOptions]);
                 updateDump();
-            };
+                syncUrl();
+            });
 
-            loadingCb.onchange = (e) => {
+            loadingCb.addEventListener('change', (e) => {
                 manager.setLoading(e.target.checked);
-            };
+                syncUrl();
+            });
 
-            focusBtn.onclick = () => manager.setFocus();
+            focusBtn.addEventListener('click', () => manager.setFocus());
 
-            clearBtn.onclick = () => {
+            clearBtn.addEventListener('click', () => {
                 localOptions = [];
                 manager.setOptions([]);
                 updateDump();
-            };
+                syncUrl();
+            });
 
-            injectBtn.onclick = () => {
+            injectBtn.addEventListener('click', () => {
                 const val = injectInput.value;
                 manager.setValue(val);
                 searchValOut.textContent = val || "-";
-            };
+                syncUrl();
+            });
 
             const injectLabelInput = group.querySelector('[data-role="inject-label"]');
             const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
-            injectLabelBtn.onclick = () => {
+            injectLabelBtn.addEventListener('click', () => {
                 manager.setLabel(injectLabelInput.value);
-            };
+                syncUrl();
+            });
+
+            // Watch resizer changes
+            const resizer = group.querySelector("center-and-height-resizer");
+            resizer.addEventListener("onLeft", () => syncUrl());
+            resizer.addEventListener("onCenter", () => syncUrl());
+            resizer.addEventListener("onHeight", () => syncUrl());
 
             updateDump();
             if (states.loading) loadingCb.checked = true;
             if (states.value) searchValOut.textContent = states.value;
+
+            if ((localOptions.length > 0 || states.loading || states.value || states.height || states.left || states.center) && instanceId > 0) {
+                syncUrl();
+            }
         };
 
-        document.getElementById('init-btn').onclick = () => {
-            init([
-                { id: 101, label: 'Option A', selected: true },
-                { id: 102, label: 'Option B' }
-            ]);
+        document.getElementById('init-btn').addEventListener('click', () => init());
+
+        const loadFromUrl = () => {
+            const instancesArea = document.getElementById("instances-area");
+            instancesArea.innerHTML = "";
+            instanceCounter = 0;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const groups = {};
+            const statesData = {};
+
+            for (const [key, value] of urlParams.entries()) {
+                const match = key.match(/^([voshlc])(\d+)$/);
+                if (match) {
+                    const [, type, id] = match;
+                    if (type === 'v') {
+                        if (!groups[id]) groups[id] = [];
+                        groups[id].push(value);
+                    } else {
+                        if (!statesData[id]) statesData[id] = {};
+                        const map = { o: 'loading', s: 'value', h: 'height', l: 'left', c: 'center' };
+                        statesData[id][map[type]] = type === 'o' ? value === '1' : value;
+                    }
+                }
+            }
+
+            const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(statesData)])).sort((a, b) => parseInt(a) - parseInt(b));
+
+            allIds.forEach(id => {
+                const options = (groups[id] || []).map(v => {
+                    const parts = v.split('|');
+                    if (parts.length === 3) {
+                        return { id: parts[0], label: parts[1], selected: parts[2] === '1' };
+                    }
+                    return { id: Math.random().toString(36).substr(2, 9), label: v };
+                });
+                init(options, statesData[id] || {});
+            });
         };
+
+        window.addEventListener("popstate", loadFromUrl);
+        loadFromUrl();
     </script>
 </body>
 </html>
