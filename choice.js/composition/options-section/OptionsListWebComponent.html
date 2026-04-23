@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OptionListManager Demo</title>
+    <title>OptionsList WebComponent Demo</title>
     <link rel="stylesheet" href="../../floating-label-pattern.css" />
     <link rel="stylesheet" href="OptionListManager.css" />
     <style>
@@ -70,8 +70,8 @@
     </style>
   </head>
   <body>
-    <h1>OptionListManager Demo</h1>
-    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> |
+    <h1>OptionsList WebComponent Demo</h1>
+    <button id="init-btn" class="gcp-css">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
     <div
@@ -116,7 +116,7 @@
 
     <script type="module">
       import "../../../js/CenterAndHeightResizer.js";
-      import { OptionListManager } from "./OptionListManager.js";
+      import "./options-list.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
 
@@ -154,7 +154,6 @@
         const instanceId = instanceCounter;
 
         let localOptions = [...initialOptions];
-        let manager = null;
 
         const maxHeightPresets = ["200px", "300px", "400px", "600px", ""];
         const group = document.createElement("div");
@@ -169,13 +168,23 @@
                         center="${states.center || "350px"}" 
                         ${states.height ? `height="${states.height}"` : ""}
                     >
+                        <options-list 
+                            id="ol-${instanceId}" 
+                            label="${states.label || "Search options..."}"
+                            ${states.loading ? "loading" : ""}
+                            ${states.disabled ? "disabled" : ""}
+                            value="${states.value || ""}"
+                            max-height="${states.maxHeight || ""}"
+                            show-footer="${states.showFooter !== false}"
+                            show-filter="${states.showFilter !== false}"
+                        ></options-list>
                     </center-and-height-resizer>
                 </div>
 
                 <div class="controls">
                     <strong>Search Value:</strong> 
                     <pre data-role="search-val-out" style="display: inline; padding: 2px 5px; margin: 0; background: #eee; width: auto; max-height: none;">-</pre>
-                    (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
+                    (onInputChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
                     onOk triggers: <span data-role="onok-count" style="font-weight: bold;">0</span>,
                     onCancel triggers: <span data-role="oncancel-count" style="font-weight: bold;">0</span>)
                 </div>
@@ -195,9 +204,8 @@
                         <input type="checkbox" data-role="filter-cb" checked> Show Filter
                     </label>
                     <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
-                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty</button>
-                    <button class="gcp-css white" data-role="render-btn">Set Custom Render</button>
-                    <button class="gcp-css white" data-role="string-render-btn">Set String Render</button>
+                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty (Attr)</button>
+                    <button class="gcp-css white" data-role="render-btn">Set Custom Render (Attr)</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                 </div>
 
@@ -231,10 +239,8 @@
 
         document.getElementById("instances-area").appendChild(group);
 
+        const ol = group.querySelector("options-list");
         const resizer = group.querySelector("center-and-height-resizer");
-        const parent = document.createElement("div");
-        parent.style.height = "100%";
-        resizer.appendChild(parent);
         const searchValOut = group.querySelector('[data-role="search-val-out"]');
         const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
         const onOkCountOut = group.querySelector('[data-role="onok-count"]');
@@ -249,14 +255,9 @@
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
         const emptyBtn = group.querySelector('[data-role="empty-btn"]');
         const renderBtn = group.querySelector('[data-role="render-btn"]');
-        const stringRenderBtn = group.querySelector('[data-role="string-render-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
-        const injectLabelInput = group.querySelector('[data-role="inject-label"]');
-        const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
-        const maxHeightInput = group.querySelector('[data-role="maxheight-input"]');
-        const maxHeightBtn = group.querySelector('[data-role="maxheight-btn"]');
 
         let onChangeCounter = 0;
         let onOkCounter = 0;
@@ -285,9 +286,8 @@
           url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
           url.searchParams.set(`f${instanceId}`, footerCb.checked ? "1" : "0");
           url.searchParams.set(`e${instanceId}`, filterCb.checked ? "1" : "0");
-          url.searchParams.set(`m${instanceId}`, states.maxHeight || "");
+          url.searchParams.set(`m${instanceId}`, ol.getAttribute("max-height") || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
-          url.searchParams.set(`a${instanceId}`, injectLabelInput.value || "");
 
           window.history.replaceState({}, "", url);
           debouncedPush();
@@ -297,88 +297,90 @@
           optionsDump.textContent = JSON.stringify(localOptions, null, 2);
         };
 
-        // Initialize Manager
-        manager = new OptionListManager(parent, {
-          options: localOptions,
-          loading: states.loading || false,
-          disabled: states.disabled || false,
-          showFooter: states.showFooter !== false,
-          showFilter: states.showFilter !== false,
-          maxHeight: states.maxHeight || "",
-          value: states.value || "",
-          onInputChange: (e) => {
-            const val = e.target.value;
-            onChangeCounter++;
-            onChangeCountOut.textContent = onChangeCounter;
-            searchValOut.textContent = val || "-";
-            syncUrl();
-          },
-          onItemClick: (item) => {
-            console.log("Item clicked:", item);
-            localOptions = localOptions.map((opt) => {
-              if (opt.id === item.id) return { ...opt, selected: !opt.selected };
-              return opt;
-            });
-            manager.setOptions(localOptions);
-            updateDump();
-            syncUrl();
-          },
-          onOk: () => {
-            onOkCounter++;
-            onOkCountOut.textContent = onOkCounter;
-          },
-          onCancel: () => {
-            onCancelCounter++;
-            onCancelCountOut.textContent = onCancelCounter;
-          },
+        // Initialize Options
+        ol.options = localOptions;
+
+        // Events
+        ol.addEventListener("onInputChange", (e) => {
+          const val = e.detail.value;
+          onChangeCounter++;
+          onChangeCountOut.textContent = onChangeCounter;
+          searchValOut.textContent = val || "-";
+          syncUrl();
+        });
+
+        ol.addEventListener("onItemClick", (e) => {
+          const item = e.detail.item;
+          localOptions = localOptions.map((opt) => {
+            if (opt.id === item.id) return { ...opt, selected: !opt.selected };
+            return opt;
+          });
+          ol.options = localOptions;
+          updateDump();
+          syncUrl();
+        });
+
+        ol.addEventListener("onOk", () => {
+          onOkCounter++;
+          onOkCountOut.textContent = onOkCounter;
+        });
+
+        ol.addEventListener("onCancel", () => {
+          onCancelCounter++;
+          onCancelCountOut.textContent = onCancelCounter;
         });
 
         // Handlers
         addBtn.addEventListener("click", () => {
           const id = Math.floor(Math.random() * 100000);
           localOptions.push({ id, label: "Dynamic Option " + id });
-          manager.setOptions([...localOptions]);
+          ol.options = [...localOptions];
           updateDump();
           syncUrl();
         });
 
         loadingCb.addEventListener("change", (e) => {
-          manager.setLoading(e.target.checked);
+          ol.loading = e.target.checked;
           syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
-          manager.setDisabled(e.target.checked);
+          ol.disabled = e.target.checked;
           syncUrl();
         });
 
         footerCb.addEventListener("change", (e) => {
-          manager.showFooter(e.target.checked);
+          ol.footer = e.target.checked;
           syncUrl();
         });
 
         filterCb.addEventListener("change", (e) => {
-          manager.showFilter(e.target.checked);
+          ol.filter = e.target.checked;
           syncUrl();
         });
 
-        focusBtn.addEventListener("click", () => manager.setFocus());
-        
+        focusBtn.addEventListener("click", () => ol.setFocus());
+
         emptyBtn.addEventListener("click", () => {
-          manager.setRenderEmpty(() => `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`);
+          ol.setAttribute(
+            "render-empty",
+            `const el = document.createElement('div'); el.style.padding = '40px'; el.style.textAlign = 'center'; el.style.color = '#ff5252'; el.style.fontWeight = 'bold'; el.style.border = '2px dashed #ff5252'; el.style.borderRadius = '8px'; el.textContent = '⚠️ Custom Empty (via Attr)!'; return el;`,
+          );
         });
 
         renderBtn.addEventListener("click", () => {
-          manager.setRenderItem((item) => {
+          ol.setAttribute(
+            "render-item",
+            `
             const el = document.createElement("div");
             el.className = "element";
             el.style.padding = "12px";
-            el.style.background = item.selected ? "#fff3e0" : "transparent";
-            el.style.color = item.selected ? "#e65100" : "inherit";
+            el.style.background = item.selected ? "#f3e5f5" : "transparent";
+            el.style.color = item.selected ? "#7b1fa2" : "inherit";
             el.dataset.id = String(item.id);
             
             const icon = document.createElement("span");
-            icon.textContent = item.selected ? "🔥 " : "❄️ ";
+            icon.textContent = item.selected ? "💜 " : "🤍 ";
             icon.style.marginRight = "10px";
             
             const label = document.createElement("label");
@@ -387,45 +389,36 @@
             el.appendChild(icon);
             el.appendChild(label);
             return el;
-          });
-        });
-
-        stringRenderBtn.addEventListener("click", () => {
-          manager.setRenderItem((item) => `
-            <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? '#e8f5e9' : 'white'}; color: ${item.selected ? '#2e7d32' : '#333'};">
-              <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? '✅' : '⬜'}</span>
-              <strong style="margin-left: 10px;">${item.label}</strong>
-              <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
-            </div>
-          `);
+          `,
+          );
         });
 
         clearBtn.addEventListener("click", () => {
           localOptions = [];
-          manager.setOptions([]);
+          ol.options = [];
           updateDump();
           syncUrl();
         });
 
         injectBtn.addEventListener("click", () => {
           const val = injectInput.value;
-          manager.setValue(val);
+          ol.value = val;
           searchValOut.textContent = val || "-";
           syncUrl();
         });
 
-        injectInput.addEventListener("input", () => syncUrl());
-
-        injectLabelInput.addEventListener("input", () => syncUrl());
+        const injectLabelInput = group.querySelector('[data-role="inject-label"]');
+        const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
         injectLabelBtn.addEventListener("click", () => {
-          manager.setLabel(injectLabelInput.value);
+          ol.label = injectLabelInput.value;
           syncUrl();
         });
 
+        const maxHeightInput = group.querySelector('[data-role="maxheight-input"]');
+        const maxHeightBtn = group.querySelector('[data-role="maxheight-btn"]');
         const setMH = (val) => {
           maxHeightInput.value = val || "";
-          states.maxHeight = val;
-          manager.setMaxHeight(val);
+          ol.maxHeight = val;
           syncUrl();
         };
         maxHeightBtn.addEventListener("click", () => setMH(maxHeightInput.value));
@@ -435,9 +428,6 @@
 
         const stepMH = (delta) => {
           let current = parseInt(maxHeightInput.value) || 0;
-          if (!maxHeightInput.value.includes("px") && maxHeightInput.value !== "") {
-            // if user typed just a number, assume px
-          }
           current += delta;
           if (current < 0) current = 0;
           setMH(current + "px");
@@ -456,16 +446,7 @@
         if (states.disabled) disabledCb.checked = true;
         footerCb.checked = states.showFooter !== false;
         filterCb.checked = states.showFilter !== false;
-        if (states.value) {
-          searchValOut.textContent = states.value;
-          injectInput.value = states.value;
-        }
-        if (states.label) {
-          injectLabelInput.value = states.label;
-        }
-        if (states.maxHeight) {
-          maxHeightInput.value = states.maxHeight;
-        }
+        if (states.value) searchValOut.textContent = states.value;
 
         if (
           (localOptions.length > 0 ||
@@ -485,11 +466,10 @@
 
       document.getElementById("init-btn").addEventListener("click", () => {
         init([
-          { id: 101, label: "Option A" },
-          { id: 102, label: "Option B", selected: true },
-          { id: 103, label: "Option C", selected: true },
-          { id: 104, label: "Option D" },
-          { id: 105, label: "Option E" },
+          { id: 101, label: "WebComp A" },
+          { id: 102, label: "WebComp B", selected: true },
+          { id: 103, label: "WebComp C", selected: true },
+          { id: 104, label: "WebComp D" },
         ]);
       });
 
@@ -503,7 +483,7 @@
         const statesData = {};
 
         for (const [key, value] of urlParams.entries()) {
-          const match = key.match(/^([voshlcamfed])(\d+)$/);
+          const match = key.match(/^([voshlc])(\d+)$/);
           if (match) {
             const [, type, id] = match;
             if (type === "v") {
@@ -521,7 +501,6 @@
                 h: "height",
                 l: "left",
                 c: "center",
-                a: "label",
               };
               statesData[id][map[type]] = type === "o" || type === "d" || type === "f" || type === "e" ? value === "1" : value;
             }
