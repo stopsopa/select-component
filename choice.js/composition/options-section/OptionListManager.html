@@ -156,6 +156,7 @@
         let localOptions = [...initialOptions];
         let manager = null;
 
+        const maxHeightPresets = ["200px", "300px", "400px", "600px", ""];
         const group = document.createElement("div");
         group.className = "demo-container";
 
@@ -168,7 +169,6 @@
                         center="${states.center || "350px"}" 
                         ${states.height ? `height="${states.height}"` : ""}
                     >
-                        <div data-role="manager-parent" style="height: 100%;"></div>
                     </center-and-height-resizer>
                 </div>
 
@@ -193,13 +193,25 @@
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="inject-input" placeholder="Value to inject..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
-                    <button class="gcp-css" data-role="inject-btn">Set Value</button>
-                </div>
-
-                <div class="controls">
-                    <input type="text" data-role="inject-label" placeholder="Label to inject..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px;">
-                    <button class="gcp-css" data-role="inject-label-btn">Set Label</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <input type="text" data-role="inject-input" placeholder="Value..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 80px;">
+                            <button class="gcp-css" data-role="inject-btn">Set Value</button>
+                        </div>
+                        <div style="display: flex; gap: 5px; align-items: center;">
+                            <input type="text" data-role="inject-label" placeholder="Label..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 80px;">
+                            <button class="gcp-css" data-role="inject-label-btn">Set Label</button>
+                        </div>
+                        <div style="display: flex; gap: 5px; align-items: center;" data-role="mh-presets-container">
+                            <div style="display: flex; gap: 2px;">
+                                <button class="gcp-css white" data-role="maxheight-down" style="padding: 0 8px; min-width: auto;">▼</button>
+                                <input type="text" data-role="maxheight-input" placeholder="Max height..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 80px;">
+                                <button class="gcp-css white" data-role="maxheight-up" style="padding: 0 8px; min-width: auto;">▲</button>
+                            </div>
+                            <button class="gcp-css" data-role="maxheight-btn">Set</button>
+                            ${maxHeightPresets.map((val) => `<button class="gcp-css white" data-role="mh-preset" data-value="${val}">${val || "Reset"}</button>`).join("")}
+                        </div>
+                    </div>
                 </div>
 
                 <div class="controls">
@@ -210,7 +222,10 @@
 
         document.getElementById("instances-area").appendChild(group);
 
-        const parent = group.querySelector('[data-role="manager-parent"]');
+        const resizer = group.querySelector("center-and-height-resizer");
+        const parent = document.createElement("div");
+        parent.style.height = "100%";
+        resizer.appendChild(parent);
         const searchValOut = group.querySelector('[data-role="search-val-out"]');
         const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
         const onOkCountOut = group.querySelector('[data-role="onok-count"]');
@@ -237,7 +252,6 @@
             url.searchParams.append(`v${instanceId}`, val);
           });
 
-          const resizer = group.querySelector("center-and-height-resizer");
           if (resizer) {
             url.searchParams.set(`l${instanceId}`, resizer.getAttribute("left") || "50px");
             url.searchParams.set(`c${instanceId}`, resizer.getAttribute("center") || "350px");
@@ -251,6 +265,7 @@
 
           url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
           url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
+          url.searchParams.set(`m${instanceId}`, states.maxHeight || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
 
           window.history.replaceState({}, "", url);
@@ -266,6 +281,7 @@
           options: localOptions,
           loading: states.loading || false,
           disabled: states.disabled || false,
+          maxHeight: states.maxHeight || "",
           value: states.value || "",
           onChange: (val) => {
             onChangeCounter++;
@@ -306,7 +322,7 @@
           manager.setLoading(e.target.checked);
           syncUrl();
         });
-        
+
         disabledCb.addEventListener("change", (e) => {
           manager.setDisabled(e.target.checked);
           syncUrl();
@@ -335,8 +351,33 @@
           syncUrl();
         });
 
+        const maxHeightInput = group.querySelector('[data-role="maxheight-input"]');
+        const maxHeightBtn = group.querySelector('[data-role="maxheight-btn"]');
+        const setMH = (val) => {
+          maxHeightInput.value = val || "";
+          states.maxHeight = val;
+          manager.setMaxHeight(val);
+          syncUrl();
+        };
+        maxHeightBtn.addEventListener("click", () => setMH(maxHeightInput.value));
+        group.querySelectorAll('[data-role="mh-preset"]').forEach((btn) => {
+          btn.addEventListener("click", () => setMH(btn.dataset.value));
+        });
+
+        const stepMH = (delta) => {
+          let current = parseInt(maxHeightInput.value) || 0;
+          if (!maxHeightInput.value.includes("px") && maxHeightInput.value !== "") {
+            // if user typed just a number, assume px
+          }
+          current += delta;
+          if (current < 0) current = 0;
+          setMH(current + "px");
+        };
+
+        group.querySelector('[data-role="maxheight-up"]').addEventListener("click", () => stepMH(10));
+        group.querySelector('[data-role="maxheight-down"]').addEventListener("click", () => stepMH(-10));
+
         // Watch resizer changes
-        const resizer = group.querySelector("center-and-height-resizer");
         resizer.addEventListener("onLeft", () => syncUrl());
         resizer.addEventListener("onCenter", () => syncUrl());
         resizer.addEventListener("onHeight", () => syncUrl());
@@ -388,8 +429,16 @@
               groups[id].push(value);
             } else {
               if (!statesData[id]) statesData[id] = {};
-              const map = { o: "loading", d: "disabled", s: "value", h: "height", l: "left", c: "center" };
-              statesData[id][map[type]] = (type === "o" || type === "d") ? value === "1" : value;
+              const map = {
+                o: "loading",
+                d: "disabled",
+                m: "maxHeight",
+                s: "value",
+                h: "height",
+                l: "left",
+                c: "center",
+              };
+              statesData[id][map[type]] = type === "o" || type === "d" ? value === "1" : value;
             }
           }
         }

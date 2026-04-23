@@ -1,7 +1,6 @@
 class OptionListManager {
-  propParentElement;
   propOptions;
-  propContainer;
+  propParentElement;
   propFilterContainer;
   propOptionsContainer;
   propFooterContainer;
@@ -10,8 +9,9 @@ class OptionListManager {
   propLabelElement = null;
   propOkButton;
   propCancelButton;
-  constructor(parentElement, options = {}) {
-    this.propParentElement = parentElement;
+  constructor(bindElement, options = {}) {
+    this.propParentElement = bindElement;
+    this.propParentElement.classList.add("option-list-manager");
     this.propOptions = {
       options: [],
       loading: false,
@@ -19,7 +19,16 @@ class OptionListManager {
       value: "",
       ...options
     };
+    if (this.propOptions.maxHeight) {
+      this.setMaxHeight(this.propOptions.maxHeight);
+    }
     this.render();
+  }
+  setMaxHeight(maxHeight) {
+    this.propOptions.maxHeight = maxHeight || "";
+    if (this.propParentElement) {
+      this.propParentElement.style.maxHeight = maxHeight || "none";
+    }
   }
   setDisabled(disabled) {
     this.propOptions.disabled = disabled;
@@ -51,9 +60,7 @@ class OptionListManager {
     }
   }
   render() {
-    if (!this.propContainer) {
-      this.propContainer = document.createElement("div");
-      this.propContainer.className = "option-list-manager";
+    if (!this.propFilterContainer) {
       this.propFilterContainer = document.createElement("div");
       this.propFilterContainer.className = "filter";
       const inputWrapper = document.createElement("div");
@@ -86,10 +93,9 @@ class OptionListManager {
       this.propOkButton.textContent = "OK";
       this.propFooterContainer.appendChild(this.propCancelButton);
       this.propFooterContainer.appendChild(this.propOkButton);
-      this.propContainer.appendChild(this.propFilterContainer);
-      this.propContainer.appendChild(this.propOptionsContainer);
-      this.propContainer.appendChild(this.propFooterContainer);
-      this.propParentElement.appendChild(this.propContainer);
+      this.propParentElement.appendChild(this.propFilterContainer);
+      this.propParentElement.appendChild(this.propOptionsContainer);
+      this.propParentElement.appendChild(this.propFooterContainer);
       this._bindEvents();
     }
     this._updateOptionsDisplay();

@@ -15,12 +15,12 @@ export type OptionListManagerOptions<T extends ListElement> = {
   onCancel?: () => void;
   onOk?: () => void;
   disabled?: boolean;
+  maxHeight?: string;
 };
 
 export class OptionListManager<T extends ListElement = ListElement> {
-  public propParentElement: HTMLElement;
   public propOptions: OptionListManagerOptions<T>;
-  public propContainer!: HTMLElement;
+  public propParentElement!: HTMLElement;
   public propFilterContainer!: HTMLElement;
   public propOptionsContainer!: HTMLElement;
   public propFooterContainer!: HTMLElement;
@@ -30,8 +30,9 @@ export class OptionListManager<T extends ListElement = ListElement> {
   public propOkButton!: HTMLButtonElement;
   public propCancelButton!: HTMLButtonElement;
 
-  constructor(parentElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
-    this.propParentElement = parentElement;
+  constructor(bindElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
+    this.propParentElement = bindElement;
+    this.propParentElement.classList.add("option-list-manager");
     this.propOptions = {
       options: [],
       loading: false,
@@ -40,7 +41,18 @@ export class OptionListManager<T extends ListElement = ListElement> {
       ...options,
     };
 
+    if (this.propOptions.maxHeight) {
+      this.setMaxHeight(this.propOptions.maxHeight);
+    }
+
     this.render();
+  }
+
+  public setMaxHeight(maxHeight?: string) {
+    this.propOptions.maxHeight = maxHeight || "";
+    if (this.propParentElement) {
+      this.propParentElement.style.maxHeight = maxHeight || "none";
+    }
   }
 
   public setDisabled(disabled: boolean) {
@@ -79,10 +91,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
   }
 
   public render() {
-    if (!this.propContainer) {
-      this.propContainer = document.createElement("div");
-      this.propContainer.className = "option-list-manager";
-
+    if (!this.propFilterContainer) {
       this.propFilterContainer = document.createElement("div");
       this.propFilterContainer.className = "filter";
 
@@ -127,11 +136,9 @@ export class OptionListManager<T extends ListElement = ListElement> {
       this.propFooterContainer.appendChild(this.propCancelButton);
       this.propFooterContainer.appendChild(this.propOkButton);
 
-      this.propContainer.appendChild(this.propFilterContainer);
-      this.propContainer.appendChild(this.propOptionsContainer);
-      this.propContainer.appendChild(this.propFooterContainer);
-
-      this.propParentElement.appendChild(this.propContainer);
+      this.propParentElement.appendChild(this.propFilterContainer);
+      this.propParentElement.appendChild(this.propOptionsContainer);
+      this.propParentElement.appendChild(this.propFooterContainer);
 
       this._bindEvents();
     }
