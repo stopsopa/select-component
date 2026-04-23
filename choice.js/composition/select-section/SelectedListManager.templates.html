@@ -287,7 +287,7 @@
           onFocus: function (e) {
             onFocusCounter.textContent = ++focusCounter;
           },
-          renderItem: function (item) {
+          renderItem: function (item, defaultRender) {
             const el = document.createElement("div");
             el.className = "element";
             el.dataset.id = String(item.id);
@@ -318,8 +318,8 @@
 
             return el;
           },
-          renderList: function (list) {
-            const elements = list.map((item) => this.propOptions.renderItem.call(this, item));
+          renderList: function (list, defaultRenderList) {
+            const elements = list.map((item) => this.renderItem(item));
             const groups = [];
             for (let i = 0; i < elements.length; i += 3) {
               const groupDiv = document.createElement("div");

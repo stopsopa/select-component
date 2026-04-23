@@ -6,7 +6,7 @@ export class SelectedList extends HTMLElement {
   private _attributeEvents: Record<string, any> = {};
 
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "list", "onFocus", "onClear", "onChange", "onDelete", "render-item", "render-list"];
+    return ["label", "show-input", "value", "disabled", "error", "loading", "list", "onFocus", "onClear", "onChange", "onDelete"];
   }
 
   constructor() {
@@ -48,20 +48,6 @@ export class SelectedList extends HTMLElement {
       },
     };
 
-    const renderItem = this.getAttribute("render-item");
-    if (renderItem) {
-      this._options.renderItem = (item) => {
-        return new Function("item", "manager", renderItem).call(this, item, this._manager);
-      };
-    }
-
-    const renderList = this.getAttribute("render-list");
-    if (renderList) {
-      this._options.renderList = (list) => {
-        return new Function("list", "manager", renderList).call(this, list, this._manager);
-      };
-    }
-
     ["onFocus", "onClear", "onChange", "onDelete"].forEach((attr) => {
       const val = this.getAttribute(attr);
       if (val) this._setupAttributeEvent(attr, val);
@@ -70,7 +56,7 @@ export class SelectedList extends HTMLElement {
     this._manager = new SelectedListManager(this, this._options);
   }
 
-  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+  attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     if (!this._manager) return;
 
     switch (name) {
@@ -100,27 +86,11 @@ export class SelectedList extends HTMLElement {
           console.error("Invalid JSON in list attribute", newValue);
         }
         break;
-      case "render-item":
-        if (newValue) {
-          this._manager.propOptions.renderItem = (item) => {
-            return new Function("item", "manager", newValue).call(this, item, this._manager);
-          };
+      default:
+        const eventName = name.startsWith("on") ? name : null;
+        if (eventName) {
+          this._setupAttributeEvent(name, newValue);
         }
-        this._manager.render();
-        break;
-      case "render-list":
-        if (newValue) {
-          this._manager.propOptions.renderList = (list) => {
-            return new Function("list", "manager", newValue).call(this, list, this._manager);
-          };
-        }
-        this._manager.render();
-        break;
-      case "onFocus":
-      case "onClear":
-      case "onChange":
-      case "onDelete":
-        this._setupAttributeEvent(name, newValue);
         break;
     }
   }

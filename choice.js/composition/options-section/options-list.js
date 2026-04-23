@@ -66,7 +66,7 @@ class OptionsList extends HTMLElement {
     });
     this._manager = new OptionListManager(this, this._options);
   }
-  attributeChangedCallback(name, oldValue, newValue) {
+  attributeChangedCallback(name, _oldValue, newValue) {
     if (!this._manager) return;
     switch (name) {
       case "options":

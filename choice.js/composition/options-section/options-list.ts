@@ -74,7 +74,7 @@ export class OptionsList extends HTMLElement {
     this._manager = new OptionListManager(this, this._options);
   }
 
-  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+  attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     if (!this._manager) return;
 
     switch (name) {
