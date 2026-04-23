@@ -1,12 +1,104 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>ListManager</title>
+    <link rel="stylesheet" href="ListManager.css">
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
 </head>
 <body>
-    
+    <button id="inject-a" class="gcp-css">List A</button>
+    <button id="inject-b" class="gcp-css">List B</button>
+    <button id="clear-list" class="gcp-css white">Clear</button>
+
+    <center-and-height-resizer id="resizer" left="50px" center="350px" height="300px">
+        <div id="list-container" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="filter">
+                <div class="input-wrapper">
+                    <input type="text" id="filter-input" placeholder=" ">
+                    <label for="filter-input">Filter...</label>
+                    <div class="spinner" id="filter-spinner"></div>
+                </div>
+            </div>
+            <div id="options-list-target" style="flex: 1; overflow-y: auto;"></div>
+        </div>
+    </center-and-height-resizer>
+
+    <script type="module">
+        import "../../../js/CenterAndHeightResizer.js";
+        import { ListManager } from "./ListManager.js";
+
+        let currentList = [];
+        const manager = new ListManager(document.getElementById('options-list-target'), {
+            onItemClick: (item) => {
+                currentList = currentList.map(opt => {
+                    if (opt.id === item.id) return { ...opt, selected: !opt.selected };
+                    return opt;
+                });
+                applyFilter();
+            }
+        });
+
+        const filterInput = document.getElementById('filter-input');
+        const applyFilter = () => {
+            const query = filterInput.value.toLowerCase();
+            const filtered = currentList.filter(item => 
+                item.label.toLowerCase().includes(query)
+            );
+            manager.setOptions(filtered);
+        };
+
+        filterInput.addEventListener('input', applyFilter);
+
+
+        const fruits = [
+            { id: 1, label: 'Apple' },
+            { id: 2, label: 'Banana' },
+            { id: 3, label: 'Cherry' },
+            { id: 4, label: 'Date' },
+            { id: 5, label: 'Elderberry' },
+            { id: 6, label: 'Fig' },
+            { id: 7, label: 'Grape' },
+            { id: 8, label: 'Honeydew' },
+            { id: 9, label: 'Imbe' },
+            { id: 10, label: 'Jackfruit' },
+            { id: 11, label: 'Kiwi' },
+            { id: 12, label: 'Lemon' },
+            { id: 13, label: 'Mango' },
+            { id: 14, label: 'Nectarine' },
+            { id: 15, label: 'Orange' },
+            { id: 16, label: 'Papaya' },
+            { id: 17, label: 'Quince' },
+            { id: 18, label: 'Raspberry' },
+            { id: 19, label: 'Strawberry' },
+            { id: 20, label: 'Tangerine' }
+        ];
+
+        const colors = [
+            { id: 'c1', label: 'Red' },
+            { id: 'c2', label: 'Green' },
+            { id: 'c3', label: 'Blue' },
+            { id: 'c4', label: 'Yellow' },
+            { id: 'c5', label: 'Magenta' },
+            { id: 'c6', label: 'Cyan' }
+        ];
+
+        document.getElementById('inject-a').addEventListener('click', () => {
+            currentList = [...fruits];
+            applyFilter();
+        });
+        document.getElementById('inject-b').addEventListener('click', () => {
+            currentList = [...colors];
+            applyFilter();
+        });
+        document.getElementById('clear-list').addEventListener('click', () => {
+            currentList = [];
+            applyFilter();
+        });
+
+        currentList = [...fruits];
+        applyFilter();
+    </script>
 </body>
 </html>
