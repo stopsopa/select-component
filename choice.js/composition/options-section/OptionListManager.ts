@@ -14,6 +14,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   onChange?: (value: string) => void;
   onCancel?: () => void;
   onOk?: () => void;
+  disabled?: boolean;
 };
 
 export class OptionListManager<T extends ListElement = ListElement> {
@@ -34,11 +35,17 @@ export class OptionListManager<T extends ListElement = ListElement> {
     this.propOptions = {
       options: [],
       loading: false,
+      disabled: false,
       value: "",
       ...options,
     };
 
     this.render();
+  }
+
+  public setDisabled(disabled: boolean) {
+    this.propOptions.disabled = disabled;
+    this._updateDisabledDisplay();
   }
 
   public setOptions(options: T[]) {
@@ -131,6 +138,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
     this._updateOptionsDisplay();
     this._updateLoadingDisplay();
+    this._updateDisabledDisplay();
     this.setValue(this.propOptions.value || "");
   }
 
@@ -165,6 +173,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
     });
 
     this.propOptionsContainer.addEventListener("click", (e) => {
+      if (this.propOptions.disabled) return;
       const target = e.target as HTMLElement;
       const element = target.closest(".element") as HTMLElement;
       if (element) {
@@ -206,6 +215,12 @@ export class OptionListManager<T extends ListElement = ListElement> {
   private _updateLoadingDisplay() {
     if (this.propSpinnerElement) {
       this.propSpinnerElement.classList.toggle("loading", !!this.propOptions.loading);
+    }
+  }
+
+  private _updateDisabledDisplay() {
+    if (this.propOptionsContainer) {
+      this.propOptionsContainer.classList.toggle("disabled", !!this.propOptions.disabled);
     }
   }
 }

@@ -185,6 +185,9 @@
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
                         <input type="checkbox" data-role="loading-cb"> Loading Spinner
                     </label>
+                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
+                        <input type="checkbox" data-role="disabled-cb"> Disabled State
+                    </label>
                     <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                 </div>
@@ -216,6 +219,7 @@
 
         const addBtn = group.querySelector('[data-role="add-btn"]');
         const loadingCb = group.querySelector('[data-role="loading-cb"]');
+        const disabledCb = group.querySelector('[data-role="disabled-cb"]');
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
@@ -246,6 +250,7 @@
           }
 
           url.searchParams.set(`o${instanceId}`, loadingCb.checked ? "1" : "0");
+          url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
 
           window.history.replaceState({}, "", url);
@@ -260,6 +265,7 @@
         manager = new OptionListManager(parent, {
           options: localOptions,
           loading: states.loading || false,
+          disabled: states.disabled || false,
           value: states.value || "",
           onChange: (val) => {
             onChangeCounter++;
@@ -300,6 +306,11 @@
           manager.setLoading(e.target.checked);
           syncUrl();
         });
+        
+        disabledCb.addEventListener("change", (e) => {
+          manager.setDisabled(e.target.checked);
+          syncUrl();
+        });
 
         focusBtn.addEventListener("click", () => manager.setFocus());
 
@@ -332,11 +343,13 @@
 
         updateDump();
         if (states.loading) loadingCb.checked = true;
+        if (states.disabled) disabledCb.checked = true;
         if (states.value) searchValOut.textContent = states.value;
 
         if (
           (localOptions.length > 0 ||
             states.loading ||
+            states.disabled ||
             states.value ||
             states.height ||
             states.left ||
@@ -375,8 +388,8 @@
               groups[id].push(value);
             } else {
               if (!statesData[id]) statesData[id] = {};
-              const map = { o: "loading", s: "value", h: "height", l: "left", c: "center" };
-              statesData[id][map[type]] = type === "o" ? value === "1" : value;
+              const map = { o: "loading", d: "disabled", s: "value", h: "height", l: "left", c: "center" };
+              statesData[id][map[type]] = (type === "o" || type === "d") ? value === "1" : value;
             }
           }
         }

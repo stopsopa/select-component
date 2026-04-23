@@ -15,10 +15,15 @@ class OptionListManager {
     this.propOptions = {
       options: [],
       loading: false,
+      disabled: false,
       value: "",
       ...options
     };
     this.render();
+  }
+  setDisabled(disabled) {
+    this.propOptions.disabled = disabled;
+    this._updateDisabledDisplay();
   }
   setOptions(options) {
     this.propOptions.options = options;
@@ -89,6 +94,7 @@ class OptionListManager {
     }
     this._updateOptionsDisplay();
     this._updateLoadingDisplay();
+    this._updateDisabledDisplay();
     this.setValue(this.propOptions.value || "");
   }
   _bindEvents() {
@@ -118,6 +124,7 @@ class OptionListManager {
       }
     });
     this.propOptionsContainer.addEventListener("click", (e) => {
+      if (this.propOptions.disabled) return;
       const target = e.target;
       const element = target.closest(".element");
       if (element) {
@@ -152,6 +159,11 @@ class OptionListManager {
   _updateLoadingDisplay() {
     if (this.propSpinnerElement) {
       this.propSpinnerElement.classList.toggle("loading", !!this.propOptions.loading);
+    }
+  }
+  _updateDisabledDisplay() {
+    if (this.propOptionsContainer) {
+      this.propOptionsContainer.classList.toggle("disabled", !!this.propOptions.disabled);
     }
   }
 }
