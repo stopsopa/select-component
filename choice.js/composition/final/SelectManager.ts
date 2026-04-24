@@ -8,5 +8,8 @@
 // select-section/SelectedListManager.ts
 <%= d.render('../select-section/SelectedListManager.ts') %>
 
+// unbind/clickOutside.ts
+<%= d.render('../unbind/clickOutside.ts') %>
+
 // final library
 <%= d.render('./SelectManager.lib.ts') %>
