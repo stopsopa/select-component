@@ -5,13 +5,15 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
+export NODE_OPTIONS="";
+
 FILES=("$@")
 
 while true; do
     echo "Running transpilation for ${FILES[*]}..."
     # printf "%s\n" "${FILES[@]}" | NODE_OPTIONS="" DEBUG=true node es.ts
 
-RENDERED="$(NODE_OPTIONS="" node render.ts choice.js/composition/final/SelectManager.ts)"    
+RENDERED="$(node render.ts choice.js/composition/final/SelectManager.ts 2>&1)"    
 
 if [ "${?}" != "0" ]; then
   cat <<EEE
@@ -24,7 +26,7 @@ EEE
   exit 1
 fi
 
-cat <<EEE | NODE_OPTIONS="" DEBUG=true node es.ts
+cat <<EEE | DEBUG=true node es.ts
 $(printf "%s\n" "${FILES[@]}")
 ${RENDERED}
 EEE

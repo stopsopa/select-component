@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ContainerManager Demo</title>
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
+    <link rel="stylesheet" href="https://stopsopa.github.io/pages/js/popper/html-vanilla/popover.css" />
+    <style>
+      .show-target {
+        box-shadow: inset 0 0 11px 0 rgb(107 153 21);
+      }
+      .show-popover {
+        box-shadow: inset 0 0 11px 0 rgb(151, 21, 153);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ContainerManager Demo</h1>
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button>
+
+    <div id="instances-area"></div>
+
+    <script type="module">
+      import "../../../js/CenterAndHeightResizer.js";
+      import { ContainerManager } from "./ContainerManager.js";
+
+      let instanceCounter = 0;
+
+      document.getElementById("init-btn").addEventListener("click", () => {
+        instanceCounter++;
+        const instanceId = instanceCounter;
+
+        const group = document.createElement("div");
+        group.className = "demo-container";
+
+        group.innerHTML = `
+                <h3>Instance #${instanceId}</h3>
+                <div class="controls">
+                    <button class="gcp-css btn-show">Show</button>
+                    <button class="gcp-css btn-hide">Hide</button>
+                    <button class="gcp-css white btn-parent">Log Parent</button>
+                    <button class="gcp-css white btn-target">Log Target</button>
+                    <button class="gcp-css white btn-popover">Log Popover</button>
+                    <button class="gcp-css white btn-destroy">Destroy</button>
+                    <select class="position-select" style="padding: 5px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;">
+                        <option value="cover-bottom">cover-bottom</option>
+                        <option value="bottom">bottom</option>
+                        <option value="top">top</option>
+                        <option value="left">left</option>
+                        <option value="right">right</option>
+                    </select>
+                    <input type="text" class="offset-input" value="0px" placeholder="offset (e.g. 10px)" style="padding: 5px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; width: 120px;" />
+                    <button class="gcp-css white btn-offset-up" style="min-width: auto; padding: 0 8px;">▲</button>
+                    <button class="gcp-css white btn-offset-down" style="min-width: auto; padding: 0 8px;">▼</button>           
+                </div>
+                <center-and-height-resizer left="50px" center="350px">
+                    <div></div>
+                </center-and-height-resizer>
+            `;
+
+        document.getElementById("instances-area").appendChild(group);
+
+        const parentDiv = group.querySelector("center-and-height-resizer > div");
+        const manager = new ContainerManager(parentDiv);
+
+        const target = manager.getTarget();
+        target.classList.add("show-target");
+        target.innerHTML = `<textarea>Target textarea</textarea>`;
+
+        const popover = manager.getPopover();
+        popover.classList.add("show-popover");
+        popover.innerHTML = `<textarea>Resizable textarea</textarea>`;
+
+        group.querySelector(".btn-show").addEventListener("click", () => manager.show());
+        group.querySelector(".btn-hide").addEventListener("click", () => manager.hide());
+        group.querySelector(".btn-parent").addEventListener("click", () => console.log("Parent:", manager.getParent()));
+        group.querySelector(".btn-target").addEventListener("click", () => console.log("Target:", manager.getTarget()));
+        group
+          .querySelector(".btn-popover")
+          .addEventListener("click", () => console.log("Popover:", manager.getPopover()));
+
+        group.querySelector(".btn-destroy").addEventListener("click", () => {
+          manager.destroy();
+          group.remove();
+        });
+
+        group.querySelector(".position-select").addEventListener("change", (e) => {
+          manager.setPosition(e.target.value);
+        });
+
+        const offsetInput = group.querySelector(".offset-input");
+        const updateOffset = (val) => {
+          offsetInput.value = val;
+          manager.setOffset(val);
+        };
+        const stepOffset = (delta) => {
+          let current = parseInt(offsetInput.value) || 0;
+          updateOffset(current + delta + "px");
+        };
+
+        offsetInput.addEventListener("input", (e) => updateOffset(e.target.value));
+        group.querySelector(".btn-offset-up").addEventListener("click", () => stepOffset(1));
+        group.querySelector(".btn-offset-down").addEventListener("click", () => stepOffset(-1));
+      });
+    </script>
+  </body>
+</html>

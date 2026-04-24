@@ -51,9 +51,9 @@ export default function produceRender<P extends object = any>(parentFile: string
         render: produceRender(filePath, permaData),
       });
     } catch (e) {
-      console.error(`_.template() error in produceRender() for ${file}`, e);
+      console.error(`produceRender() error: in produceRender() for ${file}`, e);
 
-      throw new Error(`_.template() error in produceRender() for ${file}`);
+      throw new Error(`produceRender() error: in produceRender() for ${file}`);
     }
   };
 }
