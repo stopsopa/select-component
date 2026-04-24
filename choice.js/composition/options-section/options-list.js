@@ -147,7 +147,7 @@ class OptionsList extends HTMLElement {
   setOptions(options) {
     // we don't necessarily want to stringify options back to attribute for performance and avoiding circularity
     // but we can if we want to stay in sync. SelectedList doesn't seem to do it for 'list'.
-    // this.setAttribute("options", JSON.stringify(options)); 
+    // this.setAttribute("options", JSON.stringify(options));
     this._manager?.setOptions(options);
   }
   updateOptions(options) {

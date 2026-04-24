@@ -1,8 +1,8 @@
-import { SelectedListManager, ListElement, SelectedListManagerOptions } from "./SelectedListManager.js";
+import { SelectedListManager, SelectedListElement, SelectedListManagerOptions } from "./SelectedListManager.js";
 
 export class SelectedList extends HTMLElement {
-  private _manager: SelectedListManager<ListElement> | null = null;
-  private _options: SelectedListManagerOptions<ListElement> = {};
+  private _manager: SelectedListManager<SelectedListElement> | null = null;
+  private _options: SelectedListManagerOptions<SelectedListElement> = {};
   private _attributeEvents: Record<string, any> = {};
 
   static get observedAttributes() {
@@ -115,7 +115,7 @@ export class SelectedList extends HTMLElement {
   }
 
   // Proxied methods
-  public updateList(list: ListElement[]) {
+  public updateList(list: SelectedListElement[]) {
     this._manager?.updateList(list);
   }
 
@@ -151,11 +151,11 @@ export class SelectedList extends HTMLElement {
     this._manager?.setShowInput(state);
   }
 
-  public setRenderItem(renderer?: (item: ListElement, defaultRender: (item: ListElement) => HTMLElement) => HTMLElement) {
+  public setRenderItem(renderer?: (item: SelectedListElement, defaultRender: (item: SelectedListElement) => HTMLElement) => HTMLElement) {
     this._manager?.setRenderItem(renderer);
   }
 
-  public setRenderList(renderer?: (list: ListElement[], defaultRender: (list: ListElement[]) => HTMLElement[]) => HTMLElement[]) {
+  public setRenderList(renderer?: (list: SelectedListElement[], defaultRender: (list: SelectedListElement[]) => HTMLElement[]) => HTMLElement[]) {
     this._manager?.setRenderList(renderer);
   }
 
@@ -168,7 +168,7 @@ export class SelectedList extends HTMLElement {
     return this._manager?.propList || [];
   }
 
-  set list(val: ListElement[]) {
+  set list(val: SelectedListElement[]) {
     this.updateList(val);
   }
 

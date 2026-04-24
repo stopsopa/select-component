@@ -1,11 +1,11 @@
-export type ListElement = {
+export type OptionsListElement = {
   id: number | string;
   label: string;
   selected?: boolean;
   [key: string]: any;
 };
 
-export type OptionListManagerOptions<T extends ListElement> = {
+export type OptionListManagerOptions<T extends OptionsListElement> = {
   options?: T[];
   loading?: boolean;
   value?: string;
@@ -25,7 +25,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
 };
 
 
-export class OptionListManager<T extends ListElement = ListElement> {
+export class OptionListManager<T extends OptionsListElement = OptionsListElement> {
   public propOptions: OptionListManagerOptions<T>;
   public propParentElement!: HTMLElement;
   public propFilterContainer!: HTMLElement;

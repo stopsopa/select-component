@@ -1,10 +1,10 @@
-export type ListElement = {
+export type SelectedListElement = {
   id: number | string;
   label: string;
   [key: string]: any;
 };
 
-export type SelectedListManagerOptions<T extends ListElement> = {
+export type SelectedListManagerOptions<T extends SelectedListElement> = {
   list?: T[];
   showInput?: boolean;
   value?: string;
@@ -21,7 +21,7 @@ export type SelectedListManagerOptions<T extends ListElement> = {
   loading?: boolean;
 };
 
-export class SelectedListManager<T extends ListElement> {
+export class SelectedListManager<T extends SelectedListElement> {
   public propParentElement: HTMLElement;
   public propContainer!: HTMLElement;
   public propFlexList!: HTMLElement;

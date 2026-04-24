@@ -1,8 +1,8 @@
-import { OptionListManager, ListElement, OptionListManagerOptions } from "./OptionListManager.js";
+import { OptionListManager, OptionsListElement, OptionListManagerOptions } from "./OptionListManager.js";
 
 export class OptionsList extends HTMLElement {
-  private _manager: OptionListManager<ListElement> | null = null;
-  private _options: OptionListManagerOptions<ListElement> = {};
+  private _manager: OptionListManager<OptionsListElement> | null = null;
+  private _options: OptionListManagerOptions<OptionsListElement> = {};
   private _attributeEvents: Record<string, any> = {};
 
   static get observedAttributes() {
@@ -161,14 +161,14 @@ export class OptionsList extends HTMLElement {
     this._manager?.showFilter(show);
   }
 
-  public setOptions(options: ListElement[]) {
+  public setOptions(options: OptionsListElement[]) {
     // we don't necessarily want to stringify options back to attribute for performance and avoiding circularity
     // but we can if we want to stay in sync. SelectedList doesn't seem to do it for 'list'.
-    // this.setAttribute("options", JSON.stringify(options)); 
+    // this.setAttribute("options", JSON.stringify(options));
     this._manager?.setOptions(options);
   }
 
-  public updateOptions(options: ListElement[]) {
+  public updateOptions(options: OptionsListElement[]) {
     this.setOptions(options);
   }
 
@@ -192,11 +192,18 @@ export class OptionsList extends HTMLElement {
     this._manager?.setRenderEmpty(renderer);
   }
 
-  public setRenderItem(renderer?: (item: ListElement, defaultRender: (item: ListElement) => string | HTMLElement) => string | HTMLElement) {
+  public setRenderItem(
+    renderer?: (item: OptionsListElement, defaultRender: (item: OptionsListElement) => string | HTMLElement) => string | HTMLElement,
+  ) {
     this._manager?.setRenderItem(renderer);
   }
 
-  public setRenderList(renderer?: (list: ListElement[], defaultRender: (list: ListElement[]) => (string | HTMLElement)[]) => (string | HTMLElement)[]) {
+  public setRenderList(
+    renderer?: (
+      list: OptionsListElement[],
+      defaultRender: (list: OptionsListElement[]) => (string | HTMLElement)[],
+    ) => (string | HTMLElement)[],
+  ) {
     this._manager?.setRenderList(renderer);
   }
 
@@ -225,7 +232,7 @@ export class OptionsList extends HTMLElement {
     return this._manager?.propOptions.options || [];
   }
 
-  set options(val: ListElement[]) {
+  set options(val: OptionsListElement[]) {
     this.setOptions(val);
   }
 
