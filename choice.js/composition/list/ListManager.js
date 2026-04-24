@@ -11,10 +11,10 @@ class ListManager {
     };
     this.render();
   }
-  setHighlightedId(id) {
-    this.propHighlightedId = id;
+  itemPick(id) {
+    this.propHighlightedId = id ?? null;
     this._updateOptionsDisplay();
-    if (id !== null) {
+    if (this.propHighlightedId !== null) {
       this._scrollToHighlighted();
     }
   }

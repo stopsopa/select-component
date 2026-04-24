@@ -8,11 +8,30 @@
     <link rel="stylesheet" href="../../floating-label-pattern.css" />
 </head>
 <body>
+    <div id="event-counters" style="margin-bottom: 20px; padding: 10px; background: #f0f0f0; border-radius: 4px; font-family: monospace; display: flex; gap: 15px; flex-wrap: wrap;">
+        <div>Pick: <span id="count-pick">0</span></div>
+        <div>Filter: <span id="count-filter">0</span></div>
+        <div>List Load: <span id="count-load">0</span></div>
+        <div>Max-Height: <span id="count-mh">0</span></div>
+        <div>Highlight: <span id="count-highlight">0</span></div>
+    </div>
     <button id="inject-a" class="gcp-css">List A</button>
     <button id="inject-b" class="gcp-css">List B</button>
     <button id="inject-c" class="gcp-css">List C</button>
     <button id="inject-d" class="gcp-css">List D</button>
     <button id="clear-list" class="gcp-css white">Clear</button>
+
+    <div style="margin-top: 10px; margin-bottom: 20px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <span>Highlight ID:</span>
+        <button class="gcp-css white id-pick" data-id="1">1</button>
+        <button class="gcp-css white id-pick" data-id="10">10</button>
+        <button class="gcp-css white id-pick" data-id="c1">c1</button>
+        <button class="gcp-css white id-pick" data-id="c2">c2</button>
+        <button class="gcp-css white id-pick" data-id="x1">x1</button>
+        <button class="gcp-css white id-pick" data-id="x2">x2</button>
+        <button class="gcp-css white id-pick" data-id="22">22</button>
+        <button id="clear-highlight" class="gcp-css white">Clear Highlight</button>
+    </div>
 
 
     <center-and-height-resizer id="resizer" left="50px" center="350px" height="300px">
@@ -45,15 +64,28 @@
         let currentList = [];
         let activeListName = '';
 
+        const counters = {
+            pick: 0,
+            filter: 0,
+            load: 0,
+            mh: 0,
+            highlight: 0
+        };
+
+        const updateCounter = (key) => {
+            counters[key]++;
+            document.getElementById(`count-${key}`).textContent = counters[key];
+        };
+
         const fruits = [
-            { id: 1, label: 'Apple' },
-            { id: 2, label: 'Banana' },
-            { id: 3, label: 'Cherry' },
-            { id: 4, label: 'Date' },
-            { id: 5, label: 'Elderberry' },
-            { id: 10, label: 'Jackfruit' },
-            { id: 11, label: 'Kiwi' },
-            { id: 12, label: 'Lemon' }
+            { id: 1, label: 'Apple (1)' },
+            { id: 2, label: 'Banana (2)' },
+            { id: 3, label: 'Cherry (3)' },
+            { id: 4, label: 'Date (4)' },
+            { id: 5, label: 'Elderberry (5)' },
+            { id: 10, label: 'Jackfruit (10)' },
+            { id: 11, label: 'Kiwi (11)' },
+            { id: 12, label: 'Lemon (12)' }
         ];
 
         const colors = [
@@ -70,7 +102,7 @@
             { id: 22, label: 'Apple (22)' },
             { id: 10, label: 'Jackfruit (10)' },
             { id: 4, label: 'Date (4)' },
-            { id: 0, label: 'Orange' },
+            { id: 0, label: 'Orange (0)' },
             { id: 2, label: 'Banana (2)' },
             { id: 12, label: 'Lemon (12)' },
             { id: 1, label: 'Apple (1)' },
@@ -114,11 +146,12 @@
 
         const manager = new ListManager(document.getElementById('options-list-target'), {
             onItemPick: (item) => {
+                updateCounter('pick');
                 currentList = currentList.map(opt => {
                     if (opt.id === item.id) return { ...opt, selected: !opt.selected };
                     return opt;
                 });
-                manager.setHighlightedId(item.id);
+                manager.itemPick(item.id);
                 applyFilter();
                 syncUrl();
                 filterInput.focus();
@@ -131,14 +164,15 @@
             if (manager.propHighlightedId !== null) {
                 const stillExists = currentList.some(item => String(item.id) === String(manager.propHighlightedId));
                 if (!stillExists) {
-                    manager.setHighlightedId(null);
+                    manager.itemPick(null);
                 } else {
-                    manager.setHighlightedId(manager.propHighlightedId);
+                    manager.itemPick(manager.propHighlightedId);
                 }
             }
         };
 
         filterInput.addEventListener('input', () => {
+            updateCounter('filter');
             applyFilter();
             syncUrl();
         });
@@ -150,25 +184,29 @@
 
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                if (currentIndex === -1) manager.setHighlightedId(options[0].id);
-                else if (currentIndex < options.length - 1) manager.setHighlightedId(options[currentIndex + 1].id);
+                if (currentIndex === -1) manager.itemPick(options[0].id);
+                else if (currentIndex < options.length - 1) manager.itemPick(options[currentIndex + 1].id);
+                updateCounter('highlight');
                 syncUrl();
             } else if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                if (currentIndex === -1) manager.setHighlightedId(options[options.length - 1].id);
-                else if (currentIndex > 0) manager.setHighlightedId(options[currentIndex - 1].id);
+                if (currentIndex === -1) manager.itemPick(options[options.length - 1].id);
+                else if (currentIndex > 0) manager.itemPick(options[currentIndex - 1].id);
+                updateCounter('highlight');
                 syncUrl();
             } else if (e.key === 'Enter') {
                 e.preventDefault();
                 manager.triggerItemPick();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
-                manager.setHighlightedId(null);
+                manager.itemPick(null);
+                updateCounter('highlight');
                 syncUrl();
             }
         });
 
         const loadList = (name) => {
+            updateCounter('load');
             activeListName = name;
             const baseList = lists[name] || [];
             // Preserve selection if switching lists
@@ -183,13 +221,29 @@
         document.getElementById('inject-c').addEventListener('click', () => loadList('C'));
         document.getElementById('inject-d').addEventListener('click', () => loadList('D'));
         document.getElementById('clear-list').addEventListener('click', () => {
+            updateCounter('load');
             activeListName = '';
             currentList = [];
             applyFilter();
             syncUrl();
         });
 
+        document.getElementById('clear-highlight').addEventListener('click', () => {
+            manager.itemPick();
+            updateCounter('highlight');
+            syncUrl();
+        });
+        document.querySelectorAll('.id-pick').forEach(btn => {
+            btn.addEventListener('click', () => {
+                manager.itemPick(btn.dataset.id);
+                updateCounter('highlight');
+                syncUrl();
+                filterInput.focus();
+            });
+        });
+
         const setMaxHeight = (val) => {
+            updateCounter('mh');
             manager.setMaxHeight(val);
             maxHeightInput.value = val || '';
             syncUrl();
@@ -218,7 +272,7 @@
             }
 
             applyFilter();
-            if (highlight) manager.setHighlightedId(highlight);
+            if (highlight) manager.itemPick(highlight);
         };
 
         loadFromUrl();

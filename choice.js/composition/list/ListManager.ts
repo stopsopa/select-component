@@ -26,10 +26,10 @@ export class ListManager<T extends ListElement = ListElement> {
     this.render();
   }
 
-  public setHighlightedId(id: string | number | null) {
-    this.propHighlightedId = id;
+  public itemPick(id?: string | number | null) {
+    this.propHighlightedId = id ?? null;
     this._updateOptionsDisplay();
-    if (id !== null) {
+    if (this.propHighlightedId !== null) {
       this._scrollToHighlighted();
     }
   }
