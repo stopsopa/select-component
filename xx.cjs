@@ -63,6 +63,7 @@ cat <<EEE
   choice.js/composition/list-up-down-navi/ListManager.ts \${S}
   choice.js/composition/final/SelectManager.ts \${S}
   choice.js/composition/container/ContainerManager.ts \${S}
+  choice.js/composition/unbind/clickOutside.ts \${S}
   choice.js/composition/final/SelectManager.lib.ts \${S}
   js/CenterAndHeightResizer.ts
 
