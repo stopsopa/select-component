@@ -5,18 +5,59 @@ first of all, for entire length of this conversation and plan, stick to grug ski
 
 # Plan
 
-I would like to create SelectManager.ts class which will combine logic of two other managers:
+I would like to create SelectManager.lib.ts class which will combine logic of few other managers:
 
+- choice.js/composition/container/ContainerManager.ts
 - choice.js/composition/select-section/SelectedListManager.ts
 - choice.js/composition/options-section/OptionListManager.ts
 
-We will have to create two divs
-One for SelectedListManager
-One for OptionListManager
+and utility:
 
-So our component will have to create <div> and inside it another two divs and launch one for SelectedListManager and one for OptionListManager.
+- choice.js/composition/unbind/clickOutside.ts
 
-I will have to 
+In it's constructor I would like first initialize ContainerManager.ts against given div
+and then use SelectedListManager.ts on .getTarget()
+and OptionListManager.ts on .getTarget()
+
+Then our manager should also expose field 'selected' which would hold reference to SelectedListManager instance
+and field 'options' which would hold reference to OptionListManager instance
+also
+field 'container' which would hold reference to ContainerManager instance
+
+Also I would like to show popover (ContainerManager.ts -> .show()) on SelectedListManager.ts -> onFocus()
+
+and hide popover on clickOutside.ts event bound to .getTarget()
+
+SelectManager.lib.ts should have destroy method which would call all destroy methods of all managers.
+and it would also unbind event from clickOutside.ts
+
+before destroying entire html from initial dom element used in SelectManager.lib.ts constructor
+
+
+
 
 # build process
+
+Work in 
+choice.js/composition/final/SelectManager.lib.ts
+
+Never touch
+SelectManager.lib.js
+SelectManager.rendered.js
+SelectManager.rendered.ts
+these are stages of final build to:
+SelectManager.rendered.js
+
+and when creating choice.js/composition/final/demo.html load
+
+choice.js/composition/final/SelectManager.rendered.js
+
+also assume there is always working transpiler which assembles  choice.js/composition/final/SelectManager.rendered.ts by combining libraries using template choice.js/composition/final/SelectManager.ts into choice.js/composition/final/SelectManager.rendered.ts
+
+after that choice.js/composition/final/SelectManager.rendered.ts is transpiled to choice.js/composition/final/SelectManager.lib.js
+
+so in demo.html use load ESM choice.js/composition/final/SelectManager.lib.js
+
+in demo also create "Initialize Component" but also create button in each block around particular instance the button to destroy that instance and test .destroy() methods
+
 
