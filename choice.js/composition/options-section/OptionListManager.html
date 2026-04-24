@@ -202,6 +202,7 @@
                     <button class="gcp-css white" data-role="string-render-btn">Set String Render</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                     <button class="gcp-css white" data-role="attach-window-btn">Attach Arrows to Window</button>
+                    <button class="gcp-css white" data-role="detach-window-btn">Detach Arrows from Window</button>
                 </div>
 
                 <div class="controls">
@@ -257,6 +258,7 @@
         const stringRenderBtn = group.querySelector('[data-role="string-render-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const attachWindowBtn = group.querySelector('[data-role="attach-window-btn"]');
+        const detachWindowBtn = group.querySelector('[data-role="detach-window-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
         const injectLabelInput = group.querySelector('[data-role="inject-label"]');
@@ -423,17 +425,12 @@
           syncUrl();
         });
 
-        let windowArrowsAttached = false;
         attachWindowBtn.addEventListener("click", () => {
-          if (windowArrowsAttached) {
-            manager.detachArrowsUpAndDown(window);
-            attachWindowBtn.textContent = "Attach Arrows to Window";
-            windowArrowsAttached = false;
-          } else {
-            manager.attachArrowsUpAndDown(window);
-            attachWindowBtn.textContent = "Detach Arrows from Window";
-            windowArrowsAttached = true;
-          }
+          manager.attachArrowsUpAndDown(window);
+        });
+
+        detachWindowBtn.addEventListener("click", () => {
+          manager.detachArrowsUpAndDown(window);
         });
 
         injectBtn.addEventListener("click", () => {
