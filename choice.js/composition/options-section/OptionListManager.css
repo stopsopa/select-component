@@ -162,6 +162,11 @@
         border-left-color: var(--gcp-css-primary, #1a73e8);
         color: var(--gcp-css-primary, #1a73e8);
       }
+
+      &.highlighted {
+        outline: 2px solid var(--gcp-css-primary, #1a73e8);
+        outline-offset: -2px;
+      }
     }
 
     .empty-msg {

@@ -170,6 +170,9 @@ class OptionsList extends HTMLElement {
   setFocus() {
     this._manager?.setFocus();
   }
+  itemPick(id) {
+    this._manager?.itemPick(id);
+  }
   render() {
     this._manager?.render();
   }
@@ -221,6 +224,12 @@ class OptionsList extends HTMLElement {
   }
   set filter(val) {
     this.showFilter(val);
+  }
+  get highlight() {
+    return this._manager?.propHighlightedId ?? null;
+  }
+  set highlight(val) {
+    this.itemPick(val);
   }
 }
 customElements.define("options-list", OptionsList);

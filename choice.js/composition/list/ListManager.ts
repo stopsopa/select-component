@@ -34,7 +34,7 @@ export class ListManager<T extends ListElement = ListElement> {
     }
   }
 
-  public triggerItemPick() {
+  public pickHighlighted() {
     if (this.propHighlightedId === null) return;
     const item = this.propOptions.options?.find((opt) => String(opt.id) === String(this.propHighlightedId));
     if (item && this.propOptions.onItemPick) {

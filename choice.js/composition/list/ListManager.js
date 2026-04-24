@@ -18,7 +18,7 @@ class ListManager {
       this._scrollToHighlighted();
     }
   }
-  triggerItemPick() {
+  pickHighlighted() {
     if (this.propHighlightedId === null) return;
     const item = this.propOptions.options?.find((opt) => String(opt.id) === String(this.propHighlightedId));
     if (item && this.propOptions.onItemPick) {

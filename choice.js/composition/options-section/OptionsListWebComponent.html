@@ -288,6 +288,7 @@
           url.searchParams.set(`e${instanceId}`, filterCb.checked ? "1" : "0");
           url.searchParams.set(`m${instanceId}`, ol.getAttribute("max-height") || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
+          url.searchParams.set(`y${instanceId}`, ol.highlight || "");
 
           window.history.replaceState({}, "", url);
           debouncedPush();
@@ -462,6 +463,10 @@
         ) {
           syncUrl();
         }
+
+        if (states.highlight) {
+          ol.itemPick(states.highlight);
+        }
       };
 
       document.getElementById("init-btn").addEventListener("click", () => {
@@ -483,7 +488,7 @@
         const statesData = {};
 
         for (const [key, value] of urlParams.entries()) {
-          const match = key.match(/^([voshlc])(\d+)$/);
+          const match = key.match(/^([voshlcamfedy])(\d+)$/);
           if (match) {
             const [, type, id] = match;
             if (type === "v") {
@@ -501,6 +506,7 @@
                 h: "height",
                 l: "left",
                 c: "center",
+                y: "highlight",
               };
               statesData[id][map[type]] = type === "o" || type === "d" || type === "f" || type === "e" ? value === "1" : value;
             }

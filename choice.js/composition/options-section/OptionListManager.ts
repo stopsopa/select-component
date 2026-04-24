@@ -35,6 +35,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
   public propLabelElement: HTMLLabelElement | null = null;
   public propOkButton!: HTMLButtonElement;
   public propCancelButton!: HTMLButtonElement;
+  public propHighlightedId: string | number | null = null;
 
   constructor(bindElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
     this.propParentElement = bindElement;
@@ -102,6 +103,30 @@ export class OptionListManager<T extends ListElement = ListElement> {
     this.propOptions.label = label;
     if (this.propLabelElement) {
       this.propLabelElement.textContent = label || "";
+    }
+  }
+
+  public itemPick(id?: string | number | null) {
+    this.propHighlightedId = id ?? null;
+    this._updateOptionsDisplay();
+    if (this.propHighlightedId !== null) {
+      this._scrollToHighlighted();
+    }
+  }
+
+  public pickHighlighted() {
+    if (this.propHighlightedId === null) return;
+    const item = this.propOptions.options?.find((opt) => String(opt.id) === String(this.propHighlightedId));
+    if (item && this.propOptions.onItemPick) {
+      this.propOptions.onItemPick(item);
+    }
+  }
+
+  private _scrollToHighlighted() {
+    if (this.propHighlightedId === null) return;
+    const el = this.propOptionsContainer.querySelector(`.element[data-id="${this.propHighlightedId}"]`) as HTMLElement;
+    if (el) {
+      el.scrollIntoView({ block: "nearest" });
     }
   }
 
@@ -220,7 +245,36 @@ export class OptionListManager<T extends ListElement = ListElement> {
       });
 
       this.propInputElement.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || (e.key === "Backspace" && this.propInputElement!.value === "")) {
+        const options = this.propOptions.options || [];
+        const currentIndex = options.findIndex((item) => String(item.id) === String(this.propHighlightedId));
+
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (currentIndex === -1) {
+            this.itemPick(options[0]?.id);
+          } else if (currentIndex < options.length - 1) {
+            this.itemPick(options[currentIndex + 1].id);
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (currentIndex === -1) {
+            this.itemPick(options[options.length - 1]?.id);
+          } else if (currentIndex > 0) {
+            this.itemPick(options[currentIndex - 1].id);
+          }
+        } else if (e.key === "Enter") {
+          if (this.propHighlightedId !== null) {
+            e.preventDefault();
+            this.pickHighlighted();
+          } else if (this.propInputElement!.value === "") {
+            if (this.propOptions.onInputChange) {
+              this.propOptions.onInputChange(e);
+            }
+          }
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          this.itemPick(null);
+        } else if (e.key === "Backspace" && this.propInputElement!.value === "") {
           if (this.propOptions.onInputChange) {
             this.propOptions.onInputChange(e);
           }
@@ -248,7 +302,9 @@ export class OptionListManager<T extends ListElement = ListElement> {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
         if (item && this.propOptions.onItemPick) {
+          this.itemPick(item.id);
           this.propOptions.onItemPick(item);
+          this.setFocus();
         }
       }
     });
@@ -293,6 +349,13 @@ export class OptionListManager<T extends ListElement = ListElement> {
         } else {
           el.classList.remove("selected");
         }
+
+        if (this.propHighlightedId !== null && String(dataItem.id) === String(this.propHighlightedId)) {
+          el.classList.add("highlighted");
+        } else {
+          el.classList.remove("highlighted");
+        }
+
         container.appendChild(el);
       }
     });

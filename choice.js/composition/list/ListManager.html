@@ -89,12 +89,12 @@
         ];
 
         const colors = [
+            { id: 'c2', label: 'Cyan (c2)' },
             { id: 1, label: 'Red (ID 1)' },
             { id: 2, label: 'Green (ID 2)' },
             { id: 3, label: 'Blue (ID 3)' },
             { id: 10, label: 'Yellow (ID 10)' },
             { id: 'c1', label: 'Magenta (c1)' },
-            { id: 'c2', label: 'Cyan (c2)' },
             { id: 'c3', label: 'Black (c3)' }
         ];
 
@@ -196,7 +196,7 @@
                 syncUrl();
             } else if (e.key === 'Enter') {
                 e.preventDefault();
-                manager.triggerItemPick();
+                manager.pickHighlighted();
             } else if (e.key === 'Escape') {
                 e.preventDefault();
                 manager.itemPick(null);

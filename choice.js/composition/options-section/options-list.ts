@@ -195,6 +195,10 @@ export class OptionsList extends HTMLElement {
     this._manager?.setFocus();
   }
 
+  public itemPick(id?: string | number | null) {
+    this._manager?.itemPick(id);
+  }
+
   public render() {
     this._manager?.render();
   }
@@ -262,6 +266,14 @@ export class OptionsList extends HTMLElement {
 
   set filter(val: boolean) {
     this.showFilter(val);
+  }
+
+  get highlight() {
+    return this._manager?.propHighlightedId ?? null;
+  }
+
+  set highlight(val: string | number | null) {
+    this.itemPick(val);
   }
 }
 

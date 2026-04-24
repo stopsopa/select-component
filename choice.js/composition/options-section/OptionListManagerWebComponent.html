@@ -293,6 +293,7 @@
           url.searchParams.set(`m${instanceId}`, ol.maxHeight || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
           url.searchParams.set(`a${instanceId}`, injectLabelInput.value || "");
+          url.searchParams.set(`y${instanceId}`, ol.highlight || "");
 
           window.history.replaceState({}, "", url);
           debouncedPush();
@@ -468,6 +469,10 @@
         ) {
           syncUrl();
         }
+
+        if (states.highlight) {
+          ol.itemPick(states.highlight);
+        }
       };
 
       document.getElementById("init-btn").addEventListener("click", () => {
@@ -506,6 +511,7 @@
                 l: "left",
                 c: "center",
                 a: "label",
+                y: "highlight",
               };
               statesData[id][map[type]] = type === "o" || type === "d" || type === "f" || type === "e" ? value === "1" : value;
             }
