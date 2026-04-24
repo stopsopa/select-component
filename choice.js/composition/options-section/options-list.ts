@@ -78,6 +78,10 @@ export class OptionsList extends HTMLElement {
     this._manager = new OptionListManager(this, this._options);
   }
 
+  disconnectedCallback() {
+    this._manager?.destroy();
+  }
+
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     if (!this._manager) return;
 

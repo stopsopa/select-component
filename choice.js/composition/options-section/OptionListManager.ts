@@ -37,7 +37,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
   public propOkButton!: HTMLButtonElement;
   public propCancelButton!: HTMLButtonElement;
   public propHighlightedId: string | number | null = null;
-  private _attachedElements = new WeakMap<any, (e: KeyboardEvent) => void>();
+  private _attachedElements = new Map<any, (e: KeyboardEvent) => void>();
 
   constructor(bindElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
     this.propParentElement = bindElement;
@@ -192,6 +192,15 @@ export class OptionListManager<T extends ListElement = ListElement> {
       element.removeEventListener("keydown", listener);
       this._attachedElements.delete(element);
     }
+  }
+
+  public destroy() {
+    // This is the trick: we track all elements we've attached to and detach them here.
+    // This is especially important for the 'window' object which persists.
+    for (const [element] of this._attachedElements) {
+      this.detachArrowsUpAndDown(element);
+    }
+    this._attachedElements.clear();
   }
 
   public render() {

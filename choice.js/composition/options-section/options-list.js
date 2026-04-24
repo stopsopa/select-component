@@ -70,6 +70,9 @@ class OptionsList extends HTMLElement {
     });
     this._manager = new OptionListManager(this, this._options);
   }
+  disconnectedCallback() {
+    this._manager?.destroy();
+  }
   attributeChangedCallback(name, _oldValue, newValue) {
     if (!this._manager) return;
     switch (name) {
