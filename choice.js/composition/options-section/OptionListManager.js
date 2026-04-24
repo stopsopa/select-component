@@ -10,6 +10,7 @@ class OptionListManager {
   propOkButton;
   propCancelButton;
   propHighlightedId = null;
+  _attachedElements = /* @__PURE__ */ new WeakMap();
   constructor(bindElement, options = {}) {
     this.propParentElement = bindElement;
     this.propParentElement.classList.add("option-list-manager");
@@ -74,6 +75,9 @@ class OptionListManager {
     if (this.propHighlightedId !== null) {
       this._scrollToHighlighted();
     }
+    if (this.propOptions.onHighlightChange) {
+      this.propOptions.onHighlightChange(this.propHighlightedId);
+    }
   }
   pickHighlighted() {
     if (this.propHighlightedId === null) return;
@@ -122,6 +126,21 @@ class OptionListManager {
       this.propInputElement.focus();
     }
   }
+  attachArrowsUpAndDown(element) {
+    if (this._attachedElements.has(element)) {
+      return;
+    }
+    const listener = (e) => this._handleKeyDown(e);
+    this._attachedElements.set(element, listener);
+    element.addEventListener("keydown", listener);
+  }
+  detachArrowsUpAndDown(element) {
+    const listener = this._attachedElements.get(element);
+    if (listener) {
+      element.removeEventListener("keydown", listener);
+      this._attachedElements.delete(element);
+    }
+  }
   render() {
     if (!this.propFilterContainer) {
       this.propFilterContainer = document.createElement("div");
@@ -144,6 +163,7 @@ class OptionListManager {
       this.propFilterContainer.appendChild(inputWrapper);
       this.propOptionsContainer = document.createElement("div");
       this.propOptionsContainer.className = "options";
+      this.propOptionsContainer.tabIndex = 0;
       this.propFooterContainer = document.createElement("div");
       this.propFooterContainer.className = "footer";
       this.propCancelButton = document.createElement("button");
@@ -178,42 +198,9 @@ class OptionListManager {
           this.propOptions.onInputChange(e);
         }
       });
-      this.propInputElement.addEventListener("keydown", (e) => {
-        const options = this.propOptions.options || [];
-        const currentIndex = options.findIndex((item) => String(item.id) === String(this.propHighlightedId));
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          if (currentIndex === -1) {
-            this.itemPick(options[0]?.id);
-          } else if (currentIndex < options.length - 1) {
-            this.itemPick(options[currentIndex + 1].id);
-          }
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          if (currentIndex === -1) {
-            this.itemPick(options[options.length - 1]?.id);
-          } else if (currentIndex > 0) {
-            this.itemPick(options[currentIndex - 1].id);
-          }
-        } else if (e.key === "Enter") {
-          if (this.propHighlightedId !== null) {
-            e.preventDefault();
-            this.pickHighlighted();
-          } else if (this.propInputElement.value === "") {
-            if (this.propOptions.onInputChange) {
-              this.propOptions.onInputChange(e);
-            }
-          }
-        } else if (e.key === "Escape") {
-          e.preventDefault();
-          this.itemPick(null);
-        } else if (e.key === "Backspace" && this.propInputElement.value === "") {
-          if (this.propOptions.onInputChange) {
-            this.propOptions.onInputChange(e);
-          }
-        }
-      });
+      this.attachArrowsUpAndDown(this.propInputElement);
     }
+    this.attachArrowsUpAndDown(this.propOptionsContainer);
     this.propOkButton.addEventListener("click", () => {
       if (this.propOptions.onOk) {
         this.propOptions.onOk();
@@ -238,6 +225,47 @@ class OptionListManager {
         }
       }
     });
+  }
+  _handleKeyDown(e) {
+    const options = this.propOptions.options || [];
+    const currentIndex = options.findIndex((item) => String(item.id) === String(this.propHighlightedId));
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (currentIndex === -1) {
+        this.itemPick(options[0]?.id);
+      } else if (currentIndex < options.length - 1) {
+        this.itemPick(options[currentIndex + 1].id);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (currentIndex === -1) {
+        this.itemPick(options[options.length - 1]?.id);
+      } else if (currentIndex > 0) {
+        this.itemPick(options[currentIndex - 1].id);
+      }
+    } else if (e.key === "Enter") {
+      if (this.propHighlightedId !== null) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.pickHighlighted();
+      } else if (this.propInputElement && this.propInputElement.value === "") {
+        if (this.propOptions.onInputChange) {
+          e.stopPropagation();
+          this.propOptions.onInputChange(e);
+        }
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      this.itemPick(null);
+    } else if (e.key === "Backspace" && this.propInputElement && this.propInputElement.value === "") {
+      if (this.propOptions.onInputChange) {
+        e.stopPropagation();
+        this.propOptions.onInputChange(e);
+      }
+    }
   }
   _updateOptionsDisplay() {
     const container = this.propOptionsContainer;

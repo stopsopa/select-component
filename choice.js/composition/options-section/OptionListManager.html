@@ -177,7 +177,9 @@
                     <pre data-role="search-val-out" style="display: inline; padding: 2px 5px; margin: 0; background: #eee; width: auto; max-height: none;">-</pre>
                     (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
                     onOk triggers: <span data-role="onok-count" style="font-weight: bold;">0</span>,
-                    onCancel triggers: <span data-role="oncancel-count" style="font-weight: bold;">0</span>)
+                    onCancel triggers: <span data-role="oncancel-count" style="font-weight: bold;">0</span>,
+                    onItemPick triggers: <span data-role="onpick-count" style="font-weight: bold;">0</span>,
+                    onHighlightChange triggers: <span data-role="onhighlight-count" style="font-weight: bold;">0</span>)
                 </div>
 
                 <div class="controls">
@@ -199,6 +201,7 @@
                     <button class="gcp-css white" data-role="render-btn">Set Custom Render</button>
                     <button class="gcp-css white" data-role="string-render-btn">Set String Render</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
+                    <button class="gcp-css white" data-role="attach-window-btn">Attach Arrows to Window</button>
                 </div>
 
                 <div class="controls">
@@ -239,6 +242,8 @@
         const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
         const onOkCountOut = group.querySelector('[data-role="onok-count"]');
         const onCancelCountOut = group.querySelector('[data-role="oncancel-count"]');
+        const onPickCountOut = group.querySelector('[data-role="onpick-count"]');
+        const onHighlightCountOut = group.querySelector('[data-role="onhighlight-count"]');
         const optionsDump = group.querySelector('[data-role="options-dump"]');
 
         const addBtn = group.querySelector('[data-role="add-btn"]');
@@ -251,6 +256,7 @@
         const renderBtn = group.querySelector('[data-role="render-btn"]');
         const stringRenderBtn = group.querySelector('[data-role="string-render-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
+        const attachWindowBtn = group.querySelector('[data-role="attach-window-btn"]');
         const injectInput = group.querySelector('[data-role="inject-input"]');
         const injectBtn = group.querySelector('[data-role="inject-btn"]');
         const injectLabelInput = group.querySelector('[data-role="inject-label"]');
@@ -261,6 +267,8 @@
         let onChangeCounter = 0;
         let onOkCounter = 0;
         let onCancelCounter = 0;
+        let onPickCounter = 0;
+        let onHighlightCounter = 0;
 
         const syncUrl = () => {
           const url = new URL(window.location);
@@ -315,6 +323,8 @@
             syncUrl();
           },
           onItemPick: (item) => {
+            onPickCounter++;
+            onPickCountOut.textContent = onPickCounter;
             console.log("Item clicked:", item);
             localOptions = localOptions.map((opt) => {
               if (opt.id === item.id) return { ...opt, selected: !opt.selected };
@@ -331,6 +341,11 @@
           onCancel: () => {
             onCancelCounter++;
             onCancelCountOut.textContent = onCancelCounter;
+          },
+          onHighlightChange: (id) => {
+            onHighlightCounter++;
+            onHighlightCountOut.textContent = onHighlightCounter;
+            syncUrl();
           },
         });
 
@@ -406,6 +421,19 @@
           manager.setOptions([]);
           updateDump();
           syncUrl();
+        });
+
+        let windowArrowsAttached = false;
+        attachWindowBtn.addEventListener("click", () => {
+          if (windowArrowsAttached) {
+            manager.detachArrowsUpAndDown(window);
+            attachWindowBtn.textContent = "Attach Arrows to Window";
+            windowArrowsAttached = false;
+          } else {
+            manager.attachArrowsUpAndDown(window);
+            attachWindowBtn.textContent = "Detach Arrows from Window";
+            windowArrowsAttached = true;
+          }
         });
 
         injectBtn.addEventListener("click", () => {

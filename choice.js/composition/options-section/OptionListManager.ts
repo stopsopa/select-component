@@ -14,6 +14,7 @@ export type OptionListManagerOptions<T extends ListElement> = {
   onInputChange?: (e: Event) => void;
   onCancel?: () => void;
   onOk?: () => void;
+  onHighlightChange?: (id: string | number | null) => void;
   disabled?: boolean;
   maxHeight?: string;
   showFooter?: boolean;
@@ -36,6 +37,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
   public propOkButton!: HTMLButtonElement;
   public propCancelButton!: HTMLButtonElement;
   public propHighlightedId: string | number | null = null;
+  private _attachedElements = new WeakMap<any, (e: KeyboardEvent) => void>();
 
   constructor(bindElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
     this.propParentElement = bindElement;
@@ -112,6 +114,9 @@ export class OptionListManager<T extends ListElement = ListElement> {
     if (this.propHighlightedId !== null) {
       this._scrollToHighlighted();
     }
+    if (this.propOptions.onHighlightChange) {
+      this.propOptions.onHighlightChange(this.propHighlightedId);
+    }
   }
 
   public pickHighlighted() {
@@ -172,6 +177,23 @@ export class OptionListManager<T extends ListElement = ListElement> {
     }
   }
 
+  public attachArrowsUpAndDown(element: any) {
+    if (this._attachedElements.has(element)) {
+      return;
+    }
+    const listener = (e: KeyboardEvent) => this._handleKeyDown(e);
+    this._attachedElements.set(element, listener);
+    element.addEventListener("keydown", listener);
+  }
+
+  public detachArrowsUpAndDown(element: any) {
+    const listener = this._attachedElements.get(element);
+    if (listener) {
+      element.removeEventListener("keydown", listener);
+      this._attachedElements.delete(element);
+    }
+  }
+
   public render() {
     if (!this.propFilterContainer) {
       this.propFilterContainer = document.createElement("div");
@@ -201,6 +223,7 @@ export class OptionListManager<T extends ListElement = ListElement> {
 
       this.propOptionsContainer = document.createElement("div");
       this.propOptionsContainer.className = "options";
+      this.propOptionsContainer.tabIndex = 0;
 
       this.propFooterContainer = document.createElement("div");
       this.propFooterContainer.className = "footer";
@@ -244,43 +267,10 @@ export class OptionListManager<T extends ListElement = ListElement> {
         }
       });
 
-      this.propInputElement.addEventListener("keydown", (e) => {
-        const options = this.propOptions.options || [];
-        const currentIndex = options.findIndex((item) => String(item.id) === String(this.propHighlightedId));
-
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          if (currentIndex === -1) {
-            this.itemPick(options[0]?.id);
-          } else if (currentIndex < options.length - 1) {
-            this.itemPick(options[currentIndex + 1].id);
-          }
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          if (currentIndex === -1) {
-            this.itemPick(options[options.length - 1]?.id);
-          } else if (currentIndex > 0) {
-            this.itemPick(options[currentIndex - 1].id);
-          }
-        } else if (e.key === "Enter") {
-          if (this.propHighlightedId !== null) {
-            e.preventDefault();
-            this.pickHighlighted();
-          } else if (this.propInputElement!.value === "") {
-            if (this.propOptions.onInputChange) {
-              this.propOptions.onInputChange(e);
-            }
-          }
-        } else if (e.key === "Escape") {
-          e.preventDefault();
-          this.itemPick(null);
-        } else if (e.key === "Backspace" && this.propInputElement!.value === "") {
-          if (this.propOptions.onInputChange) {
-            this.propOptions.onInputChange(e);
-          }
-        }
-      });
+      this.attachArrowsUpAndDown(this.propInputElement);
     }
+
+    this.attachArrowsUpAndDown(this.propOptionsContainer);
 
     this.propOkButton.addEventListener("click", () => {
       if (this.propOptions.onOk) {
@@ -308,6 +298,49 @@ export class OptionListManager<T extends ListElement = ListElement> {
         }
       }
     });
+  }
+
+  private _handleKeyDown(e: KeyboardEvent) {
+    const options = this.propOptions.options || [];
+    const currentIndex = options.findIndex((item) => String(item.id) === String(this.propHighlightedId));
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (currentIndex === -1) {
+        this.itemPick(options[0]?.id);
+      } else if (currentIndex < options.length - 1) {
+        this.itemPick(options[currentIndex + 1].id);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      e.stopPropagation();
+      if (currentIndex === -1) {
+        this.itemPick(options[options.length - 1]?.id);
+      } else if (currentIndex > 0) {
+        this.itemPick(options[currentIndex - 1].id);
+      }
+    } else if (e.key === "Enter") {
+      if (this.propHighlightedId !== null) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.pickHighlighted();
+      } else if (this.propInputElement && this.propInputElement.value === "") {
+        if (this.propOptions.onInputChange) {
+          e.stopPropagation();
+          this.propOptions.onInputChange(e);
+        }
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      this.itemPick(null);
+    } else if (e.key === "Backspace" && this.propInputElement && this.propInputElement.value === "") {
+      if (this.propOptions.onInputChange) {
+        e.stopPropagation();
+        this.propOptions.onInputChange(e);
+      }
+    }
   }
 
   private _updateOptionsDisplay() {

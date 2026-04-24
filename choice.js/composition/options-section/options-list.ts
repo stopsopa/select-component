@@ -19,6 +19,7 @@ export class OptionsList extends HTMLElement {
       "onInputChange",
       "onCancel",
       "onOk",
+      "onHighlightChange",
     ];
   }
 
@@ -63,6 +64,9 @@ export class OptionsList extends HTMLElement {
       },
       onOk: () => {
         this.dispatchEvent(new CustomEvent("onOk"));
+      },
+      onHighlightChange: (id) => {
+        this.dispatchEvent(new CustomEvent("onHighlightChange", { detail: { id } }));
       },
     };
 
@@ -110,6 +114,7 @@ export class OptionsList extends HTMLElement {
       case "onInputChange":
       case "onCancel":
       case "onOk":
+      case "onHighlightChange":
         this._setupAttributeEvent(name, newValue);
         break;
     }
@@ -197,6 +202,14 @@ export class OptionsList extends HTMLElement {
 
   public itemPick(id?: string | number | null) {
     this._manager?.itemPick(id);
+  }
+
+  public attachArrowsUpAndDown(element: HTMLElement) {
+    this._manager?.attachArrowsUpAndDown(element);
+  }
+
+  public detachArrowsUpAndDown(element: HTMLElement) {
+    this._manager?.detachArrowsUpAndDown(element);
   }
 
   public render() {
