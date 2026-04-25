@@ -12,4 +12,4 @@
 <%= d.render('../unbind/clickOutside.ts') %>
 
 // final library
-<%= d.render('./SelectManager.lib.ts') %>
+<%= d.render('./SelectManager.lib.ts').replace(/import\s+[\s\S]*?\s+from\s+['"].*?['"];?/g, '') %>

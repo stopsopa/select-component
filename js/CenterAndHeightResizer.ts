@@ -60,7 +60,6 @@ export class CenterAndHeightResizer extends HTMLElement {
           flex-shrink: 0;
           transition: background 0.2s;
           user-select: none;
-          z-index: 10;
           position: relative;
         }
         .resizer.horizontal {

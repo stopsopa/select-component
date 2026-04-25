@@ -9,6 +9,7 @@ function clickOutside(target, onUnbindEvent) {
       }
     }
   };
+  console.log("document", document, "target: ", target);
   // Use capturing phase so we don't miss events if some child stops propagation
   document.addEventListener("click", handler, true);
   document.addEventListener("touchstart", handler, { capture: true, passive: true });

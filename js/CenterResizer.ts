@@ -46,7 +46,6 @@ export class CenterResizer extends HTMLElement {
           transition: background 0.2s;
           user-select: none;
           margin: 0 -4px;
-          z-index: 10;
           position: relative;
         }
         .resizer:hover,
