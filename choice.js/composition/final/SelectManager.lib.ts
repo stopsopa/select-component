@@ -4,8 +4,8 @@ import { SelectedListManager, SelectedListManagerOptions, SelectedListElement } 
 import { clickOutside } from "../unbind/clickOutside.js";
 
 export type SelectManagerOptions<T extends OptionsListElement & SelectedListElement> = {
-  selectOptions?: SelectedListManagerOptions<T>;
-  optionsOptions?: OptionsListManagerOptions<T>;
+  select?: SelectedListManagerOptions<T>;
+  options?: OptionsListManagerOptions<T>;
 };
 
 export class SelectManager<T extends OptionsListElement & SelectedListElement> {
@@ -20,7 +20,7 @@ export class SelectManager<T extends OptionsListElement & SelectedListElement> {
 
     this.container = new ContainerManager(this._parent);
 
-    const selOpts = { ...options.selectOptions };
+    const selOpts = { ...options.select };
     const oldOnFocus = selOpts.onFocus;
     selOpts.onFocus = (e: FocusEvent) => {
       console.log("show*");
@@ -47,7 +47,7 @@ export class SelectManager<T extends OptionsListElement & SelectedListElement> {
 
       popover.appendChild(div);
 
-      this.options = new OptionsListManager(div, options.optionsOptions);
+      this.options = new OptionsListManager(div, options.options);
     }
 
     // this._unbindClickOutside = clickOutside([this.container.getParent(), this.container.getPopover()], () => {

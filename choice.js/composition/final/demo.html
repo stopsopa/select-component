@@ -216,7 +216,7 @@
 
         let buff = [];
         const manager = new SelectManager(container, {
-          selectOptions: {
+          select: {
             label: states.label || "Select Fruit",
             list: initialList || [],
             disabled: states.disabled || false,
@@ -231,7 +231,7 @@
               syncUrl();
             },
           },
-          optionsOptions: {
+          options: {
             label: "Search fruit...",
             options: mockOptions,
             maxHeight: "250px",

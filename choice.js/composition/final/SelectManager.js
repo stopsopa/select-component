@@ -658,7 +658,7 @@ var SelectManager = class {
   constructor(parent, options = {}) {
     this._parent = parent;
     this.container = new ContainerManager(this._parent);
-    const selOpts = { ...options.selectOptions };
+    const selOpts = { ...options.select };
     const oldOnFocus = selOpts.onFocus;
     selOpts.onFocus = (e) => {
       console.log("show*");
@@ -677,7 +677,7 @@ var SelectManager = class {
       const popover = this.container.getPopover();
       const div = document.createElement("div");
       popover.appendChild(div);
-      this.options = new OptionsListManager(div, options.optionsOptions);
+      this.options = new OptionsListManager(div, options.options);
     }
     this._unbindClickOutside = clickOutside([this.container.getParent()], () => {
       console.log("hide*");
