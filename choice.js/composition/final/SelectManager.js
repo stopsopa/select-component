@@ -648,6 +648,16 @@ function clickOutside(targets, callback) {
   };
 }
 
+// choice.js/composition/final/helpers.js
+function selectedAddDeduplicatedItem(selected, item) {
+  const tmp = [...selected];
+  const found = tmp.find((i) => String(i.id) === String(item.id));
+  if (!found) {
+    tmp.push(item);
+  }
+  return tmp;
+}
+
 // choice.js/composition/final/SelectManager.lib.js
 var SelectManager = class {
   container;
@@ -708,5 +718,6 @@ var SelectManager = class {
   OptionsListManager,
   SelectManager,
   SelectedListManager,
-  clickOutside
+  clickOutside,
+  selectedAddDeduplicatedItem
 };
