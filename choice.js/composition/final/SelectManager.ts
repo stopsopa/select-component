@@ -1,18 +1,14 @@
+/** @es.ts 
+{
+   mode: "bundle",
+   extension: ".js",
+   options: {
+   }
+}
+@es.ts */
 
-// container/ContainerManager.ts
-<%= d.render('../container/ContainerManager.ts') %>
-
-// options-section/OptionListManager.ts
-<%= d.render('../options-section/OptionListManager.ts') %>
-
-// select-section/SelectedListManager.ts
-<%= d.render('../select-section/SelectedListManager.ts') %>
-
-// unbind/clickOutside.ts
-<%= d.render('../unbind/clickOutside.ts') %>
-
-// helpers.ts
-<%= d.render('./helpers.ts') %>
-
-// final library
-<%= d.render('./SelectManager.lib.ts').replace(/import\s+[\s\S]*?\s+from\s+['"].*?['"];?/g, '') %>
+export * from "../container/ContainerManager.js";
+export * from "../options-section/OptionListManager.js";
+export * from "../select-section/SelectedListManager.js";
+export * from "../unbind/clickOutside.js";
+export * from "./SelectManager.lib.js";

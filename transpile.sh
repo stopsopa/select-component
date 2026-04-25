@@ -13,24 +13,25 @@ while true; do
     echo "Running transpilation for ${FILES[*]}..."
     # printf "%s\n" "${FILES[@]}" | NODE_OPTIONS="" DEBUG=true node es.ts
 
-RENDERED="$(node render.ts choice.js/composition/final/SelectManager.ts 2>&1)"    
+# RENDERED="$(node render.ts choice.js/composition/final/SelectManager.ts 2>&1)"    
 
-if [ "${?}" != "0" ]; then
-  cat <<EEE
+# if [ "${?}" != "0" ]; then
+#   cat <<EEE
 
-failed: node render.ts choice.js/composition/final/SelectManager.ts
-${RENDERED}
+# failed: node render.ts choice.js/composition/final/SelectManager.ts
+# ${RENDERED}
 
-EEE
+# EEE
 
-  exit 1
-fi
+#   exit 1
+# fi
 
-cat <<EEE | DEBUG=true node es.ts
-$(printf "%s\n" "${FILES[@]}")
-${RENDERED}
-EEE
+# cat <<EEE | DEBUG=true node es.ts
+# $(printf "%s\n" "${FILES[@]}")
+# ${RENDERED}
+# EEE
 
+printf "%s\n" "${FILES[@]}" | DEBUG=true node es.ts
 
     echo "Waiting for changes..."
     node bash/fs/watch.cjs "${FILES[@]}"

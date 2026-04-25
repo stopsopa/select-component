@@ -1,3 +1,8 @@
+import { ContainerManager } from "../container/ContainerManager.js";
+import { OptionListManager, OptionListManagerOptions, OptionsListElement } from "../options-section/OptionListManager.js";
+import { SelectedListManager, SelectedListManagerOptions, SelectedListElement } from "../select-section/SelectedListManager.js";
+import { clickOutside } from "../unbind/clickOutside.js";
+
 export type SelectManagerOptions<T extends OptionsListElement & SelectedListElement> = {
   selectOptions?: SelectedListManagerOptions<T>;
   optionOptions?: OptionListManagerOptions<T>;
