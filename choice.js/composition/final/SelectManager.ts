@@ -11,5 +11,8 @@
 // unbind/clickOutside.ts
 <%= d.render('../unbind/clickOutside.ts') %>
 
+// helpers.ts
+<%= d.render('./helpers.ts') %>
+
 // final library
 <%= d.render('./SelectManager.lib.ts').replace(/import\s+[\s\S]*?\s+from\s+['"].*?['"];?/g, '') %>

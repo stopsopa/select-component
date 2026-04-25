@@ -214,16 +214,20 @@
           dump.textContent = JSON.stringify(list, null, 2);
         };
 
+        let buff = [];
         const manager = new SelectManager(container, {
           selectOptions: {
             label: states.label || "Select Fruit",
             list: initialList || [],
             disabled: states.disabled || false,
             loading: states.loading || false,
+            onFocus: () => {
+              buff = [...selected];
+            },
             onDelete: (itemId) => {                          
-              selected = selected.filter((i) => String(i.id) !== String(itemId));
-              manager.selected.updateList(selected);
-              updateDump(selected);
+              buff = buff.filter((i) => String(i.id) !== String(itemId));
+              manager.selected.updateList(buff);
+              updateDump(buff);
               syncUrl();
             },
           },
@@ -232,13 +236,18 @@
             options: mockOptions,
             maxHeight: "250px",
             onItemPick: (item) => {
-              selected = [...selected, item];
-              manager.selected.updateList(selected);
-              updateDump(selected);
-              syncUrl();
+              if (!buff.some((i) => String(i.id) === String(item.id))) {
+                buff = [...buff, item];
+                manager.selected.updateList(buff);
+                updateDump(buff);
+                syncUrl();
+              }
             },
             onCancel: () => manager.container.hide(),
-            onOk: () => manager.container.hide(),
+            onOk: () => {
+              selected = [...buff];
+              manager.container.hide()
+            },
           },
         });
 
