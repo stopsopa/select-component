@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OptionListManager Demo</title>
+    <title>OptionsList WebComponent Attributes Demo</title>
     <link rel="stylesheet" href="../../floating-label-pattern.css" />
-    <link rel="stylesheet" href="OptionListManager.css" />
+    <link rel="stylesheet" href="OptionsListManager.css" />
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -70,8 +70,9 @@
     </style>
   </head>
   <body>
-    <h1>OptionListManager Demo</h1>
-    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> |
+    <h1>OptionsList WebComponent Attributes Demo</h1>
+    <p>This demo interacts with the component exclusively via <strong>HTML attributes</strong> (setAttribute, toggleAttribute, and on* attributes).</p>
+    <button id="init-btn" class="gcp-css">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
     <div
@@ -116,7 +117,7 @@
 
     <script type="module">
       import "../../../js/CenterAndHeightResizer.js";
-      import { OptionListManager } from "./OptionListManager.js";
+      import "./options-list.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
 
@@ -154,7 +155,6 @@
         const instanceId = instanceCounter;
 
         let localOptions = [...initialOptions];
-        let manager = null;
 
         const maxHeightPresets = ["200px", "300px", "400px", "600px", ""];
         const group = document.createElement("div");
@@ -169,13 +169,29 @@
                         center="${states.center || "350px"}" 
                         ${states.height ? `height="${states.height}"` : ""}
                     >
+                        <options-list 
+                            id="ol-${instanceId}" 
+                            label="${states.label || "Search via attrs..."}"
+                            ${states.loading ? "loading" : ""}
+                            ${states.disabled ? "disabled" : ""}
+                            value="${states.value || ""}"
+                            max-height="${states.maxHeight || ""}"
+                            show-footer="${states.showFooter !== false}"
+                            show-filter="${states.showFilter !== false}"
+                            options='${JSON.stringify(localOptions)}'
+                            onInputChange="this.handleDemoInputChange(event)"
+                            onItemPick="this.handleDemoItemClick(event)"
+                            onOk="this.handleDemoOk(event)"
+                            onCancel="this.handleDemoCancel(event)"
+                            onHighlightChange="this.handleDemoHighlightChange(event)"
+                        ></options-list>
                     </center-and-height-resizer>
                 </div>
 
                 <div class="controls">
                     <strong>Search Value:</strong> 
                     <pre data-role="search-val-out" style="display: inline; padding: 2px 5px; margin: 0; background: #eee; width: auto; max-height: none;">-</pre>
-                    (onChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
+                    (onInputChange triggers: <span data-role="onchange-count" style="font-weight: bold;">0</span>,
                     onOk triggers: <span data-role="onok-count" style="font-weight: bold;">0</span>,
                     onCancel triggers: <span data-role="oncancel-count" style="font-weight: bold;">0</span>,
                     onItemPick triggers: <span data-role="onpick-count" style="font-weight: bold;">0</span>,
@@ -196,10 +212,11 @@
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
                         <input type="checkbox" data-role="filter-cb" checked> Show Filter
                     </label>
-                    <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
-                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty</button>
-                    <button class="gcp-css white" data-role="render-btn">Set Custom Render</button>
-                    <button class="gcp-css white" data-role="string-render-btn">Set String Render</button>
+                    <button class="gcp-css white" data-role="focus-btn">Focus Input (via Method)</button>
+                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty (Attr)</button>
+                    <button class="gcp-css white" data-role="reset-empty-btn">Reset Empty</button>
+                    <button class="gcp-css white" data-role="render-btn">Set Custom Render (Attr)</button>
+                    <button class="gcp-css white" data-role="reset-render-btn">Reset Render</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                     <button class="gcp-css white" data-role="attach-window-btn">Attach Arrows to Window</button>
                     <button class="gcp-css white" data-role="detach-window-btn">Detach Arrows from Window</button>
@@ -235,10 +252,8 @@
 
         document.getElementById("instances-area").appendChild(group);
 
+        const ol = group.querySelector("options-list");
         const resizer = group.querySelector("center-and-height-resizer");
-        const parent = document.createElement("div");
-        parent.style.height = "100%";
-        resizer.appendChild(parent);
         const searchValOut = group.querySelector('[data-role="search-val-out"]');
         const onChangeCountOut = group.querySelector('[data-role="onchange-count"]');
         const onOkCountOut = group.querySelector('[data-role="onok-count"]');
@@ -254,8 +269,9 @@
         const filterCb = group.querySelector('[data-role="filter-cb"]');
         const focusBtn = group.querySelector('[data-role="focus-btn"]');
         const emptyBtn = group.querySelector('[data-role="empty-btn"]');
+        const resetEmptyBtn = group.querySelector('[data-role="reset-empty-btn"]');
         const renderBtn = group.querySelector('[data-role="render-btn"]');
-        const stringRenderBtn = group.querySelector('[data-role="string-render-btn"]');
+        const resetRenderBtn = group.querySelector('[data-role="reset-render-btn"]');
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const attachWindowBtn = group.querySelector('[data-role="attach-window-btn"]');
         const detachWindowBtn = group.querySelector('[data-role="detach-window-btn"]');
@@ -295,148 +311,130 @@
           url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
           url.searchParams.set(`f${instanceId}`, footerCb.checked ? "1" : "0");
           url.searchParams.set(`e${instanceId}`, filterCb.checked ? "1" : "0");
-          url.searchParams.set(`m${instanceId}`, states.maxHeight || "");
+          url.searchParams.set(`m${instanceId}`, ol.getAttribute("max-height") || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
           url.searchParams.set(`a${instanceId}`, injectLabelInput.value || "");
-          url.searchParams.set(`y${instanceId}`, manager.propHighlightedId || "");
+          url.searchParams.set(`y${instanceId}`, ol.highlight || "");
 
           window.history.replaceState({}, "", url);
           debouncedPush();
         };
 
         const updateDump = () => {
-          optionsDump.textContent = JSON.stringify(localOptions, null, 2);
+          const optAttr = ol.getAttribute("options");
+          try {
+            const opts = optAttr ? JSON.parse(optAttr) : [];
+            optionsDump.textContent = JSON.stringify(opts, null, 2);
+          } catch (e) {
+            optionsDump.textContent = "Error parsing options attribute";
+          }
         };
 
-        // Initialize Manager
-        manager = new OptionListManager(parent, {
-          options: localOptions,
-          loading: states.loading || false,
-          disabled: states.disabled || false,
-          showFooter: states.showFooter !== false,
-          showFilter: states.showFilter !== false,
-          maxHeight: states.maxHeight || "",
-          value: states.value || "",
-          onInputChange: (e) => {
-            const val = e.target.value;
-            onChangeCounter++;
-            onChangeCountOut.textContent = onChangeCounter;
-            searchValOut.textContent = val || "-";
-            syncUrl();
-          },
-          onItemPick: (item) => {
-            onPickCounter++;
-            onPickCountOut.textContent = onPickCounter;
-            console.log("Item clicked:", item);
-            localOptions = localOptions.map((opt) => {
-              if (opt.id === item.id) return { ...opt, selected: !opt.selected };
-              return opt;
-            });
-            manager.setOptions(localOptions);
-            updateDump();
-            syncUrl();
-          },
-          onOk: () => {
-            onOkCounter++;
-            onOkCountOut.textContent = onOkCounter;
-          },
-          onCancel: () => {
-            onCancelCounter++;
-            onCancelCountOut.textContent = onCancelCounter;
-          },
-          onHighlightChange: (id) => {
-            onHighlightCounter++;
-            onHighlightCountOut.textContent = onHighlightCounter;
-            syncUrl();
-          },
-        });
+        // Events via inline attributes (assigned to element instance for 'this' context in web component logic)
+        ol.handleDemoInputChange = (e) => {
+          const val = e.detail.value;
+          onChangeCounter++;
+          onChangeCountOut.textContent = onChangeCounter;
+          searchValOut.textContent = val || "-";
+          syncUrl();
+        };
+
+        ol.handleDemoItemClick = (e) => {
+          onPickCounter++;
+          onPickCountOut.textContent = onPickCounter;
+          const item = e.detail.item;
+          localOptions = localOptions.map((opt) => {
+            if (opt.id === item.id) return { ...opt, selected: !opt.selected };
+            return opt;
+          });
+          ol.setAttribute("options", JSON.stringify(localOptions));
+          updateDump();
+          syncUrl();
+        };
+
+        ol.handleDemoOk = () => {
+          onOkCounter++;
+          onOkCountOut.textContent = onOkCounter;
+        };
+
+        ol.handleDemoCancel = () => {
+          onCancelCounter++;
+          onCancelCountOut.textContent = onCancelCounter;
+        };
+
+        ol.handleDemoHighlightChange = (e) => {
+          onHighlightCounter++;
+          onHighlightCountOut.textContent = onHighlightCounter;
+          syncUrl();
+        };
 
         // Handlers
         addBtn.addEventListener("click", () => {
           const id = Math.floor(Math.random() * 100000);
-          localOptions.push({ id, label: "Dynamic Option " + id });
-          manager.setOptions([...localOptions]);
+          localOptions.push({ id, label: "Attr Option " + id });
+          ol.setAttribute("options", JSON.stringify(localOptions));
           updateDump();
           syncUrl();
         });
 
         loadingCb.addEventListener("change", (e) => {
-          manager.setLoading(e.target.checked);
+          ol.toggleAttribute("loading", e.target.checked);
           syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
-          manager.setDisabled(e.target.checked);
+          ol.toggleAttribute("disabled", e.target.checked);
           syncUrl();
         });
 
         footerCb.addEventListener("change", (e) => {
-          manager.showFooter(e.target.checked);
+          ol.setAttribute("show-footer", e.target.checked ? "true" : "false");
           syncUrl();
         });
 
         filterCb.addEventListener("change", (e) => {
-          manager.showFilter(e.target.checked);
+          ol.setAttribute("show-filter", e.target.checked ? "true" : "false");
           syncUrl();
         });
 
-        focusBtn.addEventListener("click", () => manager.setFocus());
-        
+        focusBtn.addEventListener("click", () => ol.setFocus()); // Method is needed for focus
+
         emptyBtn.addEventListener("click", () => {
-          manager.setRenderEmpty(() => `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`);
+          ol.setRenderEmpty(() => "<div style=\"padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🏜️</div>Nothing found...</div>");
+        });
+
+        resetEmptyBtn.addEventListener("click", () => {
+          ol.setRenderEmpty();
         });
 
         renderBtn.addEventListener("click", () => {
-          manager.setRenderItem((item) => {
-            const el = document.createElement("div");
-            el.className = "element";
-            el.style.padding = "12px";
-            el.style.background = item.selected ? "#fff3e0" : "transparent";
-            el.style.color = item.selected ? "#e65100" : "inherit";
-            el.dataset.id = String(item.id);
-            
-            const icon = document.createElement("span");
-            icon.textContent = item.selected ? "🔥 " : "❄️ ";
-            icon.style.marginRight = "10px";
-            
-            const label = document.createElement("label");
-            label.textContent = item.label;
-            
-            el.appendChild(icon);
-            el.appendChild(label);
-            return el;
+          ol.setRenderItem((item) => {
+            return `<div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 4px solid ${item.selected ? '#3182ce' : 'transparent'}; background: ${item.selected ? '#ebf8ff' : 'white'}; margin-bottom: 4px; border-radius: 0 4px 4px 0;"><span style="font-size: 18px;">${item.selected ? '✅' : '⬜'}</span><label style="flex-grow: 1; cursor: pointer;">${item.label}</label>${item.selected ? '<span style="font-size: 12px; color: #3182ce; font-weight: bold;">SELECTED</span>' : ''}</div>`;
           });
         });
 
-        stringRenderBtn.addEventListener("click", () => {
-          manager.setRenderItem((item) => `
-            <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? '#e8f5e9' : 'white'}; color: ${item.selected ? '#2e7d32' : '#333'};">
-              <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? '✅' : '⬜'}</span>
-              <strong style="margin-left: 10px;">${item.label}</strong>
-              <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
-            </div>
-          `);
+        resetRenderBtn.addEventListener("click", () => {
+          ol.setRenderItem();
         });
 
         clearBtn.addEventListener("click", () => {
           localOptions = [];
-          manager.setOptions([]);
+          ol.setAttribute("options", "[]");
           updateDump();
           syncUrl();
         });
 
         attachWindowBtn.addEventListener("click", () => {
-          manager.attachArrowsUpAndDown(window);
+          ol.attachArrowsUpAndDown(window);
         });
 
         detachWindowBtn.addEventListener("click", () => {
-          manager.detachArrowsUpAndDown(window);
+          ol.detachArrowsUpAndDown(window);
         });
 
         injectBtn.addEventListener("click", () => {
-          const val = injectInput.value;
-          manager.setValue(val);
-          searchValOut.textContent = val || "-";
+          ol.setAttribute("value", injectInput.value);
+          searchValOut.textContent = injectInput.value || "-";
           syncUrl();
         });
 
@@ -444,14 +442,13 @@
 
         injectLabelInput.addEventListener("input", () => syncUrl());
         injectLabelBtn.addEventListener("click", () => {
-          manager.setLabel(injectLabelInput.value);
+          ol.setAttribute("label", injectLabelInput.value);
           syncUrl();
         });
 
         const setMH = (val) => {
           maxHeightInput.value = val || "";
-          states.maxHeight = val;
-          manager.setMaxHeight(val);
+          ol.setAttribute("max-height", val || "");
           syncUrl();
         };
         maxHeightBtn.addEventListener("click", () => setMH(maxHeightInput.value));
@@ -461,9 +458,6 @@
 
         const stepMH = (delta) => {
           let current = parseInt(maxHeightInput.value) || 0;
-          if (!maxHeightInput.value.includes("px") && maxHeightInput.value !== "") {
-            // if user typed just a number, assume px
-          }
           current += delta;
           if (current < 0) current = 0;
           setMH(current + "px");
@@ -509,17 +503,14 @@
         }
 
         if (states.highlight) {
-          manager.itemPick(states.highlight);
+          ol.itemPick(states.highlight);
         }
       };
 
       document.getElementById("init-btn").addEventListener("click", () => {
         init([
-          { id: 101, label: "Option A" },
-          { id: 102, label: "Option B", selected: true },
-          { id: 103, label: "Option C", selected: true },
-          { id: 104, label: "Option D" },
-          { id: 105, label: "Option E" },
+          { id: 301, label: "Attr Item A" },
+          { id: 302, label: "Attr Item B", selected: true },
         ]);
       });
 
@@ -533,7 +524,7 @@
         const statesData = {};
 
         for (const [key, value] of urlParams.entries()) {
-          const match = key.match(/^([voshlcamfed])(\d+)$/);
+          const match = key.match(/^([voshlcamfedy])(\d+)$/);
           if (match) {
             const [, type, id] = match;
             if (type === "v") {

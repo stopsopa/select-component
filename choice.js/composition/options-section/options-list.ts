@@ -1,8 +1,8 @@
-import { OptionListManager, OptionsListElement, OptionListManagerOptions } from "./OptionListManager.js";
+import { OptionsListManager, OptionsListElement, OptionsListManagerOptions } from "./OptionsListManager.js";
 
 export class OptionsList extends HTMLElement {
-  private _manager: OptionListManager<OptionsListElement> | null = null;
-  private _options: OptionListManagerOptions<OptionsListElement> = {};
+  private _manager: OptionsListManager<OptionsListElement> | null = null;
+  private _options: OptionsListManagerOptions<OptionsListElement> = {};
   private _attributeEvents: Record<string, any> = {};
 
   static get observedAttributes() {
@@ -75,7 +75,7 @@ export class OptionsList extends HTMLElement {
       if (val) this._setupAttributeEvent(attr, val);
     });
 
-    this._manager = new OptionListManager(this, this._options);
+    this._manager = new OptionsListManager(this, this._options);
   }
 
   disconnectedCallback() {

@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OptionsList WebComponent Attributes Demo</title>
+    <title>OptionsList WebComponent API Demo</title>
     <link rel="stylesheet" href="../../floating-label-pattern.css" />
-    <link rel="stylesheet" href="OptionListManager.css" />
+    <link rel="stylesheet" href="OptionsListManager.css" />
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -70,8 +70,8 @@
     </style>
   </head>
   <body>
-    <h1>OptionsList WebComponent Attributes Demo</h1>
-    <p>This demo interacts with the component exclusively via <strong>HTML attributes</strong> (setAttribute, toggleAttribute, and on* attributes).</p>
+    <h1>OptionsList WebComponent API Demo</h1>
+    <p>This demo interacts with the component primarily via its <strong>JavaScript API</strong> (methods and event listeners).</p>
     <button id="init-btn" class="gcp-css">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
@@ -114,6 +114,8 @@
     </div>
 
     <div id="instances-area"></div>
+    <hr />
+    <options-list></options-list>
 
     <script type="module">
       import "../../../js/CenterAndHeightResizer.js";
@@ -171,19 +173,6 @@
                     >
                         <options-list 
                             id="ol-${instanceId}" 
-                            label="${states.label || "Search via attrs..."}"
-                            ${states.loading ? "loading" : ""}
-                            ${states.disabled ? "disabled" : ""}
-                            value="${states.value || ""}"
-                            max-height="${states.maxHeight || ""}"
-                            show-footer="${states.showFooter !== false}"
-                            show-filter="${states.showFilter !== false}"
-                            options='${JSON.stringify(localOptions)}'
-                            onInputChange="this.handleDemoInputChange(event)"
-                            onItemPick="this.handleDemoItemClick(event)"
-                            onOk="this.handleDemoOk(event)"
-                            onCancel="this.handleDemoCancel(event)"
-                            onHighlightChange="this.handleDemoHighlightChange(event)"
                         ></options-list>
                     </center-and-height-resizer>
                 </div>
@@ -212,10 +201,10 @@
                     <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
                         <input type="checkbox" data-role="filter-cb" checked> Show Filter
                     </label>
-                    <button class="gcp-css white" data-role="focus-btn">Focus Input (via Method)</button>
-                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty (Attr)</button>
+                    <button class="gcp-css white" data-role="focus-btn">Focus Input</button>
+                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty (Method)</button>
                     <button class="gcp-css white" data-role="reset-empty-btn">Reset Empty</button>
-                    <button class="gcp-css white" data-role="render-btn">Set Custom Render (Attr)</button>
+                    <button class="gcp-css white" data-role="render-btn">Set Custom Render (Method)</button>
                     <button class="gcp-css white" data-role="reset-render-btn">Reset Render</button>
                     <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
                     <button class="gcp-css white" data-role="attach-window-btn">Attach Arrows to Window</button>
@@ -311,7 +300,7 @@
           url.searchParams.set(`d${instanceId}`, disabledCb.checked ? "1" : "0");
           url.searchParams.set(`f${instanceId}`, footerCb.checked ? "1" : "0");
           url.searchParams.set(`e${instanceId}`, filterCb.checked ? "1" : "0");
-          url.searchParams.set(`m${instanceId}`, ol.getAttribute("max-height") || "");
+          url.searchParams.set(`m${instanceId}`, ol.maxHeight || "");
           url.searchParams.set(`s${instanceId}`, searchValOut.textContent === "-" ? "" : searchValOut.textContent);
           url.searchParams.set(`a${instanceId}`, injectLabelInput.value || "");
           url.searchParams.set(`y${instanceId}`, ol.highlight || "");
@@ -321,25 +310,29 @@
         };
 
         const updateDump = () => {
-          const optAttr = ol.getAttribute("options");
-          try {
-            const opts = optAttr ? JSON.parse(optAttr) : [];
-            optionsDump.textContent = JSON.stringify(opts, null, 2);
-          } catch (e) {
-            optionsDump.textContent = "Error parsing options attribute";
-          }
+          optionsDump.textContent = JSON.stringify(localOptions, null, 2);
         };
 
-        // Events via inline attributes (assigned to element instance for 'this' context in web component logic)
-        ol.handleDemoInputChange = (e) => {
+        // Initialize Options via Method
+        ol.setLabel(states.label || "Search options...");
+        ol.setLoading(!!states.loading);
+        ol.setDisabled(!!states.disabled);
+        ol.setValue(states.value || "");
+        ol.setMaxHeight(states.maxHeight || "");
+        ol.showFooter(states.showFooter !== false);
+        ol.showFilter(states.showFilter !== false);
+        ol.updateOptions(localOptions);
+
+        // Events via addEventListener
+        ol.addEventListener("onInputChange", (e) => {
           const val = e.detail.value;
           onChangeCounter++;
           onChangeCountOut.textContent = onChangeCounter;
           searchValOut.textContent = val || "-";
           syncUrl();
-        };
+        });
 
-        ol.handleDemoItemClick = (e) => {
+        ol.addEventListener("onItemPick", (e) => {
           onPickCounter++;
           onPickCountOut.textContent = onPickCounter;
           const item = e.detail.item;
@@ -347,60 +340,60 @@
             if (opt.id === item.id) return { ...opt, selected: !opt.selected };
             return opt;
           });
-          ol.setAttribute("options", JSON.stringify(localOptions));
+          ol.updateOptions(localOptions);
           updateDump();
           syncUrl();
-        };
+        });
 
-        ol.handleDemoOk = () => {
+        ol.addEventListener("onOk", () => {
           onOkCounter++;
           onOkCountOut.textContent = onOkCounter;
-        };
+        });
 
-        ol.handleDemoCancel = () => {
+        ol.addEventListener("onCancel", () => {
           onCancelCounter++;
           onCancelCountOut.textContent = onCancelCounter;
-        };
+        });
 
-        ol.handleDemoHighlightChange = (e) => {
+        ol.addEventListener("onHighlightChange", (e) => {
           onHighlightCounter++;
           onHighlightCountOut.textContent = onHighlightCounter;
           syncUrl();
-        };
+        });
 
         // Handlers
         addBtn.addEventListener("click", () => {
           const id = Math.floor(Math.random() * 100000);
-          localOptions.push({ id, label: "Attr Option " + id });
-          ol.setAttribute("options", JSON.stringify(localOptions));
+          localOptions.push({ id, label: "API Option " + id });
+          ol.updateOptions([...localOptions]);
           updateDump();
           syncUrl();
         });
 
         loadingCb.addEventListener("change", (e) => {
-          ol.toggleAttribute("loading", e.target.checked);
+          ol.setLoading(e.target.checked);
           syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
-          ol.toggleAttribute("disabled", e.target.checked);
+          ol.setDisabled(e.target.checked);
           syncUrl();
         });
 
         footerCb.addEventListener("change", (e) => {
-          ol.setAttribute("show-footer", e.target.checked ? "true" : "false");
+          ol.showFooter(e.target.checked);
           syncUrl();
         });
 
         filterCb.addEventListener("change", (e) => {
-          ol.setAttribute("show-filter", e.target.checked ? "true" : "false");
+          ol.showFilter(e.target.checked);
           syncUrl();
         });
 
-        focusBtn.addEventListener("click", () => ol.setFocus()); // Method is needed for focus
+        focusBtn.addEventListener("click", () => ol.setFocus());
 
         emptyBtn.addEventListener("click", () => {
-          ol.setRenderEmpty(() => "<div style=\"padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🏜️</div>Nothing found...</div>");
+          ol.setRenderEmpty(() => "<div style=\"padding: 30px; text-align: center; background: #f0fff4; border: 2px dashed #c6f6d5; border-radius: 8px; color: #2f855a; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🍃</div>Pure and empty...</div>");
         });
 
         resetEmptyBtn.addEventListener("click", () => {
@@ -409,7 +402,7 @@
 
         renderBtn.addEventListener("click", () => {
           ol.setRenderItem((item) => {
-            return `<div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 4px solid ${item.selected ? '#3182ce' : 'transparent'}; background: ${item.selected ? '#ebf8ff' : 'white'}; margin-bottom: 4px; border-radius: 0 4px 4px 0;"><span style="font-size: 18px;">${item.selected ? '✅' : '⬜'}</span><label style="flex-grow: 1; cursor: pointer;">${item.label}</label>${item.selected ? '<span style="font-size: 12px; color: #3182ce; font-weight: bold;">SELECTED</span>' : ''}</div>`;
+            return `<div style="display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid ${item.selected ? '#38a169' : '#e2e8f0'}; background: ${item.selected ? '#f0fff4' : 'white'}; margin-bottom: 6px; border-radius: 8px; transition: all 0.2s;"><span style="font-size: 20px;">${item.selected ? '⭐' : '⚫'}</span><label style="flex-grow: 1; font-weight: ${item.selected ? 'bold' : 'normal'};">${item.label}</label></div>`;
           });
         });
 
@@ -419,7 +412,7 @@
 
         clearBtn.addEventListener("click", () => {
           localOptions = [];
-          ol.setAttribute("options", "[]");
+          ol.updateOptions([]);
           updateDump();
           syncUrl();
         });
@@ -433,8 +426,9 @@
         });
 
         injectBtn.addEventListener("click", () => {
-          ol.setAttribute("value", injectInput.value);
-          searchValOut.textContent = injectInput.value || "-";
+          const val = injectInput.value;
+          ol.setValue(val);
+          searchValOut.textContent = val || "-";
           syncUrl();
         });
 
@@ -442,13 +436,13 @@
 
         injectLabelInput.addEventListener("input", () => syncUrl());
         injectLabelBtn.addEventListener("click", () => {
-          ol.setAttribute("label", injectLabelInput.value);
+          ol.setLabel(injectLabelInput.value);
           syncUrl();
         });
 
         const setMH = (val) => {
           maxHeightInput.value = val || "";
-          ol.setAttribute("max-height", val || "");
+          ol.setMaxHeight(val);
           syncUrl();
         };
         maxHeightBtn.addEventListener("click", () => setMH(maxHeightInput.value));
@@ -509,8 +503,8 @@
 
       document.getElementById("init-btn").addEventListener("click", () => {
         init([
-          { id: 301, label: "Attr Item A" },
-          { id: 302, label: "Attr Item B", selected: true },
+          { id: 201, label: "API Item 1" },
+          { id: 202, label: "API Item 2", selected: true },
         ]);
       });
 
@@ -524,7 +518,7 @@
         const statesData = {};
 
         for (const [key, value] of urlParams.entries()) {
-          const match = key.match(/^([voshlcamfedy])(\d+)$/);
+          const match = key.match(/^([voshlcamfed])(\d+)$/);
           if (match) {
             const [, type, id] = match;
             if (type === "v") {

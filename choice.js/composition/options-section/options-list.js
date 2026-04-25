@@ -1,4 +1,4 @@
-import { OptionListManager } from "./OptionListManager.js";
+import { OptionsListManager } from "./OptionsListManager.js";
 class OptionsList extends HTMLElement {
   _manager = null;
   _options = {};
@@ -68,7 +68,7 @@ class OptionsList extends HTMLElement {
       const val = this.getAttribute(attr);
       if (val) this._setupAttributeEvent(attr, val);
     });
-    this._manager = new OptionListManager(this, this._options);
+    this._manager = new OptionsListManager(this, this._options);
   }
   disconnectedCallback() {
     this._manager?.destroy();

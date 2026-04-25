@@ -1,4 +1,4 @@
-class OptionListManager {
+class OptionsListManager {
   propOptions;
   propParentElement;
   propFilterContainer;
@@ -13,7 +13,7 @@ class OptionListManager {
   _attachedElements = /* @__PURE__ */ new Map();
   constructor(bindElement, options = {}) {
     this.propParentElement = bindElement;
-    this.propParentElement.classList.add("option-list-manager");
+    this.propParentElement.classList.add("options-list-manager");
     this.propOptions = {
       options: [],
       loading: false,
@@ -340,5 +340,5 @@ class OptionListManager {
   }
 }
 export {
-  OptionListManager
+  OptionsListManager
 };

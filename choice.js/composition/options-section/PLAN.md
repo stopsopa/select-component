@@ -70,7 +70,7 @@ We will have to have some indicator that there is no options to display -> empty
 
 <demo>
 
-I need demo in choice.js/composition/options-section/OptionListManager.html keep it simple, just render our web component 
+I need demo in choice.js/composition/options-section/OptionsListManager.html keep it simple, just render our web component 
 wrapped with js/CenterAndHeightResizer.ts and see how it will work
 
 you can add controls to change or listen for changes from that component 

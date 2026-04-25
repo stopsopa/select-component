@@ -55,8 +55,8 @@ var ContainerManager = class {
   }
 };
 
-// choice.js/composition/options-section/OptionListManager.js
-var OptionListManager = class {
+// choice.js/composition/options-section/OptionsListManager.js
+var OptionsListManager = class {
   propOptions;
   propParentElement;
   propFilterContainer;
@@ -71,7 +71,7 @@ var OptionListManager = class {
   _attachedElements = /* @__PURE__ */ new Map();
   constructor(bindElement, options = {}) {
     this.propParentElement = bindElement;
-    this.propParentElement.classList.add("option-list-manager");
+    this.propParentElement.classList.add("options-list-manager");
     this.propOptions = {
       options: [],
       loading: false,
@@ -677,7 +677,7 @@ var SelectManager = class {
       const popover = this.container.getPopover();
       const div = document.createElement("div");
       popover.appendChild(div);
-      this.options = new OptionListManager(div, options.optionOptions);
+      this.options = new OptionsListManager(div, options.optionsOptions);
     }
     this._unbindClickOutside = clickOutside([this.container.getParent()], () => {
       console.log("hide*");
@@ -705,7 +705,7 @@ var SelectManager = class {
 }
 @es.ts */export {
   ContainerManager,
-  OptionListManager,
+  OptionsListManager,
   SelectManager,
   SelectedListManager,
   clickOutside

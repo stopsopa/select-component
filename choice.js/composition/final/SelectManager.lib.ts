@@ -1,17 +1,17 @@
 import { ContainerManager } from "../container/ContainerManager.js";
-import { OptionListManager, OptionListManagerOptions, OptionsListElement } from "../options-section/OptionListManager.js";
+import { OptionsListManager, OptionsListManagerOptions, OptionsListElement } from "../options-section/OptionsListManager.js";
 import { SelectedListManager, SelectedListManagerOptions, SelectedListElement } from "../select-section/SelectedListManager.js";
 import { clickOutside } from "../unbind/clickOutside.js";
 
 export type SelectManagerOptions<T extends OptionsListElement & SelectedListElement> = {
   selectOptions?: SelectedListManagerOptions<T>;
-  optionOptions?: OptionListManagerOptions<T>;
+  optionsOptions?: OptionsListManagerOptions<T>;
 };
 
 export class SelectManager<T extends OptionsListElement & SelectedListElement> {
   public container: ContainerManager;
   public selected: SelectedListManager<T>;
-  public options: OptionListManager<T>;
+  public options: OptionsListManager<T>;
   private _unbindClickOutside: () => void;
   private _parent: HTMLDivElement;
 
@@ -47,7 +47,7 @@ export class SelectManager<T extends OptionsListElement & SelectedListElement> {
 
       popover.appendChild(div);
 
-      this.options = new OptionListManager(div, options.optionOptions);
+      this.options = new OptionsListManager(div, options.optionsOptions);
     }
 
     // this._unbindClickOutside = clickOutside([this.container.getParent(), this.container.getPopover()], () => {

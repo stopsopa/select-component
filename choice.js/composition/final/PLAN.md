@@ -9,7 +9,7 @@ I would like to create SelectManager.lib.ts class which will combine logic of fe
 
 - choice.js/composition/container/ContainerManager.ts
 - choice.js/composition/select-section/SelectedListManager.ts
-- choice.js/composition/options-section/OptionListManager.ts
+- choice.js/composition/options-section/OptionsListManager.ts
 
 and utility:
 
@@ -17,10 +17,10 @@ and utility:
 
 In it's constructor I would like first initialize ContainerManager.ts against given div
 and then use SelectedListManager.ts on .getTarget()
-and OptionListManager.ts on .getTarget()
+and OptionsListManager.ts on .getTarget()
 
 Then our manager should also expose field 'selected' which would hold reference to SelectedListManager instance
-and field 'options' which would hold reference to OptionListManager instance
+and field 'options' which would hold reference to OptionsListManager instance
 also
 field 'container' which would hold reference to ContainerManager instance
 

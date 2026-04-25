@@ -5,7 +5,7 @@ export type OptionsListElement = {
   [key: string]: any;
 };
 
-export type OptionListManagerOptions<T extends OptionsListElement> = {
+export type OptionsListManagerOptions<T extends OptionsListElement> = {
   options?: T[];
   loading?: boolean;
   value?: string;
@@ -25,8 +25,8 @@ export type OptionListManagerOptions<T extends OptionsListElement> = {
 };
 
 
-export class OptionListManager<T extends OptionsListElement = OptionsListElement> {
-  public propOptions: OptionListManagerOptions<T>;
+export class OptionsListManager<T extends OptionsListElement = OptionsListElement> {
+  public propOptions: OptionsListManagerOptions<T>;
   public propParentElement!: HTMLElement;
   public propFilterContainer!: HTMLElement;
   public propOptionsContainer!: HTMLElement;
@@ -39,9 +39,9 @@ export class OptionListManager<T extends OptionsListElement = OptionsListElement
   public propHighlightedId: string | number | null = null;
   private _attachedElements = new Map<any, (e: KeyboardEvent) => void>();
 
-  constructor(bindElement: HTMLElement, options: OptionListManagerOptions<T> = {}) {
+  constructor(bindElement: HTMLElement, options: OptionsListManagerOptions<T> = {}) {
     this.propParentElement = bindElement;
-    this.propParentElement.classList.add("option-list-manager");
+    this.propParentElement.classList.add("options-list-manager");
     this.propOptions = {
       options: [],
       loading: false,
