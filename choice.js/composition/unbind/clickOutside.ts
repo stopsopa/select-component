@@ -1,16 +1,14 @@
-export function clickOutside(target: HTMLElement, onUnbindEvent: EventListenerOrEventListenerObject) {
+export function clickOutside(targets: HTMLElement | HTMLElement[], callback: (e: Event) => void) {
+  const targetList = Array.isArray(targets) ? targets : [targets];
   const handler = (e: Event) => {
     const node = e.target as Node;
-    if (target && !target.contains(node)) {
-      if (typeof onUnbindEvent === "function") {
-        onUnbindEvent(e);
-      } else if (onUnbindEvent && typeof onUnbindEvent.handleEvent === "function") {
-        onUnbindEvent.handleEvent(e);
-      }
+    const isInside = targetList.some((target) => target && target.contains(node));
+    if (!isInside) {
+      callback(e);
     }
   };
 
-  console.log("document", document, "target: ", target);
+  console.log("document", document, "target: ", targetList);
   // Use capturing phase so we don't miss events if some child stops propagation
   document.addEventListener("click", handler, true);
   document.addEventListener("touchstart", handler, { capture: true, passive: true });

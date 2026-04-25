@@ -45,7 +45,8 @@ export class SelectManager<T extends OptionsListElement & SelectedListElement> {
       this.options = new OptionListManager(div, options.optionOptions);
     }
 
-    this._unbindClickOutside = clickOutside(this.container.getParent(), () => {
+    // this._unbindClickOutside = clickOutside([this.container.getParent(), this.container.getPopover()], () => {
+    this._unbindClickOutside = clickOutside([this.container.getParent()], () => {
       console.log("hide*");
       this.container.hide();
     });

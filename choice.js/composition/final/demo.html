@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -45,6 +45,7 @@
         letter-spacing: 1px;
       }
       .resizer-container {
+        padding-top: 20px;
         border: 1px dashed #ccc;
         margin-bottom: 15px;
         position: relative;
@@ -60,12 +61,7 @@
         padding-top: 1rem;
         border-top: 1px solid #eee;
       }
-      .component-container {
-        width: 100%;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-      }
+
       #init-btn {
         margin-bottom: 20px;
       }
@@ -78,9 +74,46 @@
   </head>
   <body>
     <h1>SelectManager Demo</h1>
-    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | 
-    <a href="" id="reload-link">reload</a> | 
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> |
     <a href="../..">up ..</a>
+
+    <div
+      id="history-indicator"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+      "
+    >
+      <span id="history-time" style="font-family: monospace; opacity: 0.8">No history entry</span>
+      <button
+        id="push-btn"
+        style="
+          cursor: pointer;
+          background: #444;
+          color: #fff;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+          transition: background 0.2s;
+        "
+      >
+        Push State
+      </button>
+    </div>
 
     <div id="instances-area"></div>
 
@@ -89,6 +122,33 @@
       import { SelectManager } from "./SelectManager.rendered.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
+
+      // Global history logic
+      let pushTimeout = null;
+      const historyTime = document.getElementById("history-time");
+      const pushBtn = document.getElementById("push-btn");
+      const updateHistoryIndicator = () => {
+        const now = new Date();
+        historyTime.textContent =
+          "Last push: " +
+          now.getHours().toString().padStart(2, "0") +
+          ":" +
+          now.getMinutes().toString().padStart(2, "0") +
+          ":" +
+          now.getSeconds().toString().padStart(2, "0");
+        pushBtn.style.background = "#28a745";
+        setTimeout(() => (pushBtn.style.background = "#444"), 500);
+      };
+      const pushHistory = () => {
+        if (pushTimeout) clearTimeout(pushTimeout);
+        window.history.pushState({}, "", window.location.href);
+        updateHistoryIndicator();
+      };
+      const debouncedPush = () => {
+        if (pushTimeout) clearTimeout(pushTimeout);
+        pushTimeout = setTimeout(pushHistory, 3000);
+      };
+      pushBtn.addEventListener("click", pushHistory);
 
       let instanceCounter = 0;
 
@@ -103,29 +163,34 @@
         { id: 8, label: "Honeydew" },
       ];
 
-      const init = (config = {}) => {
+      const init = (initialList = [], states = {}) => {
         instanceCounter++;
         const id = instanceCounter;
-        
+
         const section = document.createElement("div");
         section.className = "demo-section";
         section.innerHTML = `
           <h2>Instance #${id}</h2>
           <button class="gcp-css white destroy-btn" id="destroy-${id}">Destroy</button>
           <div class="resizer-container">
-            <center-and-height-resizer id="resizer-${id}" left="20%" center="60%" height="60px">
-              <div id="container-${id}" class="component-container"></div>
+            <center-and-height-resizer 
+              id="resizer-${id}" 
+              left="${states.left || "20%"}" 
+              center="${states.center || "60%"}" 
+              height="${states.height || "60px"}"
+            >
+              <div id="container-${id}"></div>
             </center-and-height-resizer>
           </div>
           <div class="controls">
             <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
-              <input type="checkbox" id="disabled-${id}" ${config.disabled ? 'checked' : ''}> Disabled
+              <input type="checkbox" id="disabled-${id}" ${states.disabled ? "checked" : ""}> Disabled
             </label>
             <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
-              <input type="checkbox" id="loading-${id}" ${config.loading ? 'checked' : ''}> Loading
+              <input type="checkbox" id="loading-${id}" ${states.loading ? "checked" : ""}> Loading
             </label>
             <button class="gcp-css white" id="toggle-error-${id}">Toggle Error</button>
-            <input type="text" id="label-input-${id}" placeholder="Set Label" class="gcp-css" style="padding: 0 10px; width: 100px;">
+            <input type="text" id="label-input-${id}" placeholder="Set Label" class="gcp-css" style="padding: 0 10px; width: 100px;" value="${states.label || ""}">
             <button class="gcp-css white" id="set-label-${id}">Set Label</button>
           </div>
           <div class="controls">
@@ -133,72 +198,177 @@
             <pre id="dump-${id}" style="background: #f8f8f8; padding: 10px; border: 1px solid #eee; border-radius: 4px; font-size: 12px; flex: 1; margin: 0; max-height: 100px; overflow: auto;"></pre>
           </div>
         `;
-        
+
         document.getElementById("instances-area").appendChild(section);
-        
+
+        let selected = [];
+
         const container = document.getElementById(`container-${id}`);
         const dump = document.getElementById(`dump-${id}`);
-        
+        const resizer = document.getElementById(`resizer-${id}`);
+        const disabledCb = document.getElementById(`disabled-${id}`);
+        const loadingCb = document.getElementById(`loading-${id}`);
+        const labelInput = document.getElementById(`label-input-${id}`);
+
         const updateDump = (list) => {
           dump.textContent = JSON.stringify(list, null, 2);
         };
 
         const manager = new SelectManager(container, {
           selectOptions: {
-            label: config.label || "Select Fruit",
-            list: config.list || [],
-            disabled: config.disabled || false,
-            loading: config.loading || false,
-            onDelete: (itemId) => {
-              const newList = manager.selected.propList.filter(i => String(i.id) !== String(itemId));
-              manager.selected.updateList(newList);
-              updateDump(newList);
-            }
+            label: states.label || "Select Fruit",
+            list: initialList || [],
+            disabled: states.disabled || false,
+            loading: states.loading || false,
+            onDelete: (itemId) => {                          
+              selected = selected.filter((i) => String(i.id) !== String(itemId));
+              manager.selected.updateList(selected);
+              updateDump(selected);
+              syncUrl();
+            },
           },
           optionOptions: {
             label: "Search fruit...",
             options: mockOptions,
             maxHeight: "250px",
             onItemPick: (item) => {
-              manager.selected.updateList([item]);
-              manager.container.hide();
-              updateDump([item]);
+              selected = [...selected, item];
+              manager.selected.updateList(selected);
+              updateDump(selected);
+              syncUrl();
             },
             onCancel: () => manager.container.hide(),
             onOk: () => manager.container.hide(),
           },
         });
 
-        updateDump(config.list || []);
+        const syncUrl = () => {
+          const url = new URL(window.location);
+          url.searchParams.delete(`v${id}`);
+          manager.selected.propList.forEach((item) => {
+            url.searchParams.append(`v${id}`, [item.id, item.label].join("|"));
+          });
 
-        document.getElementById(`disabled-${id}`).addEventListener("change", (e) => {
+          url.searchParams.set(`l${id}`, resizer.getAttribute("left") || "20%");
+          url.searchParams.set(`c${id}`, resizer.getAttribute("center") || "60%");
+          url.searchParams.set(`h${id}`, resizer.getAttribute("height") || "60px");
+          url.searchParams.set(`d${id}`, disabledCb.checked ? "1" : "0");
+          url.searchParams.set(`o${id}`, loadingCb.checked ? "1" : "0");
+          url.searchParams.set(`a${id}`, labelInput.value || "");
+          url.searchParams.set(`e${id}`, manager.selected.propContainer.classList.contains("error") ? "1" : "0");
+
+          window.history.replaceState({}, "", url);
+          debouncedPush();
+        };
+
+        if (states.error) {
+          manager.selected.setErrorState(true);
+        }
+
+        updateDump(initialList || []);
+
+        disabledCb.addEventListener("change", (e) => {
           manager.selected.setDisabled(e.target.checked);
+          syncUrl();
         });
 
-        document.getElementById(`loading-${id}`).addEventListener("change", (e) => {
+        loadingCb.addEventListener("change", (e) => {
           manager.selected.setLoading(e.target.checked);
+          syncUrl();
         });
 
         document.getElementById(`toggle-error-${id}`).addEventListener("click", () => {
-          const isError = manager.selected.propElement.classList.contains("error");
+          const isError = manager.selected.propContainer.classList.contains("error");
           manager.selected.setErrorState(!isError);
+          syncUrl();
         });
 
         document.getElementById(`set-label-${id}`).addEventListener("click", () => {
-          const val = document.getElementById(`label-input-${id}`).value;
-          if (val) manager.selected.setLabel(val);
+          const val = labelInput.value;
+          manager.selected.setLabel(val || "Select Fruit");
+          syncUrl();
         });
+
+        resizer.addEventListener("onLeft", () => syncUrl());
+        resizer.addEventListener("onCenter", () => syncUrl());
+        resizer.addEventListener("onHeight", () => syncUrl());
 
         document.getElementById(`destroy-${id}`).addEventListener("click", () => {
           manager.destroy();
           section.remove();
         });
 
+        if (
+          (initialList.length > 0 ||
+            states.disabled ||
+            states.loading ||
+            states.error ||
+            states.label ||
+            states.left ||
+            states.center ||
+            states.height) &&
+          id > 0
+        ) {
+          syncUrl();
+        }
+
         return manager;
       };
 
       document.getElementById("init-btn").addEventListener("click", () => init());
 
+      const loadFromUrl = () => {
+        const instancesArea = document.getElementById("instances-area");
+        instancesArea.innerHTML = "";
+        instanceCounter = 0;
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const groups = {};
+        const statesData = {};
+
+        for (const [key, value] of urlParams.entries()) {
+          const match = key.match(/^([vlchdoae])(\d+)$/);
+          if (match) {
+            const [, type, id] = match;
+            if (type === "v") {
+              if (!groups[id]) groups[id] = [];
+              groups[id].push(value);
+            } else {
+              if (!statesData[id]) statesData[id] = {};
+              const map = {
+                l: "left",
+                c: "center",
+                h: "height",
+                d: "disabled",
+                o: "loading",
+                a: "label",
+                e: "error",
+              };
+              statesData[id][map[type]] = type === "d" || type === "o" || type === "e" ? value === "1" : value;
+            }
+          }
+        }
+
+        const allIds = Array.from(new Set([...Object.keys(groups), ...Object.keys(statesData)])).sort(
+          (a, b) => parseInt(a) - parseInt(b),
+        );
+
+        if (allIds.length === 0) {
+          // Default state if no URL params
+          init([], { label: "Default Configuration" });
+        } else {
+          allIds.forEach((id) => {
+            const list = (groups[id] || []).map((v) => {
+              const parts = v.split("|");
+              return { id: parts[0], label: parts[1] };
+            });
+            init(list, statesData[id] || {});
+          });
+        }
+      };
+
+      window.addEventListener("popstate", loadFromUrl);
+      loadFromUrl();
     </script>
   </body>
 </html>
