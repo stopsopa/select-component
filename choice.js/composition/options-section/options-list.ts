@@ -48,7 +48,7 @@ export class OptionsList extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
 
-    this.shadowRoot!.innerHTML = `<div></div>`;
+    this.shadowRoot!.innerHTML = `<style></style><div></div>`;
 
     this._mountPoint = this.shadowRoot!.querySelector("div") as HTMLElement;
   }
@@ -168,7 +168,6 @@ export class OptionsList extends HTMLElement {
     this._stylesInjected = true;
 
     const style = document.createElement("style");
-    style.className = "injected-css";
 
     // Scenario A: Bundler injected raw CSS string directly
     if (OptionsList.cssText) {
@@ -195,7 +194,7 @@ export class OptionsList extends HTMLElement {
     }
 
     // Remove existing injected CSS if updating dynamically (e.g. css-urls changed)
-    const existingStyle = this.shadowRoot!.querySelector("style.injected-css");
+    const existingStyle = this.shadowRoot!.querySelector("style");
     if (existingStyle) {
       existingStyle.remove();
     }

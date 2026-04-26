@@ -8,7 +8,7 @@ import { SelectedListManager } from "./SelectedListManager.js";
  *
  * Example of Global HTML Declaration in the main document <head>:
  * <head>
- *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
+ *   <meta name="selected-list-css" content="SelectedListManager.css">
  * </head>
  */
 class SelectedList extends HTMLElement {
@@ -39,18 +39,8 @@ class SelectedList extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
-    this.shadowRoot.innerHTML = `
-      <style>
-        :host {
-          display: block;
-        }
-        .component-wrapper {
-          width: 100%;
-        }
-      </style>
-      <div class="component-wrapper"></div>
-    `;
-    this._mountPoint = this.shadowRoot.querySelector(".component-wrapper");
+    this.shadowRoot.innerHTML = `<style></style><div></div>`;
+    this._mountPoint = this.shadowRoot.querySelector("div");
   }
   connectedCallback() {
     this._injectStyles();
@@ -154,7 +144,6 @@ class SelectedList extends HTMLElement {
     if (this._stylesInjected) return;
     this._stylesInjected = true;
     const style = document.createElement("style");
-    style.className = "injected-css";
     // Scenario A: Bundler injected raw CSS string directly
     if (SelectedList.cssText) {
       style.textContent = SelectedList.cssText;
@@ -166,12 +155,18 @@ class SelectedList extends HTMLElement {
       } else {
         urls = SelectedList.defaultCssUrls;
       }
-      if (urls.length > 0) {
-        style.textContent = urls.map((url) => `@import url("${url}");`).join("\n");
-      }
+      urls.forEach((url) => {
+        if (!url) return;
+        style.textContent += `@import url("${url}");
+`;
+      });
     }
-    // Insert as the first element so it can be overridden by specific logic if ever needed
-    this.shadowRoot.insertBefore(style, this.shadowRoot.firstChild);
+    // Remove existing injected CSS if updating dynamically
+    const existingStyle = this.shadowRoot.querySelector("style");
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    this.shadowRoot.appendChild(style);
   }
   // Proxied methods
   setSelected(list) {
