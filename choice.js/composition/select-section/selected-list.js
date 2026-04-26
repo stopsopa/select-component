@@ -1,4 +1,16 @@
 import { SelectedListManager } from "./SelectedListManager.js";
+/**
+ * Injects CSS into the Shadow DOM.
+ * Priority:
+ * 1. SelectedList.cssText (Bundler string injection)
+ * 2. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+ * 3. SelectedList.defaultCssUrls (Global JS property)
+ *
+ * Example of Global HTML Declaration in the main document <head>:
+ * <head>
+ *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
+ * </head>
+ */
 class SelectedList extends HTMLElement {
   _manager = null;
   _options = {};
@@ -8,12 +20,21 @@ class SelectedList extends HTMLElement {
   // 1. For Bundlers: Assign CSS string directly (e.g. import css from './style.css?raw')
   static cssText = "";
   // 2. For Vanilla JS: Default URLs (Vite/Webpack5 will also process import.meta.url)
-  static defaultCssUrls = [
-    new URL("../../floating-label-pattern.css", import.meta.url).href,
-    new URL("SelectedListManager.css", import.meta.url).href
-  ];
+  static defaultCssUrls = [];
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete", "css-urls"];
+    return [
+      "label",
+      "show-input",
+      "value",
+      "disabled",
+      "error",
+      "loading",
+      "selected",
+      "onFocus",
+      "onClear",
+      "onChange",
+      "onDelete"
+    ];
   }
   constructor() {
     super();
@@ -96,14 +117,6 @@ class SelectedList extends HTMLElement {
       case "loading":
         this._manager.setLoading(this.hasAttribute("loading"));
         break;
-      case "css-urls":
-        if (this._stylesInjected) {
-          const styleNodes = this.shadowRoot.querySelectorAll("style.injected-css");
-          styleNodes.forEach((node) => node.remove());
-          this._stylesInjected = false;
-          this._injectStyles();
-        }
-        break;
       case "selected":
         try {
           const list = JSON.parse(newValue);
@@ -137,19 +150,6 @@ class SelectedList extends HTMLElement {
       this.addEventListener(internalEventName, this._attributeEvents[name]);
     }
   }
-  /**
-   * Injects CSS into the Shadow DOM.
-   * Priority:
-   * 1. SelectedList.cssText (Bundler string injection)
-   * 2. <selected-list css-urls="/path1.css, /path2.css"> (Instance-level HTML attribute)
-   * 3. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
-   * 4. SelectedList.defaultCssUrls (Global JS property)
-   *
-   * Example of Global HTML Declaration in the main document <head>:
-   * <head>
-   *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
-   * </head>
-   */
   _injectStyles() {
     if (this._stylesInjected) return;
     this._stylesInjected = true;
@@ -160,11 +160,8 @@ class SelectedList extends HTMLElement {
       style.textContent = SelectedList.cssText;
     } else {
       let urls = [];
-      const urlsAttr = this.getAttribute("css-urls");
       const metaTag = document.querySelector('meta[name="selected-list-css"]');
-      if (urlsAttr) {
-        urls = urlsAttr.split(",").map((s) => s.trim());
-      } else if (metaTag && metaTag.getAttribute("content")) {
+      if (metaTag && metaTag.getAttribute("content")) {
         urls = metaTag.getAttribute("content").split(",").map((s) => s.trim());
       } else {
         urls = SelectedList.defaultCssUrls;

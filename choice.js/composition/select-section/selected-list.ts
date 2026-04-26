@@ -1,5 +1,17 @@
 import { SelectedListManager, SelectedListElement, SelectedListManagerOptions } from "./SelectedListManager.js";
 
+/**
+ * Injects CSS into the Shadow DOM.
+ * Priority:
+ * 1. SelectedList.cssText (Bundler string injection)
+ * 2. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+ * 3. SelectedList.defaultCssUrls (Global JS property)
+ *
+ * Example of Global HTML Declaration in the main document <head>:
+ * <head>
+ *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
+ * </head>
+ */
 export class SelectedList extends HTMLElement {
   private _manager: SelectedListManager<SelectedListElement> | null = null;
   private _options: SelectedListManagerOptions<SelectedListElement> = {};
@@ -9,15 +21,24 @@ export class SelectedList extends HTMLElement {
 
   // 1. For Bundlers: Assign CSS string directly (e.g. import css from './style.css?raw')
   static cssText: string = "";
-  
+
   // 2. For Vanilla JS: Default URLs (Vite/Webpack5 will also process import.meta.url)
-  static defaultCssUrls: string[] = [
-    new URL("../../floating-label-pattern.css", import.meta.url).href,
-    new URL("SelectedListManager.css", import.meta.url).href
-  ];
+  static defaultCssUrls: string[] = [];
 
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete", "css-urls"];
+    return [
+      "label",
+      "show-input",
+      "value",
+      "disabled",
+      "error",
+      "loading",
+      "selected",
+      "onFocus",
+      "onClear",
+      "onChange",
+      "onDelete",
+    ];
   }
 
   constructor() {
@@ -88,7 +109,6 @@ export class SelectedList extends HTMLElement {
     this._manager = new SelectedListManager(this._mountPoint, this._options);
   }
 
-
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     if (!this._manager) return;
 
@@ -111,15 +131,6 @@ export class SelectedList extends HTMLElement {
       case "loading":
         this._manager.setLoading(this.hasAttribute("loading"));
         break;
-      case "css-urls":
-        // If attribute changes at runtime, clear and reinject styles
-        if (this._stylesInjected) {
-          const styleNodes = this.shadowRoot!.querySelectorAll('style.injected-css');
-          styleNodes.forEach(node => node.remove());
-          this._stylesInjected = false;
-          this._injectStyles();
-        }
-        break;
       case "selected":
         try {
           const list = JSON.parse(newValue);
@@ -136,18 +147,18 @@ export class SelectedList extends HTMLElement {
         break;
     }
   }
- 
+
   private _setupAttributeEvent(name: string, value: string) {
     const eventName = name.slice(2).toLowerCase(); // onFocus -> focus
     // Actually, our internal events are dispatched with names like "onFocus"
     // Let's use the exact name for now.
     const internalEventName = name;
- 
+
     if (this._attributeEvents[name]) {
       this.removeEventListener(internalEventName, this._attributeEvents[name]);
       delete this._attributeEvents[name];
     }
- 
+
     if (value) {
       this._attributeEvents[name] = (e: any) => {
         new Function("event", value).call(this, e);
@@ -156,19 +167,7 @@ export class SelectedList extends HTMLElement {
     }
   }
 
-  /**
-   * Injects CSS into the Shadow DOM.
-   * Priority:
-   * 1. SelectedList.cssText (Bundler string injection)
-   * 2. <selected-list css-urls="/path1.css, /path2.css"> (Instance-level HTML attribute)
-   * 3. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
-   * 4. SelectedList.defaultCssUrls (Global JS property)
-   *
-   * Example of Global HTML Declaration in the main document <head>:
-   * <head>
-   *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
-   * </head>
-   */
+
   private _injectStyles() {
     if (this._stylesInjected) return;
     this._stylesInjected = true;
@@ -179,23 +178,23 @@ export class SelectedList extends HTMLElement {
     // Scenario A: Bundler injected raw CSS string directly
     if (SelectedList.cssText) {
       style.textContent = SelectedList.cssText;
-    } 
-    // Scenario B: Load from URLs (Local Attribute > Global Meta Tag > Default Static Property)
+    }
+    // Scenario B: Load from URLs (Global Meta Tag > Default Static Property)
     else {
       let urls: string[] = [];
-      const urlsAttr = this.getAttribute("css-urls");
       const metaTag = document.querySelector('meta[name="selected-list-css"]');
-      
-      if (urlsAttr) {
-        urls = urlsAttr.split(",").map(s => s.trim());
-      } else if (metaTag && metaTag.getAttribute("content")) {
-        urls = metaTag.getAttribute("content")!.split(",").map(s => s.trim());
+
+      if (metaTag && metaTag.getAttribute("content")) {
+        urls = metaTag
+          .getAttribute("content")!
+          .split(",")
+          .map((s) => s.trim());
       } else {
         urls = SelectedList.defaultCssUrls;
       }
-      
+
       if (urls.length > 0) {
-        style.textContent = urls.map(url => `@import url("${url}");`).join("\n");
+        style.textContent = urls.map((url) => `@import url("${url}");`).join("\n");
       }
     }
 
@@ -240,11 +239,18 @@ export class SelectedList extends HTMLElement {
     this._manager?.setShowInput(state);
   }
 
-  public setRenderItem(renderer?: (item: SelectedListElement, defaultRender: (item: SelectedListElement) => HTMLElement) => HTMLElement) {
+  public setRenderItem(
+    renderer?: (item: SelectedListElement, defaultRender: (item: SelectedListElement) => HTMLElement) => HTMLElement,
+  ) {
     this._manager?.setRenderItem(renderer);
   }
 
-  public setRenderList(renderer?: (selected: SelectedListElement[], defaultRender: (selected: SelectedListElement[]) => HTMLElement[]) => HTMLElement[]) {
+  public setRenderList(
+    renderer?: (
+      selected: SelectedListElement[],
+      defaultRender: (selected: SelectedListElement[]) => HTMLElement[],
+    ) => HTMLElement[],
+  ) {
     this._manager?.setRenderList(renderer);
   }
 

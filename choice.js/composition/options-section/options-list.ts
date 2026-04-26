@@ -1,9 +1,30 @@
 import { OptionsListManager, OptionsListElement, OptionsListManagerOptions } from "./OptionsListManager.js";
 
+/**
+ * Injects CSS into the Shadow DOM.
+ * Priority:
+ * 1. OptionsList.cssText (Bundler string injection)
+ * 2. <meta name="options-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+ * 3. OptionsList.defaultCssUrls (Global JS property)
+ *
+ * Example of Global HTML Declaration in the main document <head>:
+ * <head>
+ *   <meta name="options-list-css" content="OptionsListManager.css" />
+ * </head>
+ */
 export class OptionsList extends HTMLElement {
+  /**
+   * Bundlers can inject raw CSS string here to avoid HTTP requests entirely.
+   * e.g., OptionsList.cssText = import('./OptionsListManager.css?raw');
+   */
+  static cssText: string = "";
+  static defaultCssUrls: string[] = [];
+
   private _manager: OptionsListManager<OptionsListElement> | null = null;
   private _options: OptionsListManagerOptions<OptionsListElement> = {};
   private _attributeEvents: Record<string, any> = {};
+  private _stylesInjected: boolean = false;
+  private _mountPoint!: HTMLElement;
 
   static get observedAttributes() {
     return [
@@ -25,9 +46,16 @@ export class OptionsList extends HTMLElement {
 
   constructor() {
     super();
+    this.attachShadow({ mode: "open" });
+
+    this.shadowRoot!.innerHTML = `<div></div>`;
+
+    this._mountPoint = this.shadowRoot!.querySelector("div") as HTMLElement;
   }
 
   connectedCallback() {
+    this._injectStyles();
+
     if (this._manager) return;
 
     this._options = {
@@ -71,9 +99,8 @@ export class OptionsList extends HTMLElement {
       if (val) this._setupAttributeEvent(attr, val);
     });
 
-    this._manager = new OptionsListManager(this, this._options);
+    this._manager = new OptionsListManager(this._mountPoint, this._options);
   }
-
 
   disconnectedCallback() {
     this._manager?.destroy();
@@ -135,6 +162,47 @@ export class OptionsList extends HTMLElement {
     }
   }
 
+
+  private _injectStyles() {
+    if (this._stylesInjected) return;
+    this._stylesInjected = true;
+
+    const style = document.createElement("style");
+    style.className = "injected-css";
+
+    // Scenario A: Bundler injected raw CSS string directly
+    if (OptionsList.cssText) {
+      style.textContent = OptionsList.cssText;
+    }
+    // Scenario B: Load from URLs (Global Meta Tag > Default Static Property)
+    else {
+      let urls: string[] = [];
+      const metaTag = document.querySelector('meta[name="options-list-css"]');
+
+      if (metaTag && metaTag.getAttribute("content")) {
+        urls = metaTag
+          .getAttribute("content")!
+          .split(",")
+          .map((s) => s.trim());
+      } else {
+        urls = OptionsList.defaultCssUrls;
+      }
+
+      urls.forEach((url) => {
+        if (!url) return;
+        style.textContent += `@import url("${url}");\n`;
+      });
+    }
+
+    // Remove existing injected CSS if updating dynamically (e.g. css-urls changed)
+    const existingStyle = this.shadowRoot!.querySelector("style.injected-css");
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    this.shadowRoot!.appendChild(style);
+  }
+
   // Proxied methods
   public setMaxHeight(maxHeight?: string) {
     if (maxHeight) this.setAttribute("max-height", maxHeight);
@@ -190,7 +258,10 @@ export class OptionsList extends HTMLElement {
   }
 
   public setRenderItem(
-    renderer?: (item: OptionsListElement, defaultRender: (item: OptionsListElement) => string | HTMLElement) => string | HTMLElement,
+    renderer?: (
+      item: OptionsListElement,
+      defaultRender: (item: OptionsListElement) => string | HTMLElement,
+    ) => string | HTMLElement,
   ) {
     this._manager?.setRenderItem(renderer);
   }

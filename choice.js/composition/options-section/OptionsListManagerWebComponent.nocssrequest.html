@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OptionsList WebComponent Attributes Demo</title>
     <link rel="stylesheet" href="../../floating-label-pattern.css" />
-    <link rel="stylesheet" href="OptionsListManager.css" />
+    <!-- No meta tag or link tag here because we are injecting CSS via JS to avoid extra requests -->
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -60,18 +60,29 @@
         box-sizing: border-box;
         margin-top: 10px;
       }
-      .gcp-css {
-        font-size: 13px !important;
-        height: 32px !important;
-      }
       #init-btn {
         margin-bottom: 20px;
       }
     </style>
   </head>
   <body>
-    <h1>OptionsList WebComponent Attributes Demo</h1>
-    <p>This demo interacts with the component exclusively via <strong>HTML attributes</strong> (setAttribute, toggleAttribute, and on* attributes).</p>
+    <h1>Load CSS in esm</h1>
+    <ace-editor lang="javascript">
+      <script type="ace">
+
+        import { OptionsList } from "./options-list.js";
+
+        // 1. If using a bundler like Vite/Webpack:
+        // OptionsList.cssText = (await import("./OptionsListManager.css?raw")).default;
+
+        const css1 = await fetch("../../floating-label-pattern.css").then(r => r.text());
+        // where floating-label-pattern.css is not needed really, but is here to show how to load multiple css files
+
+        const css2 = await fetch("./OptionsListManager.css").then(r => r.text());
+        OptionsList.cssText = css1 + "\n" + css2;
+      </script>
+    </ace-editor>
+    <hr />
     <button id="init-btn" class="gcp-css">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
@@ -117,7 +128,13 @@
 
     <script type="module">
       import "../../../js/CenterAndHeightResizer.js";
-      import "./options-list.js";
+      import { OptionsList } from "./options-list.js";
+
+      // 1. If using a bundler like Vite/Webpack:
+      // OptionsList.cssText = (await import("./OptionsListManager.css?raw")).default;
+      const css1 = await fetch("../../floating-label-pattern.css").then((r) => r.text());
+      const css2 = await fetch("./OptionsListManager.css").then((r) => r.text());
+      OptionsList.cssText = css1 + "\n" + css2;
 
       document.getElementById("reload-link").href = window.location.pathname;
 
@@ -400,7 +417,10 @@
         focusBtn.addEventListener("click", () => ol.setFocus()); // Method is needed for focus
 
         emptyBtn.addEventListener("click", () => {
-          ol.setRenderEmpty(() => "<div style=\"padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;\"><div style=\"font-size: 24px; margin-bottom: 10px;\">🏜️</div>Nothing found...</div>");
+          ol.setRenderEmpty(
+            () =>
+              '<div style="padding: 30px; text-align: center; background: #fff5f5; border: 2px dashed #ffcccc; border-radius: 8px; color: #e53e3e; font-weight: bold;"><div style="font-size: 24px; margin-bottom: 10px;">🏜️</div>Nothing found...</div>',
+          );
         });
 
         resetEmptyBtn.addEventListener("click", () => {
@@ -409,7 +429,7 @@
 
         renderBtn.addEventListener("click", () => {
           ol.setRenderItem((item) => {
-            return `<div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 4px solid ${item.selected ? '#3182ce' : 'transparent'}; background: ${item.selected ? '#ebf8ff' : 'white'}; margin-bottom: 4px; border-radius: 0 4px 4px 0;"><span style="font-size: 18px;">${item.selected ? '✅' : '⬜'}</span><label style="flex-grow: 1; cursor: pointer;">${item.label}</label>${item.selected ? '<span style="font-size: 12px; color: #3182ce; font-weight: bold;">SELECTED</span>' : ''}</div>`;
+            return `<div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-left: 4px solid ${item.selected ? "#3182ce" : "transparent"}; background: ${item.selected ? "#ebf8ff" : "white"}; margin-bottom: 4px; border-radius: 0 4px 4px 0;"><span style="font-size: 18px;">${item.selected ? "✅" : "⬜"}</span><label style="flex-grow: 1; cursor: pointer;">${item.label}</label>${item.selected ? '<span style="font-size: 12px; color: #3182ce; font-weight: bold;">SELECTED</span>' : ""}</div>`;
           });
         });
 
@@ -545,7 +565,8 @@
                 a: "label",
                 y: "highlight",
               };
-              statesData[id][map[type]] = type === "o" || type === "d" || type === "f" || type === "e" ? value === "1" : value;
+              statesData[id][map[type]] =
+                type === "o" || type === "d" || type === "f" || type === "e" ? value === "1" : value;
             }
           }
         }
@@ -569,5 +590,10 @@
       window.addEventListener("popstate", loadFromUrl);
       loadFromUrl();
     </script>
+    <script
+      type="module"
+      src="https://stopsopa.github.io/ace-editor-webcomponent/ace-web-component.js"
+      data-main-ace="https://stopsopa.github.io/ace-editor-webcomponent/noprettier/ace/ace-builds-1.43.4/src-min-noconflict/ace.js"
+    ></script>
   </body>
 </html>
