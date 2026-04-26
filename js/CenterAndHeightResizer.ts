@@ -36,7 +36,6 @@ export class CenterAndHeightResizer extends HTMLElement {
           align-items: stretch;
         }
         .center-column {
-          flex-grow: 1;
           display: flex;
           flex-direction: column;
           min-width: 0;
@@ -55,6 +54,9 @@ export class CenterAndHeightResizer extends HTMLElement {
         .side-div {
           flex-shrink: 0;
           box-sizing: border-box;
+        }
+        #right-div {
+          flex-grow: 1;
         }
         .resizer {
           flex-shrink: 0;
@@ -138,7 +140,7 @@ export class CenterAndHeightResizer extends HTMLElement {
         this.leftDiv.style.width = newValue;
         break;
       case "center":
-        this.rightDiv.style.width = newValue;
+        this.centerDiv.style.width = newValue;
         break;
       case "height":
         this.centerDiv.style.height = newValue;
@@ -155,27 +157,27 @@ export class CenterAndHeightResizer extends HTMLElement {
     this.resizerBottom = this.shadowRoot!.getElementById("resizer-bottom") as HTMLElement;
 
     const attrLeft = this.getAttribute("left");
-    const attrRight = this.getAttribute("center");
+    const attrCenter = this.getAttribute("center");
     const attrHeight = this.getAttribute("height");
 
     if (attrLeft) {
       this.leftDiv.style.width = attrLeft;
     }
 
-    if (attrRight) {
-      this.rightDiv.style.width = attrRight;
+    if (attrCenter) {
+      this.centerDiv.style.width = attrCenter;
     }
 
     if (attrHeight) {
       this.centerDiv.style.height = attrHeight;
     }
 
-    this.setupResizer(this.resizerLeft, this.leftDiv, false);
-    this.setupResizer(this.resizerRight, this.rightDiv, true);
+    this.setupResizer(this.resizerLeft, this.leftDiv, "left", false);
+    this.setupResizer(this.resizerRight, this.centerDiv, "center", false);
     this.setupHeightResizer(this.resizerBottom, this.centerDiv);
   }
 
-  setupResizer(handle: HTMLElement, target: HTMLElement, isRightSide: boolean) {
+  setupResizer(handle: HTMLElement, target: HTMLElement, attrName: string, invert: boolean) {
     handle.addEventListener("mousedown", (e: MouseEvent) => {
       e.preventDefault();
       handle.classList.add("active");
@@ -184,18 +186,14 @@ export class CenterAndHeightResizer extends HTMLElement {
 
       const onMouseMove = (moveEvent: MouseEvent) => {
         let diff = moveEvent.clientX - startX;
-        if (isRightSide) diff = -diff;
+        if (invert) diff = -diff;
         let newWidth = startWidth + diff;
         newWidth = Math.max(0, newWidth);
         target.style.width = newWidth + "px";
 
-        if (isRightSide) {
-          this.setAttribute("center", newWidth + "px");
-          this.dispatchEvent(new CustomEvent("onCenter", { detail: { width: newWidth } }));
-        } else {
-          this.setAttribute("left", newWidth + "px");
-          this.dispatchEvent(new CustomEvent("onLeft", { detail: { width: newWidth } }));
-        }
+        this.setAttribute(attrName, newWidth + "px");
+        const eventName = attrName === "left" ? "onLeft" : "onCenter";
+        this.dispatchEvent(new CustomEvent(eventName, { detail: { width: newWidth } }));
       };
 
       const onMouseUp = () => {
