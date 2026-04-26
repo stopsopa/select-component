@@ -3,13 +3,36 @@ class SelectedList extends HTMLElement {
   _manager = null;
   _options = {};
   _attributeEvents = {};
+  _mountPoint;
+  _stylesInjected = false;
+  // 1. For Bundlers: Assign CSS string directly (e.g. import css from './style.css?raw')
+  static cssText = "";
+  // 2. For Vanilla JS: Default URLs (Vite/Webpack5 will also process import.meta.url)
+  static defaultCssUrls = [
+    new URL("../../floating-label-pattern.css", import.meta.url).href,
+    new URL("SelectedListManager.css", import.meta.url).href
+  ];
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete"];
+    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete", "css-urls"];
   }
   constructor() {
     super();
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: block;
+        }
+        .component-wrapper {
+          width: 100%;
+        }
+      </style>
+      <div class="component-wrapper"></div>
+    `;
+    this._mountPoint = this.shadowRoot.querySelector(".component-wrapper");
   }
   connectedCallback() {
+    this._injectStyles();
     if (this._manager) return;
     this._options = {
       label: this.getAttribute("label") || "",
@@ -50,7 +73,7 @@ class SelectedList extends HTMLElement {
       const val = this.getAttribute(attr);
       if (val) this._setupAttributeEvent(attr, val);
     });
-    this._manager = new SelectedListManager(this, this._options);
+    this._manager = new SelectedListManager(this._mountPoint, this._options);
   }
   attributeChangedCallback(name, _oldValue, newValue) {
     if (!this._manager) return;
@@ -72,6 +95,14 @@ class SelectedList extends HTMLElement {
         break;
       case "loading":
         this._manager.setLoading(this.hasAttribute("loading"));
+        break;
+      case "css-urls":
+        if (this._stylesInjected) {
+          const styleNodes = this.shadowRoot.querySelectorAll("style.injected-css");
+          styleNodes.forEach((node) => node.remove());
+          this._stylesInjected = false;
+          this._injectStyles();
+        }
         break;
       case "selected":
         try {
@@ -105,6 +136,45 @@ class SelectedList extends HTMLElement {
       };
       this.addEventListener(internalEventName, this._attributeEvents[name]);
     }
+  }
+  /**
+   * Injects CSS into the Shadow DOM.
+   * Priority:
+   * 1. SelectedList.cssText (Bundler string injection)
+   * 2. <selected-list css-urls="/path1.css, /path2.css"> (Instance-level HTML attribute)
+   * 3. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+   * 4. SelectedList.defaultCssUrls (Global JS property)
+   *
+   * Example of Global HTML Declaration in the main document <head>:
+   * <head>
+   *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
+   * </head>
+   */
+  _injectStyles() {
+    if (this._stylesInjected) return;
+    this._stylesInjected = true;
+    const style = document.createElement("style");
+    style.className = "injected-css";
+    // Scenario A: Bundler injected raw CSS string directly
+    if (SelectedList.cssText) {
+      style.textContent = SelectedList.cssText;
+    } else {
+      let urls = [];
+      const urlsAttr = this.getAttribute("css-urls");
+      const metaTag = document.querySelector('meta[name="selected-list-css"]');
+      if (urlsAttr) {
+        urls = urlsAttr.split(",").map((s) => s.trim());
+      } else if (metaTag && metaTag.getAttribute("content")) {
+        urls = metaTag.getAttribute("content").split(",").map((s) => s.trim());
+      } else {
+        urls = SelectedList.defaultCssUrls;
+      }
+      if (urls.length > 0) {
+        style.textContent = urls.map((url) => `@import url("${url}");`).join("\n");
+      }
+    }
+    // Insert as the first element so it can be overridden by specific logic if ever needed
+    this.shadowRoot.insertBefore(style, this.shadowRoot.firstChild);
   }
   // Proxied methods
   setSelected(list) {

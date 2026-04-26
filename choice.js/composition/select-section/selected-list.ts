@@ -4,16 +4,44 @@ export class SelectedList extends HTMLElement {
   private _manager: SelectedListManager<SelectedListElement> | null = null;
   private _options: SelectedListManagerOptions<SelectedListElement> = {};
   private _attributeEvents: Record<string, any> = {};
+  private _mountPoint!: HTMLElement;
+  private _stylesInjected = false;
+
+  // 1. For Bundlers: Assign CSS string directly (e.g. import css from './style.css?raw')
+  static cssText: string = "";
+  
+  // 2. For Vanilla JS: Default URLs (Vite/Webpack5 will also process import.meta.url)
+  static defaultCssUrls: string[] = [
+    new URL("../../floating-label-pattern.css", import.meta.url).href,
+    new URL("SelectedListManager.css", import.meta.url).href
+  ];
 
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete"];
+    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete", "css-urls"];
   }
 
   constructor() {
     super();
+    this.attachShadow({ mode: "open" });
+
+    this.shadowRoot!.innerHTML = `
+      <style>
+        :host {
+          display: block;
+        }
+        .component-wrapper {
+          width: 100%;
+        }
+      </style>
+      <div class="component-wrapper"></div>
+    `;
+
+    this._mountPoint = this.shadowRoot!.querySelector(".component-wrapper") as HTMLElement;
   }
 
   connectedCallback() {
+    this._injectStyles();
+
     if (this._manager) return;
 
     this._options = {
@@ -57,7 +85,7 @@ export class SelectedList extends HTMLElement {
       if (val) this._setupAttributeEvent(attr, val);
     });
 
-    this._manager = new SelectedListManager(this, this._options);
+    this._manager = new SelectedListManager(this._mountPoint, this._options);
   }
 
 
@@ -82,6 +110,15 @@ export class SelectedList extends HTMLElement {
         break;
       case "loading":
         this._manager.setLoading(this.hasAttribute("loading"));
+        break;
+      case "css-urls":
+        // If attribute changes at runtime, clear and reinject styles
+        if (this._stylesInjected) {
+          const styleNodes = this.shadowRoot!.querySelectorAll('style.injected-css');
+          styleNodes.forEach(node => node.remove());
+          this._stylesInjected = false;
+          this._injectStyles();
+        }
         break;
       case "selected":
         try {
@@ -117,6 +154,53 @@ export class SelectedList extends HTMLElement {
       };
       this.addEventListener(internalEventName, this._attributeEvents[name]);
     }
+  }
+
+  /**
+   * Injects CSS into the Shadow DOM.
+   * Priority:
+   * 1. SelectedList.cssText (Bundler string injection)
+   * 2. <selected-list css-urls="/path1.css, /path2.css"> (Instance-level HTML attribute)
+   * 3. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+   * 4. SelectedList.defaultCssUrls (Global JS property)
+   *
+   * Example of Global HTML Declaration in the main document <head>:
+   * <head>
+   *   <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css">
+   * </head>
+   */
+  private _injectStyles() {
+    if (this._stylesInjected) return;
+    this._stylesInjected = true;
+
+    const style = document.createElement("style");
+    style.className = "injected-css";
+
+    // Scenario A: Bundler injected raw CSS string directly
+    if (SelectedList.cssText) {
+      style.textContent = SelectedList.cssText;
+    } 
+    // Scenario B: Load from URLs (Local Attribute > Global Meta Tag > Default Static Property)
+    else {
+      let urls: string[] = [];
+      const urlsAttr = this.getAttribute("css-urls");
+      const metaTag = document.querySelector('meta[name="selected-list-css"]');
+      
+      if (urlsAttr) {
+        urls = urlsAttr.split(",").map(s => s.trim());
+      } else if (metaTag && metaTag.getAttribute("content")) {
+        urls = metaTag.getAttribute("content")!.split(",").map(s => s.trim());
+      } else {
+        urls = SelectedList.defaultCssUrls;
+      }
+      
+      if (urls.length > 0) {
+        style.textContent = urls.map(url => `@import url("${url}");`).join("\n");
+      }
+    }
+
+    // Insert as the first element so it can be overridden by specific logic if ever needed
+    this.shadowRoot!.insertBefore(style, this.shadowRoot!.firstChild);
   }
 
   // Proxied methods

@@ -4,8 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SelectedListManager WebComponent Templates Demo</title>
+    <!-- Global CSS configuration for the SelectedList component -->
+    <meta name="selected-list-css" content="../../floating-label-pattern.css, SelectedListManager.css" />
     <link rel="stylesheet" href="../../floating-label-pattern.css" />
-    <link rel="stylesheet" href="SelectedListManager.css" />
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -71,7 +72,9 @@
       .gcp-css:hover {
         background: #1557b0 !important;
         border-color: #1557b0 !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.12),
+          0 1px 2px rgba(0, 0, 0, 0.24) !important;
       }
       .gcp-css.white {
         background: #fff !important;
@@ -105,13 +108,48 @@
   <body>
     <h1>SelectedListManager WebComponent Templates</h1>
     <p>
-      This demo uses <code>&lt;selected-list&gt;</code> web component. Use buttons below to set custom templates via JavaScript API.
+      This demo uses <code>&lt;selected-list&gt;</code> web component. Use buttons below to set custom templates via
+      JavaScript API.
     </p>
-    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> |
+    <a href=".">up ..</a>
 
-    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px);">
-        <span id="history-time" style="font-family: monospace; opacity: 0.8;">No history entry</span>
-        <button id="push-btn" style="cursor: pointer; background: #444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; transition: background 0.2s;">Push State</button>
+    <div
+      id="history-indicator"
+      style="
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+      "
+    >
+      <span id="history-time" style="font-family: monospace; opacity: 0.8">No history entry</span>
+      <button
+        id="push-btn"
+        style="
+          cursor: pointer;
+          background: #444;
+          color: #fff;
+          border: none;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-weight: bold;
+          transition: background 0.2s;
+        "
+      >
+        Push State
+      </button>
     </div>
 
     <div id="instances-area"></div>
@@ -314,7 +352,7 @@
         sl.addEventListener("onChange", (e) => {
           inputValueOut.textContent = e.detail.value || "-";
           onChangeCounter.textContent = ++counter;
-          lastKeyOut.textContent = e.detail.key || (typeof e.detail.key);
+          lastKeyOut.textContent = e.detail.key || typeof e.detail.key;
 
           const originalEvent = e.detail.originalEvent;
           if (originalEvent.type === "keydown") {
@@ -361,68 +399,68 @@
         });
 
         customRenderBtn.addEventListener("click", () => {
-            sl.setRenderItem(function(item, defaultRender) {
-                const el = document.createElement("div");
-                el.className = "element";
-                el.dataset.id = String(item.id);
-                el.style.border = `2px solid ${item.color || "black"}`;
-                el.style.display = "flex";
-                el.style.alignItems = "center";
-                el.style.gap = "5px";
-                el.style.padding = "5px";
-                el.style.background = "#fff";
+          sl.setRenderItem(function (item, defaultRender) {
+            const el = document.createElement("div");
+            el.className = "element";
+            el.dataset.id = String(item.id);
+            el.style.border = `2px solid ${item.color || "black"}`;
+            el.style.display = "flex";
+            el.style.alignItems = "center";
+            el.style.gap = "5px";
+            el.style.padding = "5px";
+            el.style.background = "#fff";
 
-                if (item.img) {
-                    const img = document.createElement("img");
-                    img.src = `../img/${item.img}`;
-                    img.style.width = "20px";
-                    img.style.height = "20px";
-                    img.style.objectFit = "contain";
-                    el.appendChild(img);
-                }
+            if (item.img) {
+              const img = document.createElement("img");
+              img.src = `../img/${item.img}`;
+              img.style.width = "20px";
+              img.style.height = "20px";
+              img.style.objectFit = "contain";
+              el.appendChild(img);
+            }
 
-                const label = document.createElement("label");
-                label.textContent = item.label;
+            const label = document.createElement("label");
+            label.textContent = item.label;
 
-                const del = document.createElement("div");
-                del.dataset.remove = String(item.id);
+            const del = document.createElement("div");
+            del.dataset.remove = String(item.id);
 
-                el.appendChild(label);
-                el.appendChild(del);
+            el.appendChild(label);
+            el.appendChild(del);
 
-                return el;
-            });
+            return el;
+          });
         });
 
         customListRenderBtn.addEventListener("click", () => {
-            sl.setRenderList(function(selected, defaultRenderList) {
-                // Use the provided defaultRenderList(selected) to get the list of elements.
-                // This automatically handles the context and uses the current renderItem.
-                const elements = defaultRenderList(selected);
+          sl.setRenderList(function (selected, defaultRenderList) {
+            // Use the provided defaultRenderList(selected) to get the list of elements.
+            // This automatically handles the context and uses the current renderItem.
+            const elements = defaultRenderList(selected);
 
-                const groups = [];
-                for (let i = 0; i < elements.length; i += 3) {
-                    const groupDiv = document.createElement("div");
-                    groupDiv.style.border = "1px solid #1a73e8";
-                    groupDiv.style.borderRadius = "8px";
-                    groupDiv.style.padding = "8px";
-                    groupDiv.style.margin = "4px";
-                    groupDiv.style.display = "flex";
-                    groupDiv.style.gap = "8px";
-                    groupDiv.style.flexWrap = "wrap";
-                    groupDiv.style.background = "#e8f0fe";
-                    groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
-                    const chunk = elements.slice(i, i + 3);
-                    chunk.forEach((el) => groupDiv.appendChild(el));
-                    groups.push(groupDiv);
-                }
-                return groups;
-            });
+            const groups = [];
+            for (let i = 0; i < elements.length; i += 3) {
+              const groupDiv = document.createElement("div");
+              groupDiv.style.border = "1px solid #1a73e8";
+              groupDiv.style.borderRadius = "8px";
+              groupDiv.style.padding = "8px";
+              groupDiv.style.margin = "4px";
+              groupDiv.style.display = "flex";
+              groupDiv.style.gap = "8px";
+              groupDiv.style.flexWrap = "wrap";
+              groupDiv.style.background = "#e8f0fe";
+              groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+              const chunk = elements.slice(i, i + 3);
+              chunk.forEach((el) => groupDiv.appendChild(el));
+              groups.push(groupDiv);
+            }
+            return groups;
+          });
         });
 
         resetTemplatesBtn.addEventListener("click", () => {
-            sl.setRenderItem();
-            sl.setRenderList();
+          sl.setRenderItem();
+          sl.setRenderList();
         });
 
         addBtn.addEventListener("click", () => {
