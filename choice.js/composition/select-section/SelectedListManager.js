@@ -93,7 +93,7 @@ class SelectedListManager {
       }
     });
   }
-  updateList(list) {
+  setSelected(list) {
     this.propList = list;
     this.render();
   }

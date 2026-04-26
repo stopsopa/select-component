@@ -128,7 +128,7 @@ export class SelectedListManager<T extends SelectedListElement> {
     });
   }
 
-  updateList(list: T[]) {
+  setSelected(list: T[]) {
     this.propList = list;
     this.render();
   }

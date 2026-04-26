@@ -249,13 +249,13 @@
           label: "Select options",
           onDelete: function (id) {
             localList = localList.filter((item) => String(item.id) !== String(id));
-            this.updateList(localList);
+            this.setSelected(localList);
             syncUrl();
             updateDump();
           },
           onClear: function () {
             localList = [];
-            this.updateList(localList);
+            this.setSelected(localList);
             syncUrl();
             updateDump();
           },
@@ -269,7 +269,7 @@
               if (e.key === "Enter" && e.target.value.trim() !== "") {
                 localList.push({ id: globalIdCounter++, label: e.target.value.trim() });
                 e.target.value = "";
-                this.updateList(localList);
+                this.setSelected(localList);
                 syncUrl();
                 updateDump();
                 return;
@@ -277,7 +277,7 @@
 
               if (e.key === "Backspace" && e.target.value === "" && localList.length > 0) {
                 localList.pop();
-                this.updateList(localList);
+                this.setSelected(localList);
                 syncUrl();
                 updateDump();
                 return;
@@ -376,7 +376,7 @@
               color: color,
               img: img,
             });
-            manager.updateList(localList);
+            manager.setSelected(localList);
             syncUrl();
             updateDump();
           });
@@ -395,7 +395,7 @@
 
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
-            manager.updateList(localList);
+            manager.setSelected(localList);
             syncUrl();
             updateDump();
 

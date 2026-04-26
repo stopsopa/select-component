@@ -192,7 +192,7 @@
         let focusCounter = 0;
 
         const updateDump = () => {
-          const list = sl.list;
+          const list = sl.selected;
           if (list.length === 0) {
             listDump.textContent = "[]";
             return;
@@ -201,19 +201,19 @@
         };
 
         // Initialize list
-        sl.list = localList;
+        sl.selected = localList;
 
         // Register events
         sl.addEventListener("onDelete", (e) => {
           localList = localList.filter((item) => String(item.id) !== String(e.detail.id));
-          sl.updateList(localList);
+          sl.setSelected(localList);
           syncUrl();
           updateDump();
         });
 
         sl.addEventListener("onClear", () => {
           localList = [];
-          sl.updateList(localList);
+          sl.setSelected(localList);
           syncUrl();
           updateDump();
         });
@@ -229,7 +229,7 @@
             if (originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
               localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
               sl.setValue("");
-              sl.updateList(localList);
+              sl.setSelected(localList);
               syncUrl();
               updateDump();
               return;
@@ -237,7 +237,7 @@
 
             if (originalEvent.key === "Backspace" && e.detail.value === "" && localList.length > 0) {
               localList.pop();
-              sl.updateList(localList);
+              sl.setSelected(localList);
               syncUrl();
               updateDump();
               return;
@@ -277,7 +277,7 @@
 
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
-            sl.updateList(localList);
+            sl.setSelected(localList);
             syncUrl();
             updateDump();
 

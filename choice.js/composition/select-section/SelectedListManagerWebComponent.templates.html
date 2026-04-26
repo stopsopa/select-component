@@ -263,7 +263,7 @@
         let focusCounter = 0;
 
         const updateDump = () => {
-          const listAttr = sl.getAttribute("list");
+          const listAttr = sl.getAttribute("selected");
           const list = listAttr ? JSON.parse(listAttr) : [];
           if (list.length === 0) {
             listDump.textContent = "[]";
@@ -273,19 +273,19 @@
         };
 
         // Initialize list via attribute
-        sl.setAttribute("list", JSON.stringify(localList));
+        sl.setAttribute("selected", JSON.stringify(localList));
 
         // Register events
         sl.addEventListener("onDelete", (e) => {
           localList = localList.filter((item) => String(item.id) !== String(e.detail.id));
-          sl.setAttribute("list", JSON.stringify(localList));
+          sl.setAttribute("selected", JSON.stringify(localList));
           syncUrl();
           updateDump();
         });
 
         sl.handleDemoClear = () => {
           localList = [];
-          sl.setAttribute("list", JSON.stringify(localList));
+          sl.setAttribute("selected", JSON.stringify(localList));
           syncUrl();
           updateDump();
         };
@@ -300,7 +300,7 @@
             if (originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
               localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
               sl.setAttribute("value", ""); // Clear internal input
-              sl.setAttribute("list", JSON.stringify(localList));
+              sl.setAttribute("selected", JSON.stringify(localList));
               syncUrl();
               updateDump();
               return;
@@ -308,7 +308,7 @@
 
             if (originalEvent.key === "Backspace" && e.detail.value === "" && localList.length > 0) {
               localList.pop();
-              sl.setAttribute("list", JSON.stringify(localList));
+              sl.setAttribute("selected", JSON.stringify(localList));
               syncUrl();
               updateDump();
               return;
@@ -333,7 +333,7 @@
               color: color,
               img: img,
             });
-            sl.setAttribute("list", JSON.stringify(localList));
+            sl.setAttribute("selected", JSON.stringify(localList));
             syncUrl();
             updateDump();
           });
@@ -352,7 +352,7 @@
 
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
-            sl.setAttribute("list", JSON.stringify(localList));
+            sl.setAttribute("selected", JSON.stringify(localList));
             syncUrl();
             updateDump();
 

@@ -232,26 +232,40 @@
         const manager = new SelectManager(container, {
           select: {
             label: states.label || "Select Fruit",
-            list: initialList || [],
+            selected: initialList || [],
             disabled: states.disabled || false,
             loading: states.loading || false,
             onFocus: () => {
-              buff = [...selected];
+              const tmp = [...selected];
+
+              debugger;
+              return tmp;
             },
             onDelete: (itemId) => {
               buff = buff.filter((i) => String(i.id) !== String(itemId));
-              const options = manager.selected.updateList(buff);
+              const options = manager.selected.setSelected(buff);
+
+              const optionsSelected = optionsSelectBasedOnSelectedList(mockOptions, buff);
+              manager.options.setOptions(optionsSelected);
+
               updateDump(buff);
               syncUrl();
             },
           },
           options: {
             label: "Search fruit...",
-            options: optionsSelectBasedOnSelectedList(mockOptions, selected),
+            options: (function () {
+              if (typeof initialList === "undefined") {
+                return optionsSelectBasedOnSelectedList(mockOptions, selected);
+              } else {
+                return optionsSelectBasedOnSelectedList(mockOptions, initialList);
+              }
+            })(),
             maxHeight: "250px",
             onItemPick: (item) => {
+              debugger;
               buff = selectedToggleDeduplicatedItem(buff, item);
-              manager.selected.updateList(buff);
+              manager.selected.setSelected(buff);
 
               const optionsSelected = optionsSelectBasedOnSelectedList(mockOptions, buff);
               manager.options.setOptions(optionsSelected);
@@ -400,6 +414,7 @@
               const parts = v.split("|");
               return { id: parts[0], label: parts[1] };
             });
+            debugger;
             init(list, statesData[id] || {});
           });
         }

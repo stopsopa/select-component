@@ -6,7 +6,7 @@ export class SelectedList extends HTMLElement {
   private _attributeEvents: Record<string, any> = {};
 
   static get observedAttributes() {
-    return ["label", "show-input", "value", "disabled", "error", "loading", "list", "onFocus", "onClear", "onChange", "onDelete"];
+    return ["label", "show-input", "value", "disabled", "error", "loading", "selected", "onFocus", "onClear", "onChange", "onDelete"];
   }
 
   constructor() {
@@ -29,7 +29,7 @@ export class SelectedList extends HTMLElement {
       loading: this.hasAttribute("loading"),
       list: (() => {
         try {
-          return JSON.parse(this.getAttribute("list") || "[]");
+          return JSON.parse(this.getAttribute("selected") || "[]");
         } catch (e) {
           return [];
         }
@@ -78,12 +78,12 @@ export class SelectedList extends HTMLElement {
       case "loading":
         this._manager.setLoading(this.hasAttribute("loading"));
         break;
-      case "list":
+      case "selected":
         try {
           const list = JSON.parse(newValue);
-          this._manager.updateList(list);
+          this._manager.setSelected(list);
         } catch (e) {
-          console.error("Invalid JSON in list attribute", newValue);
+          console.error("Invalid JSON in selected attribute", newValue);
         }
         break;
       default:
@@ -115,8 +115,8 @@ export class SelectedList extends HTMLElement {
   }
 
   // Proxied methods
-  public updateList(list: SelectedListElement[]) {
-    this._manager?.updateList(list);
+  public setSelected(list: SelectedListElement[]) {
+    this._manager?.setSelected(list);
   }
 
   public setValue(value: string) {
@@ -164,12 +164,12 @@ export class SelectedList extends HTMLElement {
   }
 
   // Getters and setters for properties
-  get list() {
+  get selected() {
     return this._manager?.propList || [];
   }
 
-  set list(val: SelectedListElement[]) {
-    this.updateList(val);
+  set selected(val: SelectedListElement[]) {
+    this.setSelected(val);
   }
 
   get value() {
