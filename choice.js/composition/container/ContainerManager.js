@@ -2,7 +2,7 @@ class ContainerManager {
   parent;
   target;
   popover;
-  currentPosition = "cover-bottom";
+  currentPosition = "top";
   constructor(parent) {
     this.parent = parent;
     this.target = document.createElement("div");

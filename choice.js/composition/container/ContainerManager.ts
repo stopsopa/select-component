@@ -1,8 +1,35 @@
+export type PositionType =
+  | "topleft"
+  | "top-left"
+  | "top"
+  | "top-right"
+  | "topright"
+  | "left-top"
+  | "cover-top-left"
+  | "cover-top"
+  | "cover-top-right"
+  | "right-top"
+  | "left"
+  | "cover-left"
+  | "center"
+  | "cover-right"
+  | "right"
+  | "left-bottom"
+  | "cover-bottom-left"
+  | "cover-bottom"
+  | "cover-bottom-right"
+  | "right-bottom"
+  | "bottomleft"
+  | "bottom-left"
+  | "bottom"
+  | "bottom-right"
+  | "bottomright";
+
 export class ContainerManager {
   private parent: HTMLDivElement;
   private target: HTMLDivElement;
   private popover: HTMLDivElement;
-  private currentPosition: string = "cover-bottom";
+  private currentPosition: PositionType = "top";
 
   constructor(parent: HTMLDivElement) {
     this.parent = parent;
