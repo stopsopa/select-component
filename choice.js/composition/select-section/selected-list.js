@@ -10,11 +10,7 @@ class SelectedList extends HTMLElement {
     super();
   }
   connectedCallback() {
-    if (!this._manager) {
-      this._initManager();
-    }
-  }
-  _initManager() {
+    if (this._manager) return;
     this._options = {
       label: this.getAttribute("label") || "",
       showInput: this.hasAttribute("show-input") ? this.getAttribute("show-input") !== "false" : true,
@@ -36,7 +32,15 @@ class SelectedList extends HTMLElement {
         this.dispatchEvent(new CustomEvent("onClear"));
       },
       onChange: (e) => {
-        this.dispatchEvent(new CustomEvent("onChange", { detail: { originalEvent: e, value: e.target.value, key: e.key } }));
+        this.dispatchEvent(
+          new CustomEvent("onChange", {
+            detail: {
+              originalEvent: e,
+              value: e.target.value,
+              key: e.key
+            }
+          })
+        );
       },
       onFocus: (e) => {
         this.dispatchEvent(new CustomEvent("onFocus", { detail: { originalEvent: e } }));

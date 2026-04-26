@@ -14,12 +14,8 @@ export class SelectedList extends HTMLElement {
   }
 
   connectedCallback() {
-    if (!this._manager) {
-      this._initManager();
-    }
-  }
+    if (this._manager) return;
 
-  private _initManager() {
     this._options = {
       label: this.getAttribute("label") || "",
       showInput: this.hasAttribute("show-input") ? this.getAttribute("show-input") !== "false" : true,
@@ -41,7 +37,15 @@ export class SelectedList extends HTMLElement {
         this.dispatchEvent(new CustomEvent("onClear"));
       },
       onChange: (e) => {
-        this.dispatchEvent(new CustomEvent("onChange", { detail: { originalEvent: e, value: (e.target as HTMLInputElement).value, key: (e as KeyboardEvent).key } }));
+        this.dispatchEvent(
+          new CustomEvent("onChange", {
+            detail: {
+              originalEvent: e,
+              value: (e.target as HTMLInputElement).value,
+              key: (e as KeyboardEvent).key,
+            },
+          }),
+        );
       },
       onFocus: (e) => {
         this.dispatchEvent(new CustomEvent("onFocus", { detail: { originalEvent: e } }));
@@ -55,6 +59,7 @@ export class SelectedList extends HTMLElement {
 
     this._manager = new SelectedListManager(this, this._options);
   }
+
 
   attributeChangedCallback(name: string, _oldValue: string, newValue: string) {
     if (!this._manager) return;

@@ -25,15 +25,6 @@ export class OptionsList extends HTMLElement {
 
   constructor() {
     super();
-  }
-
-  connectedCallback() {
-    if (!this._manager) {
-      this._initManager();
-    }
-  }
-
-  private _initManager() {
     this._options = {
       options: (() => {
         try {
@@ -77,6 +68,7 @@ export class OptionsList extends HTMLElement {
 
     this._manager = new OptionsListManager(this, this._options);
   }
+
 
   disconnectedCallback() {
     this._manager?.destroy();

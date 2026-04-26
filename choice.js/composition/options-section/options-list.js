@@ -22,13 +22,6 @@ class OptionsList extends HTMLElement {
   }
   constructor() {
     super();
-  }
-  connectedCallback() {
-    if (!this._manager) {
-      this._initManager();
-    }
-  }
-  _initManager() {
     this._options = {
       options: (() => {
         try {
