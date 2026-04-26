@@ -181,9 +181,9 @@
           <div class="resizer-container">
             <center-and-height-resizer 
               id="resizer-${id}" 
-              left="${states.left || "20%"}" 
-              center="${states.center || "60%"}" 
-              height="${states.height || "60px"}"
+              left="${states.left || "100px"}" 
+              center="${states.center || "600px"}" 
+              height="${states.height || "auto"}"
             >
               <div id="container-${id}"></div>
             </center-and-height-resizer>
@@ -264,7 +264,7 @@
             },
           },
           options: {
-            label: "Search fruit...",
+            label: "Search fruits...",
             options: optionsSelectBasedOnSelectedList(mockOptions, selected),
             maxHeight: "250px",
             onItemPick: (item) => {
@@ -285,6 +285,7 @@
             },
           },
         });
+        manager.container.setPosition('cover-bottom');
 
         const syncUrl = () => {
           const url = new URL(window.location);
@@ -412,7 +413,7 @@
 
         if (allIds.length === 0) {
           // Default state if no URL params
-          init([], { label: "Default Configuration" });
+          init([], { label: "" });
         } else {
           allIds.forEach((id) => {
             const selected = (groups[id] || []).map((v) => {

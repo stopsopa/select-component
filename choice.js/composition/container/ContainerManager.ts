@@ -71,7 +71,8 @@ export class ContainerManager {
     return this.popover;
   }
 
-  public setPosition(position: string): void {
+  public setPosition(position: PositionType): void {
+    debugger;
     if (this.currentPosition) {
       this.popover.classList.remove(this.currentPosition);
     }
