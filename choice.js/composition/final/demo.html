@@ -119,7 +119,12 @@
 
     <script type="module">
       import "../../../js/CenterAndHeightResizer.js";
-      import { SelectManager, selectedAddDeduplicatedItem } from "./SelectManager.js";
+      import {
+        SelectManager,
+        selectedAddDeduplicatedItem,
+        selectedToggleDeduplicatedItem,
+        optionsSelectBasedOnSelectedList,
+      } from "./SelectManager.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
 
@@ -235,18 +240,22 @@
             },
             onDelete: (itemId) => {
               buff = buff.filter((i) => String(i.id) !== String(itemId));
-              manager.selected.updateList(buff);
+              const options = manager.selected.updateList(buff);
               updateDump(buff);
               syncUrl();
             },
           },
           options: {
             label: "Search fruit...",
-            options: mockOptions,
+            options: optionsSelectBasedOnSelectedList(mockOptions, selected),
             maxHeight: "250px",
             onItemPick: (item) => {
-              buff = selectedAddDeduplicatedItem(buff, item);
+              buff = selectedToggleDeduplicatedItem(buff, item);
               manager.selected.updateList(buff);
+
+              const optionsSelected = optionsSelectBasedOnSelectedList(mockOptions, buff);
+              manager.options.setOptions(optionsSelected);
+
               updateDump(buff);
               syncUrl();
             },
