@@ -25,6 +25,11 @@ export class OptionsList extends HTMLElement {
 
   constructor() {
     super();
+  }
+
+  connectedCallback() {
+    if (this._manager) return;
+
     this._options = {
       options: (() => {
         try {
