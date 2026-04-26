@@ -4,29 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SelectedListManager WebComponent Templates Demo</title>
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
     <link rel="stylesheet" href="SelectedListManager.css" />
     <style>
       body {
-        font-family: sans-serif;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         padding: 20px;
+        background: #f0f2f5;
+        color: #333;
+      }
+      h1 {
+        margin-bottom: 20px;
+        font-weight: 300;
       }
       .controls {
-        margin-top: 20px;
+        margin-top: 15px;
         display: flex;
         gap: 10px;
         flex-wrap: wrap;
         align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
       }
       .demo-container {
-        margin-top: 20px;
+        background: white;
         padding: 20px;
-        border: 1px dashed #ccc;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid #ddd;
+        margin-top: 20px;
       }
       .demo-container label {
         display: flex;
         align-items: center;
         gap: 5px;
         cursor: pointer;
+        font-size: 14px;
       }
       .template-btn {
         padding: 5px 10px;
@@ -34,21 +47,69 @@
         border: 1px solid #ccc;
         background: #fff;
         border-radius: 4px;
+        font-size: 13px;
       }
       .template-btn:hover {
         background: #f0f0f0;
+      }
+      .gcp-css {
+        font-size: 13px !important;
+        height: 32px !important;
+        padding: 0 15px !important;
+        cursor: pointer !important;
+        border: 1px solid #1a73e8 !important;
+        background: #1a73e8 !important;
+        color: #fff !important;
+        border-radius: 4px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.2s !important;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+      }
+      .gcp-css:hover {
+        background: #1557b0 !important;
+        border-color: #1557b0 !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24) !important;
+      }
+      .gcp-css.white {
+        background: #fff !important;
+        color: #333 !important;
+        border-color: #ccc !important;
+      }
+      .gcp-css.white:hover {
+        background: #f8f9fa !important;
+        border-color: #1a73e8 !important;
+        color: #1a73e8 !important;
+      }
+      pre {
+        background: #f8f8f8;
+        padding: 12px;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        font-size: 12px;
+        max-height: 150px;
+        overflow: auto;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 10px;
+      }
+      h3 {
+        margin-top: 0;
+        font-weight: 400;
+        color: #555;
       }
     </style>
   </head>
   <body>
     <h1>SelectedListManager WebComponent Templates</h1>
     <p>
-        This demo uses <code>&lt;selected-list&gt;</code> web component with custom templates provided via 
-        <code>render-item</code> and <code>render-list</code> attributes.
+      This demo uses <code>&lt;selected-list&gt;</code> web component. Use buttons below to set custom templates via JavaScript API.
     </p>
-    <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
+    <button id="init-btn" class="gcp-css">Initialize New Instance</button> | <a href="" id="reload-link">reload</a> | <a href=".">up ..</a>
 
-    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
+    <div id="history-indicator" style="position: fixed; top: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px; border-radius: 8px; font-size: 12px; z-index: 1000; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px);">
         <span id="history-time" style="font-family: monospace; opacity: 0.8;">No history entry</span>
         <button id="push-btn" style="cursor: pointer; background: #444; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; transition: background 0.2s;">Push State</button>
     </div>
@@ -144,6 +205,7 @@
         }
 
         group.innerHTML = `
+                <h3>Instance #${instanceId}</h3>
                 <center-resizer id="resizer-${instanceId}" left="${resizerLeft}" center="${resizerCenter}">
                     <selected-list 
                         id="sl-${instanceId}" 
@@ -153,61 +215,13 @@
                         show-input="${states.showInput !== false}"
                         onFocus="this.handleDemoFocus(event)"
                         onClear="this.handleDemoClear(event)"
-                        render-item="
-                            const el = document.createElement('div');
-                            el.className = 'element';
-                            el.dataset.id = String(item.id);
-                            el.style.border = '2px solid ' + (item.color || 'black');
-                            el.style.display = 'flex';
-                            el.style.alignItems = 'center';
-                            el.style.gap = '5px';
-                            el.style.padding = '5px';
-                            el.style.background = '#fff';
-
-                            if (item.img) {
-                                const img = document.createElement('img');
-                                img.src = '../img/' + item.img;
-                                img.style.width = '20px';
-                                img.style.height = '20px';
-                                img.style.objectFit = 'contain';
-                                el.appendChild(img);
-                            }
-
-                            const label = document.createElement('label');
-                            label.textContent = item.label;
-
-                            const del = document.createElement('div');
-                            del.dataset.remove = String(item.id);
-
-                            el.appendChild(label);
-                            el.appendChild(del);
-
-                            return el;
-                        "
-                        render-list="
-                            const elements = list.map(item => manager.propOptions.renderItem.call(manager, item));
-                            const groups = [];
-                            for (let i = 0; i < elements.length; i += 3) {
-                                const groupDiv = document.createElement('div');
-                                groupDiv.style.border = '2px solid gray';
-                                groupDiv.style.padding = '3px';
-                                groupDiv.style.margin = '2px';
-                                groupDiv.style.display = 'flex';
-                                groupDiv.style.gap = '5px';
-                                groupDiv.style.flexWrap = 'wrap';
-                                const chunk = elements.slice(i, i + 3);
-                                chunk.forEach(el => groupDiv.appendChild(el));
-                                groups.push(groupDiv);
-                            }
-                            return groups;
-                        "
                     ></selected-list>
                 </center-resizer>
 
-                <div style="margin-top: 10px;">
-                    Input Value: <pre data-role="input-value-out" id="input-value-out-${instanceId}" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
-                    (onChange triggers: <span data-role="onchange-counter" id="onchange-counter-${instanceId}" style="font-weight: bold;">0</span>,
-                    onFocus triggers: <span data-role="onfocus-counter" id="onfocus-counter-${instanceId}" style="font-weight: bold;">0</span>,
+                <div class="controls">
+                    <strong>Input Value:</strong> <pre data-role="input-value-out" id="input-value-out-${instanceId}" style="display: inline; background: #eee; padding: 2px 5px; margin: 0; width: auto; max-height: none;">-</pre>
+                    (onChange: <span data-role="onchange-counter" id="onchange-counter-${instanceId}" style="font-weight: bold;">0</span>,
+                    onFocus: <span data-role="onfocus-counter" id="onfocus-counter-${instanceId}" style="font-weight: bold;">0</span>,
                     last key: <span data-role="last-key" id="last-key-${instanceId}" style="font-weight: bold; color: #d11;">-</span>)
                 </div>
 
@@ -217,8 +231,14 @@
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="new-item-input" id="new-item-input-${instanceId}" placeholder="New item label">
-                    <button data-role="add-btn" id="add-btn-${instanceId}">Add Item</button>
+                    <button class="gcp-css white" data-role="custom-render-btn">Set Custom Render Item</button>
+                    <button class="gcp-css white" data-role="custom-list-render-btn">Set Custom Render List</button>
+                    <button class="gcp-css white" data-role="reset-templates-btn">Reset Templates</button>
+                </div>
+
+                <div class="controls">
+                    <input type="text" data-role="new-item-input" id="new-item-input-${instanceId}" placeholder="New item label" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 150px;">
+                    <button class="gcp-css" data-role="add-btn" id="add-btn-${instanceId}">Add Item</button>
                 </div>
 
                 <div class="controls">
@@ -228,17 +248,15 @@
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="inject-input-value" id="inject-input-value-${instanceId}" placeholder="Inject input value">
-                    <button data-role="inject-btn" id="inject-btn-${instanceId}">Set Input Value</button>
+                    <input type="text" data-role="inject-input-value" id="inject-input-value-${instanceId}" placeholder="Inject input value" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 120px;">
+                    <button class="gcp-css" data-role="inject-btn" id="inject-btn-${instanceId}">Set Input Value</button>
+                    <input type="text" data-role="inject-label-value" id="inject-label-value-${instanceId}" placeholder="Inject label value" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 120px; margin-left: 10px;">
+                    <button class="gcp-css" data-role="inject-label-btn" id="inject-label-btn-${instanceId}">Set Label Value</button>
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="inject-label-value" id="inject-label-value-${instanceId}" placeholder="Inject label value">
-                    <button data-role="inject-label-btn" id="inject-label-btn-${instanceId}">Set Label Value</button>
-                </div>
-
-                <div class="controls">
-                    <pre data-role="list-dump" style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px; width: 100%; box-sizing: border-box; overflow: auto;"></pre>
+                    <strong>List Data Dump:</strong>
+                    <pre data-role="list-dump"></pre>
                 </div>
             `;
 
@@ -259,12 +277,15 @@
         const onFocusCounter = group.querySelector('[data-role="onfocus-counter"]');
         const lastKeyOut = group.querySelector('[data-role="last-key"]');
         const listDump = group.querySelector('[data-role="list-dump"]');
+        const customRenderBtn = group.querySelector('[data-role="custom-render-btn"]');
+        const customListRenderBtn = group.querySelector('[data-role="custom-list-render-btn"]');
+        const resetTemplatesBtn = group.querySelector('[data-role="reset-templates-btn"]');
+
         let counter = 0;
         let focusCounter = 0;
 
         const updateDump = () => {
-          const listAttr = sl.getAttribute("selected");
-          const list = listAttr ? JSON.parse(listAttr) : [];
+          const list = sl.selected;
           if (list.length === 0) {
             listDump.textContent = "[]";
             return;
@@ -272,26 +293,26 @@
           listDump.textContent = "[\n" + list.map((item) => "  " + JSON.stringify(item)).join(",\n") + "\n]";
         };
 
-        // Initialize list via attribute
-        sl.setAttribute("selected", JSON.stringify(localList));
+        // Initialize list via property
+        sl.selected = localList;
 
         // Register events
         sl.addEventListener("onDelete", (e) => {
           localList = localList.filter((item) => String(item.id) !== String(e.detail.id));
-          sl.setAttribute("selected", JSON.stringify(localList));
+          sl.selected = localList;
           syncUrl();
           updateDump();
         });
 
         sl.handleDemoClear = () => {
           localList = [];
-          sl.setAttribute("selected", JSON.stringify(localList));
+          sl.selected = localList;
           syncUrl();
           updateDump();
         };
 
         sl.addEventListener("onChange", (e) => {
-          inputValueOut.textContent = e.detail.value;
+          inputValueOut.textContent = e.detail.value || "-";
           onChangeCounter.textContent = ++counter;
           lastKeyOut.textContent = e.detail.key || (typeof e.detail.key);
 
@@ -299,8 +320,8 @@
           if (originalEvent.type === "keydown") {
             if (originalEvent.key === "Enter" && e.detail.value.trim() !== "") {
               localList.push({ id: globalIdCounter++, label: e.detail.value.trim() });
-              sl.setAttribute("value", ""); // Clear internal input
-              sl.setAttribute("selected", JSON.stringify(localList));
+              sl.value = ""; // Clear internal input
+              sl.selected = localList;
               syncUrl();
               updateDump();
               return;
@@ -308,7 +329,7 @@
 
             if (originalEvent.key === "Backspace" && e.detail.value === "" && localList.length > 0) {
               localList.pop();
-              sl.setAttribute("selected", JSON.stringify(localList));
+              sl.selected = localList;
               syncUrl();
               updateDump();
               return;
@@ -333,10 +354,75 @@
               color: color,
               img: img,
             });
-            sl.setAttribute("selected", JSON.stringify(localList));
+            sl.selected = localList;
             syncUrl();
             updateDump();
           });
+        });
+
+        customRenderBtn.addEventListener("click", () => {
+            sl.setRenderItem(function(item, defaultRender) {
+                const el = document.createElement("div");
+                el.className = "element";
+                el.dataset.id = String(item.id);
+                el.style.border = `2px solid ${item.color || "black"}`;
+                el.style.display = "flex";
+                el.style.alignItems = "center";
+                el.style.gap = "5px";
+                el.style.padding = "5px";
+                el.style.background = "#fff";
+
+                if (item.img) {
+                    const img = document.createElement("img");
+                    img.src = `../img/${item.img}`;
+                    img.style.width = "20px";
+                    img.style.height = "20px";
+                    img.style.objectFit = "contain";
+                    el.appendChild(img);
+                }
+
+                const label = document.createElement("label");
+                label.textContent = item.label;
+
+                const del = document.createElement("div");
+                del.dataset.remove = String(item.id);
+
+                el.appendChild(label);
+                el.appendChild(del);
+
+                return el;
+            });
+        });
+
+        customListRenderBtn.addEventListener("click", () => {
+            sl.setRenderList(function(selected, defaultRenderList) {
+                // Use the provided defaultRenderList(selected) to get the list of elements.
+                // This automatically handles the context and uses the current renderItem.
+                const elements = defaultRenderList(selected);
+
+                const groups = [];
+                for (let i = 0; i < elements.length; i += 3) {
+                    const groupDiv = document.createElement("div");
+                    groupDiv.style.border = "1px solid #1a73e8";
+                    groupDiv.style.borderRadius = "8px";
+                    groupDiv.style.padding = "8px";
+                    groupDiv.style.margin = "4px";
+                    groupDiv.style.display = "flex";
+                    groupDiv.style.gap = "8px";
+                    groupDiv.style.flexWrap = "wrap";
+                    groupDiv.style.background = "#e8f0fe";
+                    groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+                    const chunk = elements.slice(i, i + 3);
+                    chunk.forEach((el) => groupDiv.appendChild(el));
+                    groups.push(groupDiv);
+                }
+                return groups;
+            });
+        });
+
+        resetTemplatesBtn.addEventListener("click", () => {
+            sl.setRenderItem();
+            sl.setRenderList();
         });
 
         addBtn.addEventListener("click", () => {
@@ -344,7 +430,7 @@
           let usedInternal = false;
 
           if (!val) {
-            val = inputValueOut.textContent.trim();
+            val = sl.value.trim();
             usedInternal = true;
           }
 
@@ -352,39 +438,40 @@
 
           if (val) {
             localList.push({ id: globalIdCounter++, label: val });
-            sl.setAttribute("selected", JSON.stringify(localList));
+            sl.selected = localList;
             syncUrl();
             updateDump();
 
             if (usedInternal) {
-              sl.setAttribute("value", "");
-              inputValueOut.textContent = "";
+              sl.value = "";
+              inputValueOut.textContent = "-";
             }
           }
         });
 
         errorCb.addEventListener("change", (e) => {
-          sl.toggleAttribute("error", e.target.checked);
+          sl.error = e.target.checked;
           syncUrl();
         });
 
         disabledCb.addEventListener("change", (e) => {
-          sl.toggleAttribute("disabled", e.target.checked);
+          sl.disabled = e.target.checked;
           syncUrl();
         });
 
         inputFieldCb.addEventListener("change", (e) => {
-          sl.setAttribute("show-input", e.target.checked ? "true" : "false");
+          sl.setShowInput(e.target.checked);
           syncUrl();
         });
 
         injectBtn.addEventListener("click", () => {
-          sl.setAttribute("value", injectInput.value);
+          sl.value = injectInput.value;
+          inputValueOut.textContent = injectInput.value || "-";
           injectInput.value = "";
         });
 
         injectLabelBtn.addEventListener("click", () => {
-          sl.setAttribute("label", injectLabelInput.value);
+          sl.label = injectLabelInput.value;
           injectLabelInput.value = "";
         });
 
