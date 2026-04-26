@@ -192,7 +192,7 @@
         };
 
         manager = new SelectedListManager(parentElement, {
-          list: localList,
+          selected: localList,
           label: "Select options",
           onDelete: function (id) {
             localList = localList.filter((item) => String(item.id) !== String(id));

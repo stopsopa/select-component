@@ -16,6 +16,21 @@ function selectedToggleDeduplicatedItem(selected, item) {
   }
   return tmp;
 }
+function selectedFindDeduplicatedInOptionsByIds(options, ids, existingListOfSelected) {
+  let tmp = [];
+  if (existingListOfSelected) {
+    tmp = [...existingListOfSelected];
+  }
+  ids.forEach((id) => {
+    const found = tmp.find((i) => String(i.id) === String(id));
+    if (!found) {
+      tmp.push(options.find((o) => String(o.id) === String(id)));
+    }
+  });
+  // deduplicate tmp
+  tmp = deduplicateArrayById(tmp);
+  return tmp;
+}
 function optionsSelectBasedOnSelectedList(options, selected) {
   const ids = selected.map((i) => String(i.id));
   if (ids.length === 0) {
@@ -27,8 +42,13 @@ function optionsSelectBasedOnSelectedList(options, selected) {
     return opt;
   });
 }
+function deduplicateArrayById(arr) {
+  return arr.filter((item, index) => arr.findIndex((i) => String(i.id) === String(item.id)) === index);
+}
 export {
+  deduplicateArrayById,
   optionsSelectBasedOnSelectedList,
   selectedAddDeduplicatedItem,
+  selectedFindDeduplicatedInOptionsByIds,
   selectedToggleDeduplicatedItem
 };

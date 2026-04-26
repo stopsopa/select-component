@@ -27,7 +27,7 @@ export class SelectedList extends HTMLElement {
       disabled: this.hasAttribute("disabled"),
       error: this.hasAttribute("error"),
       loading: this.hasAttribute("loading"),
-      list: (() => {
+      selected: (() => {
         try {
           return JSON.parse(this.getAttribute("selected") || "[]");
         } catch (e) {
@@ -155,7 +155,7 @@ export class SelectedList extends HTMLElement {
     this._manager?.setRenderItem(renderer);
   }
 
-  public setRenderList(renderer?: (list: SelectedListElement[], defaultRender: (list: SelectedListElement[]) => HTMLElement[]) => HTMLElement[]) {
+  public setRenderList(renderer?: (selected: SelectedListElement[], defaultRender: (selected: SelectedListElement[]) => HTMLElement[]) => HTMLElement[]) {
     this._manager?.setRenderList(renderer);
   }
 
@@ -165,7 +165,7 @@ export class SelectedList extends HTMLElement {
 
   // Getters and setters for properties
   get selected() {
-    return this._manager?.propList || [];
+    return this._manager?.propSelected || [];
   }
 
   set selected(val: SelectedListElement[]) {

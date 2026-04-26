@@ -245,7 +245,7 @@
         };
 
         manager = new SelectedListManager(parentElement, {
-          list: localList,
+          selected: localList,
           label: "Select options",
           onDelete: function (id) {
             localList = localList.filter((item) => String(item.id) !== String(id));
@@ -318,8 +318,8 @@
 
             return el;
           },
-          renderList: function (list, defaultRenderList) {
-            const elements = list.map((item) => this.renderItem(item));
+          renderList: function (selected, defaultRenderList) {
+            const elements = selected.map((item) => this.renderItem(item));
             const groups = [];
             for (let i = 0; i < elements.length; i += 3) {
               const groupDiv = document.createElement("div");

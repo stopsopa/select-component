@@ -5,12 +5,12 @@ export type SelectedListElement = {
 };
 
 export type SelectedListManagerOptions<T extends SelectedListElement> = {
-  list?: T[];
+  selected?: T[];
   showInput?: boolean;
   value?: string;
   inputFieldRender?: (value: string) => HTMLInputElement;
   renderItem?: (item: T, defaultRender: (item: T) => HTMLElement) => HTMLElement;
-  renderList?: (list: T[], defaultRender: (list: T[]) => HTMLElement[]) => HTMLElement[];
+  renderList?: (selected: T[], defaultRender: (selected: T[]) => HTMLElement[]) => HTMLElement[];
   onDelete?: (id: string) => void;
   onClear?: () => void;
   onChange?: (e: Event) => void;
@@ -27,7 +27,7 @@ export class SelectedListManager<T extends SelectedListElement> {
   public propFlexList!: HTMLElement;
   public propButtonsContainer!: HTMLElement;
   public propOptions: SelectedListManagerOptions<T>;
-  public propList: T[];
+  public propSelected: T[];
   public propInputElement: HTMLInputElement | null = null;
   public propClearButton!: HTMLButtonElement;
   public propLoaderElement: HTMLElement | null = null;
@@ -37,7 +37,7 @@ export class SelectedListManager<T extends SelectedListElement> {
     this.propParentElement = parentElement;
 
     this.propOptions = {
-      list: [],
+      selected: [],
       showInput: true,
       value: "",
       inputFieldRender: (value: string) => {
@@ -49,7 +49,7 @@ export class SelectedListManager<T extends SelectedListElement> {
         return input;
       },
       renderItem: (item, def) => def(item),
-      renderList: (list, def) => def(list),
+      renderList: (selected, def) => def(selected),
       onDelete: (id: string) => {},
       onClear: () => {},
       onChange: (e: Event) => {},
@@ -60,7 +60,7 @@ export class SelectedListManager<T extends SelectedListElement> {
       ...options,
     };
 
-    this.propList = this.propOptions.list || [];
+    this.propSelected = this.propOptions.selected || [];
 
     this._bindEvents();
 
@@ -129,7 +129,7 @@ export class SelectedListManager<T extends SelectedListElement> {
   }
 
   setSelected(list: T[]) {
-    this.propList = list;
+    this.propSelected = list;
     this.render();
   }
 
@@ -219,8 +219,8 @@ export class SelectedListManager<T extends SelectedListElement> {
     this.render();
   }
 
-  setRenderList(renderList?: (list: T[], defaultRender: (list: T[]) => HTMLElement[]) => HTMLElement[]) {
-    this.propOptions.renderList = renderList || ((list, def) => def(list));
+  setRenderList(renderList?: (selected: T[], defaultRender: (selected: T[]) => HTMLElement[]) => HTMLElement[]) {
+    this.propOptions.renderList = renderList || ((selected, def) => def(selected));
     this.render();
   }
 
@@ -241,8 +241,8 @@ export class SelectedListManager<T extends SelectedListElement> {
     return el;
   }
 
-  private _defaultRenderList(list: T[]) {
-    return list.map((item) => this.propOptions.renderItem!(item, this._defaultRenderItem.bind(this)));
+  private _defaultRenderList(selected: T[]) {
+    return selected.map((item) => this.propOptions.renderItem!(item, this._defaultRenderItem.bind(this)));
   }
 
   render() {
@@ -276,7 +276,7 @@ export class SelectedListManager<T extends SelectedListElement> {
 
     this.setShowInput(Boolean(this.propOptions.showInput));
 
-    const elements = this.propOptions.renderList!(this.propList, this._defaultRenderList.bind(this));
+    const elements = this.propOptions.renderList!(this.propSelected, this._defaultRenderList.bind(this));
 
     if (!Array.isArray(elements)) {
       throw new Error("renderList must return an array of HTMLElements");

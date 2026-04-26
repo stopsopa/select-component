@@ -22,7 +22,7 @@ class SelectedList extends HTMLElement {
       disabled: this.hasAttribute("disabled"),
       error: this.hasAttribute("error"),
       loading: this.hasAttribute("loading"),
-      list: (() => {
+      selected: (() => {
         try {
           return JSON.parse(this.getAttribute("selected") || "[]");
         } catch (e) {
@@ -143,7 +143,7 @@ class SelectedList extends HTMLElement {
   }
   // Getters and setters for properties
   get selected() {
-    return this._manager?.propList || [];
+    return this._manager?.propSelected || [];
   }
   set selected(val) {
     this.setSelected(val);

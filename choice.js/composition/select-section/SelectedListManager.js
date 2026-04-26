@@ -4,7 +4,7 @@ class SelectedListManager {
   propFlexList;
   propButtonsContainer;
   propOptions;
-  propList;
+  propSelected;
   propInputElement = null;
   propClearButton;
   propLoaderElement = null;
@@ -12,7 +12,7 @@ class SelectedListManager {
   constructor(parentElement, options = {}) {
     this.propParentElement = parentElement;
     this.propOptions = {
-      list: [],
+      selected: [],
       showInput: true,
       value: "",
       inputFieldRender: (value) => {
@@ -24,7 +24,7 @@ class SelectedListManager {
         return input;
       },
       renderItem: (item, def) => def(item),
-      renderList: (list, def) => def(list),
+      renderList: (selected, def) => def(selected),
       onDelete: (id) => {
       },
       onClear: () => {
@@ -37,7 +37,7 @@ class SelectedListManager {
       label: "",
       ...options
     };
-    this.propList = this.propOptions.list || [];
+    this.propSelected = this.propOptions.selected || [];
     this._bindEvents();
     this.render();
   }
@@ -94,7 +94,7 @@ class SelectedListManager {
     });
   }
   setSelected(list) {
-    this.propList = list;
+    this.propSelected = list;
     this.render();
   }
   setShowInput(show) {
@@ -170,7 +170,7 @@ class SelectedListManager {
     this.render();
   }
   setRenderList(renderList) {
-    this.propOptions.renderList = renderList || ((list, def) => def(list));
+    this.propOptions.renderList = renderList || ((selected, def) => def(selected));
     this.render();
   }
   _defaultRenderItem(item) {
@@ -185,8 +185,8 @@ class SelectedListManager {
     el.appendChild(del);
     return el;
   }
-  _defaultRenderList(list) {
-    return list.map((item) => this.propOptions.renderItem(item, this._defaultRenderItem.bind(this)));
+  _defaultRenderList(selected) {
+    return selected.map((item) => this.propOptions.renderItem(item, this._defaultRenderItem.bind(this)));
   }
   render() {
     if (!this.propContainer) {
@@ -209,7 +209,7 @@ class SelectedListManager {
     this.setLoading(Boolean(this.propOptions.loading));
     this.setLabel(this.propOptions.label || "");
     this.setShowInput(Boolean(this.propOptions.showInput));
-    const elements = this.propOptions.renderList(this.propList, this._defaultRenderList.bind(this));
+    const elements = this.propOptions.renderList(this.propSelected, this._defaultRenderList.bind(this));
     if (!Array.isArray(elements)) {
       throw new Error("renderList must return an array of HTMLElements");
     }

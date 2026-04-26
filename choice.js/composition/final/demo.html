@@ -124,6 +124,7 @@
         selectedAddDeduplicatedItem,
         selectedToggleDeduplicatedItem,
         optionsSelectBasedOnSelectedList,
+        selectedFindDeduplicatedInOptionsByIds,
       } from "./SelectManager.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
@@ -157,7 +158,7 @@
 
       let instanceCounter = 0;
 
-      const init = (initialList = [], states = {}) => {
+      const init = (initialSelected = [], states = {}) => {
         instanceCounter++;
         const id = instanceCounter;
 
@@ -225,14 +226,17 @@
           dump.textContent = JSON.stringify(list, null, 2);
         };
 
-        let selected = [];
+        let selected = selectedFindDeduplicatedInOptionsByIds(
+          mockOptions,
+          initialSelected ? initialSelected.map(({ id }) => id) : [],
+        );
 
         let buff = [];
 
         const manager = new SelectManager(container, {
           select: {
             label: states.label || "Select Fruit",
-            selected: initialList || [],
+            selected,
             disabled: states.disabled || false,
             loading: states.loading || false,
             onFocus: () => {
@@ -255,6 +259,8 @@
           options: {
             label: "Search fruit...",
             options: (function () {
+              // now it could be really 
+              // return optionsSelectBasedOnSelectedList(mockOptions, selected)
               if (typeof initialList === "undefined") {
                 return optionsSelectBasedOnSelectedList(mockOptions, selected);
               } else {
@@ -284,7 +290,7 @@
         const syncUrl = () => {
           const url = new URL(window.location);
           url.searchParams.delete(`v${id}`);
-          manager.selected.propList.forEach((item) => {
+          manager.selected.propSelected.forEach((item) => {
             url.searchParams.append(`v${id}`, [item.id, item.label].join("|"));
           });
 
@@ -305,7 +311,7 @@
           manager.selected.setErrorState(true);
         }
 
-        updateDump(initialList || []);
+        updateDump(selected || []);
 
         disabledCb.addEventListener("change", (e) => {
           manager.selected.setDisabled(e.target.checked);
@@ -349,7 +355,7 @@
         });
 
         if (
-          (initialList.length > 0 ||
+          (initialSelected.length > 0 ||
             states.disabled ||
             states.loading ||
             states.error ||
@@ -410,12 +416,12 @@
           init([], { label: "Default Configuration" });
         } else {
           allIds.forEach((id) => {
-            const list = (groups[id] || []).map((v) => {
+            const selected = (groups[id] || []).map((v) => {
               const parts = v.split("|");
               return { id: parts[0], label: parts[1] };
             });
             debugger;
-            init(list, statesData[id] || {});
+            init(selected, statesData[id] || {});
           });
         }
       };

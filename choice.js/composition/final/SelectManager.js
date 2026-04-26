@@ -403,7 +403,7 @@ var SelectedListManager = class {
   propFlexList;
   propButtonsContainer;
   propOptions;
-  propList;
+  propSelected;
   propInputElement = null;
   propClearButton;
   propLoaderElement = null;
@@ -411,7 +411,7 @@ var SelectedListManager = class {
   constructor(parentElement, options = {}) {
     this.propParentElement = parentElement;
     this.propOptions = {
-      list: [],
+      selected: [],
       showInput: true,
       value: "",
       inputFieldRender: (value) => {
@@ -423,7 +423,7 @@ var SelectedListManager = class {
         return input;
       },
       renderItem: (item, def) => def(item),
-      renderList: (list, def) => def(list),
+      renderList: (selected, def) => def(selected),
       onDelete: (id) => {
       },
       onClear: () => {
@@ -436,7 +436,7 @@ var SelectedListManager = class {
       label: "",
       ...options
     };
-    this.propList = this.propOptions.list || [];
+    this.propSelected = this.propOptions.selected || [];
     this._bindEvents();
     this.render();
   }
@@ -490,7 +490,7 @@ var SelectedListManager = class {
     });
   }
   setSelected(list) {
-    this.propList = list;
+    this.propSelected = list;
     this.render();
   }
   setShowInput(show) {
@@ -566,7 +566,7 @@ var SelectedListManager = class {
     this.render();
   }
   setRenderList(renderList) {
-    this.propOptions.renderList = renderList || ((list, def) => def(list));
+    this.propOptions.renderList = renderList || ((selected, def) => def(selected));
     this.render();
   }
   _defaultRenderItem(item) {
@@ -581,8 +581,8 @@ var SelectedListManager = class {
     el.appendChild(del);
     return el;
   }
-  _defaultRenderList(list) {
-    return list.map((item) => this.propOptions.renderItem(item, this._defaultRenderItem.bind(this)));
+  _defaultRenderList(selected) {
+    return selected.map((item) => this.propOptions.renderItem(item, this._defaultRenderItem.bind(this)));
   }
   render() {
     if (!this.propContainer) {
@@ -605,7 +605,7 @@ var SelectedListManager = class {
     this.setLoading(Boolean(this.propOptions.loading));
     this.setLabel(this.propOptions.label || "");
     this.setShowInput(Boolean(this.propOptions.showInput));
-    const elements = this.propOptions.renderList(this.propList, this._defaultRenderList.bind(this));
+    const elements = this.propOptions.renderList(this.propSelected, this._defaultRenderList.bind(this));
     if (!Array.isArray(elements)) {
       throw new Error("renderList must return an array of HTMLElements");
     }
@@ -667,6 +667,20 @@ function selectedToggleDeduplicatedItem(selected, item) {
   }
   return tmp;
 }
+function selectedFindDeduplicatedInOptionsByIds(options, ids, existingListOfSelected) {
+  let tmp = [];
+  if (existingListOfSelected) {
+    tmp = [...existingListOfSelected];
+  }
+  ids.forEach((id) => {
+    const found = tmp.find((i) => String(i.id) === String(id));
+    if (!found) {
+      tmp.push(options.find((o) => String(o.id) === String(id)));
+    }
+  });
+  tmp = deduplicateArrayById(tmp);
+  return tmp;
+}
 function optionsSelectBasedOnSelectedList(options, selected) {
   const ids = selected.map((i) => String(i.id));
   if (ids.length === 0) {
@@ -677,6 +691,9 @@ function optionsSelectBasedOnSelectedList(options, selected) {
     opt.selected = ids.includes(String(option.id));
     return opt;
   });
+}
+function deduplicateArrayById(arr) {
+  return arr.filter((item, index) => arr.findIndex((i) => String(i.id) === String(item.id)) === index);
 }
 
 // choice.js/composition/final/SelectManager.lib.js
@@ -740,7 +757,9 @@ var SelectManager = class {
   SelectManager,
   SelectedListManager,
   clickOutside,
+  deduplicateArrayById,
   optionsSelectBasedOnSelectedList,
   selectedAddDeduplicatedItem,
+  selectedFindDeduplicatedInOptionsByIds,
   selectedToggleDeduplicatedItem
 };
