@@ -61,10 +61,10 @@ cat <<EEE
   choice.js/composition/options-section/options-list.ts \${S}
   js/CenterResizer.ts \${S}
   choice.js/composition/list-up-down-navi/ListManager.ts \${S}
-  choice.js/composition/final/SelectManager.ts \${S}
+  choice.js/composition/manager/SelectManager.ts \${S}
   choice.js/composition/container/ContainerManager.ts \${S}
   choice.js/composition/unbind/clickOutside.ts \${S}
-  choice.js/composition/final/helpers.ts \${S}
+  choice.js/composition/manager/helpers.ts \${S}
   choice.js/composition/Module.ts \${S}
   js/CenterAndHeightResizer.ts
 

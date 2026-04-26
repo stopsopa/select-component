@@ -648,7 +648,7 @@ function clickOutside(targets, callback) {
   };
 }
 
-// choice.js/composition/final/helpers.js
+// choice.js/composition/manager/helpers.js
 function selectedAddDeduplicatedItem(selected, item) {
   const tmp = [...selected];
   const found = tmp.some((i) => String(i.id) === String(item.id));
@@ -696,7 +696,7 @@ function deduplicateArrayById(arr) {
   return arr.filter((item, index) => arr.findIndex((i) => String(i.id) === String(item.id)) === index);
 }
 
-// choice.js/composition/final/SelectManager.js
+// choice.js/composition/manager/SelectManager.js
 var SelectManager = class {
   container;
   selected;

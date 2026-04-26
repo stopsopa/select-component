@@ -13,12 +13,12 @@ while true; do
     echo "Running transpilation for ${FILES[*]}..."
     # printf "%s\n" "${FILES[@]}" | NODE_OPTIONS="" DEBUG=true node es.ts
 
-# RENDERED="$(node render.ts choice.js/composition/final/SelectManager.ts 2>&1)"    
+# RENDERED="$(node render.ts choice.js/composition/manager/SelectManager.ts 2>&1)"    
 
 # if [ "${?}" != "0" ]; then
 #   cat <<EEE
 
-# failed: node render.ts choice.js/composition/final/SelectManager.ts
+# failed: node render.ts choice.js/composition/manager/SelectManager.ts
 # ${RENDERED}
 
 # EEE

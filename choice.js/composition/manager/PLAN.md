@@ -39,7 +39,7 @@ before destroying entire html from initial dom element used in SelectManager.lib
 # build process
 
 Work in 
-choice.js/composition/final/SelectManager.lib.ts
+choice.js/composition/manager/SelectManager.lib.ts
 
 Never touch
 SelectManager.lib.js
@@ -48,15 +48,15 @@ SelectManager.rendered.ts
 these are stages of final build to:
 SelectManager.rendered.js
 
-and when creating choice.js/composition/final/demo.html load
+and when creating choice.js/composition/manager/demo.html load
 
-choice.js/composition/final/SelectManager.rendered.js
+choice.js/composition/manager/SelectManager.rendered.js
 
-also assume there is always working transpiler which assembles  choice.js/composition/final/SelectManager.rendered.ts by combining libraries using template choice.js/composition/final/SelectManager.ts into choice.js/composition/final/SelectManager.rendered.ts
+also assume there is always working transpiler which assembles  choice.js/composition/manager/SelectManager.rendered.ts by combining libraries using template choice.js/composition/manager/SelectManager.ts into choice.js/composition/manager/SelectManager.rendered.ts
 
-after that choice.js/composition/final/SelectManager.rendered.ts is transpiled to choice.js/composition/final/SelectManager.lib.js
+after that choice.js/composition/manager/SelectManager.rendered.ts is transpiled to choice.js/composition/manager/SelectManager.lib.js
 
-so in demo.html use load ESM choice.js/composition/final/SelectManager.lib.js
+so in demo.html use load ESM choice.js/composition/manager/SelectManager.lib.js
 
 in demo also create "Initialize Component" but also create button in each block around particular instance the button to destroy that instance and test .destroy() methods
 
