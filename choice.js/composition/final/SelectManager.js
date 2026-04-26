@@ -1,6 +1,10 @@
 import { ContainerManager } from "../container/ContainerManager.js";
-import { OptionsListManager } from "../options-section/OptionsListManager.js";
-import { SelectedListManager } from "../select-section/SelectedListManager.js";
+import {
+  OptionsListManager
+} from "../options-section/OptionsListManager.js";
+import {
+  SelectedListManager
+} from "../select-section/SelectedListManager.js";
 import { clickOutside } from "../unbind/clickOutside.js";
 class SelectManager {
   container;
@@ -31,7 +35,6 @@ class SelectManager {
       popover.appendChild(div);
       this.options = new OptionsListManager(div, options.options);
     }
-    // this._unbindClickOutside = clickOutside([this.container.getParent(), this.container.getPopover()], () => {
     this._unbindClickOutside = clickOutside([this.container.getParent()], () => {
       this.container.hide();
     });

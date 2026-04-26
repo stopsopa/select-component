@@ -34,7 +34,6 @@ var ContainerManager = class {
     return this.popover;
   }
   setPosition(position) {
-    debugger;
     if (this.currentPosition) {
       this.popover.classList.remove(this.currentPosition);
     }

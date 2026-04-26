@@ -1,6 +1,14 @@
 import { ContainerManager } from "../container/ContainerManager.js";
-import { OptionsListManager, OptionsListManagerOptions, OptionsListElement } from "../options-section/OptionsListManager.js";
-import { SelectedListManager, SelectedListManagerOptions, SelectedListElement } from "../select-section/SelectedListManager.js";
+import {
+  OptionsListManager,
+  OptionsListManagerOptions,
+  OptionsListElement,
+} from "../options-section/OptionsListManager.js";
+import {
+  SelectedListManager,
+  SelectedListManagerOptions,
+  SelectedListElement,
+} from "../select-section/SelectedListManager.js";
 import { clickOutside } from "../unbind/clickOutside.js";
 
 export type SelectManagerOptions<T extends OptionsListElement & SelectedListElement> = {
@@ -49,7 +57,6 @@ export class SelectManager<T extends OptionsListElement & SelectedListElement> {
       this.options = new OptionsListManager(div, options.options);
     }
 
-    // this._unbindClickOutside = clickOutside([this.container.getParent(), this.container.getPopover()], () => {
     this._unbindClickOutside = clickOutside([this.container.getParent()], () => {
       this.container.hide();
     });
