@@ -256,6 +256,12 @@
               updateDump(buff);
               syncUrl();
             },
+            onClear: () => {
+              selected = [];
+              manager.selected.setSelected(selected);
+              updateDump(selected);
+              syncUrl();
+            },
           },
           options: {
             label: "Search fruit...",

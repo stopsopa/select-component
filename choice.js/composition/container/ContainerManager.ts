@@ -10,11 +10,13 @@ export class ContainerManager {
     this.target = document.createElement("div");
 
     this.popover = document.createElement("div");
+
     this.popover.setAttribute("popover", "manual");
     this.popover.setAttribute("data-popover", "");
     this.popover.style.width = "anchor-size(width)";
     this.popover.style.boxSizing = "border-box";
     this.popover.style.border = "none";
+
     this.setPosition(this.currentPosition);
     this.setOffset("0px");
 
