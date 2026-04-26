@@ -1,6 +1,6 @@
 function selectedAddDeduplicatedItem(selected, item) {
   const tmp = [...selected];
-  const found = tmp.find((i) => String(i.id) === String(item.id));
+  const found = tmp.some((i) => String(i.id) === String(item.id));
   if (!found) {
     tmp.push(item);
   }
@@ -8,7 +8,7 @@ function selectedAddDeduplicatedItem(selected, item) {
 }
 function selectedToggleDeduplicatedItem(selected, item) {
   const tmp = [...selected];
-  const found = tmp.find((i) => String(i.id) === String(item.id));
+  const found = tmp.some((i) => String(i.id) === String(item.id));
   if (found) {
     return tmp.filter((i) => String(i.id) !== String(item.id));
   } else {
@@ -16,21 +16,23 @@ function selectedToggleDeduplicatedItem(selected, item) {
   }
   return tmp;
 }
-function selectedFindDeduplicatedInOptionsByIds(options, ids, existingListOfSelected) {
+function selectedFindDeduplicatedInOptionsByIds(options, ids, seed) {
   let tmp = [];
-  if (existingListOfSelected) {
-    tmp = [...existingListOfSelected];
+  if (seed) {
+    tmp = [...seed];
   }
   ids.forEach((id) => {
-    const found = tmp.find((i) => String(i.id) === String(id));
+    const found = tmp.some((i) => String(i.id) === String(id));
     if (!found) {
       tmp.push(options.find((o) => String(o.id) === String(id)));
     }
   });
-  // deduplicate tmp
   tmp = deduplicateArrayById(tmp);
   return tmp;
 }
+/**
+ * Set's the flag 'selected' based on list of selected objects
+ */
 function optionsSelectBasedOnSelectedList(options, selected) {
   const ids = selected.map((i) => String(i.id));
   if (ids.length === 0) {

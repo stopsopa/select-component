@@ -227,9 +227,9 @@ class OptionsListManager {
         const id = element.dataset.id;
         const item = this.propOptions.options?.find((opt) => String(opt.id) === id);
         if (item && this.propOptions.onItemPick) {
+          this.setFocus();
           this.itemPick(item.id);
           this.propOptions.onItemPick(item);
-          this.setFocus();
         }
       }
     });
@@ -320,12 +320,12 @@ class OptionsListManager {
   }
   _updateLoadingDisplay() {
     if (this.propSpinnerElement) {
-      this.propSpinnerElement.classList.toggle("loading", !!this.propOptions.loading);
+      this.propSpinnerElement.classList.toggle("loading", Boolean(this.propOptions.loading));
     }
   }
   _updateDisabledDisplay() {
     if (this.propOptionsContainer) {
-      this.propOptionsContainer.classList.toggle("disabled", !!this.propOptions.disabled);
+      this.propOptionsContainer.classList.toggle("disabled", Boolean(this.propOptions.disabled));
     }
   }
   _updateFooterDisplay() {

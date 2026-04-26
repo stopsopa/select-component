@@ -240,14 +240,11 @@
             disabled: states.disabled || false,
             loading: states.loading || false,
             onFocus: () => {
-              const tmp = [...selected];
-
-              debugger;
-              return tmp;
+              buff = [...selected];
             },
             onDelete: (itemId) => {
               buff = buff.filter((i) => String(i.id) !== String(itemId));
-              const options = manager.selected.setSelected(buff);
+              manager.selected.setSelected(buff);
 
               const optionsSelected = optionsSelectBasedOnSelectedList(mockOptions, buff);
               manager.options.setOptions(optionsSelected);
@@ -258,18 +255,9 @@
           },
           options: {
             label: "Search fruit...",
-            options: (function () {
-              // now it could be really 
-              // return optionsSelectBasedOnSelectedList(mockOptions, selected)
-              if (typeof initialList === "undefined") {
-                return optionsSelectBasedOnSelectedList(mockOptions, selected);
-              } else {
-                return optionsSelectBasedOnSelectedList(mockOptions, initialList);
-              }
-            })(),
+            options: optionsSelectBasedOnSelectedList(mockOptions, selected),
             maxHeight: "250px",
             onItemPick: (item) => {
-              debugger;
               buff = selectedToggleDeduplicatedItem(buff, item);
               manager.selected.setSelected(buff);
 
@@ -420,7 +408,6 @@
               const parts = v.split("|");
               return { id: parts[0], label: parts[1] };
             });
-            debugger;
             init(selected, statesData[id] || {});
           });
         }
