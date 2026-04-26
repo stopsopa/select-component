@@ -64,9 +64,8 @@ cat <<EEE
   choice.js/composition/final/SelectManager.ts \${S}
   choice.js/composition/container/ContainerManager.ts \${S}
   choice.js/composition/unbind/clickOutside.ts \${S}
-  choice.js/composition/final/SelectManager.lib.ts \${S}
   choice.js/composition/final/helpers.ts \${S}
-  choice.js/composition/final/SelectManager.ts \${S}
+  choice.js/composition/Module.ts \${S}
   js/CenterAndHeightResizer.ts
 
 EEE

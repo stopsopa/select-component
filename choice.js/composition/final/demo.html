@@ -125,7 +125,7 @@
         selectedToggleDeduplicatedItem,
         optionsSelectBasedOnSelectedList,
         selectedFindDeduplicatedInOptionsByIds,
-      } from "./SelectManager.js";
+      } from "../Module.js";
 
       document.getElementById("reload-link").href = window.location.pathname;
 
@@ -241,6 +241,10 @@
             loading: states.loading || false,
             onFocus: () => {
               buff = [...selected];
+
+              const optionsSelected = optionsSelectBasedOnSelectedList(mockOptions, buff);
+              manager.options.setOptions(optionsSelected);
+              manager.options.setFocus();
             },
             onDelete: (itemId) => {
               buff = buff.filter((i) => String(i.id) !== String(itemId));
@@ -259,7 +263,6 @@
             maxHeight: "250px",
             onItemPick: (item) => {
               buff = selectedToggleDeduplicatedItem(buff, item);
-              manager.selected.setSelected(buff);
 
               const optionsSelected = optionsSelectBasedOnSelectedList(mockOptions, buff);
               manager.options.setOptions(optionsSelected);
@@ -270,6 +273,8 @@
             onCancel: () => manager.container.hide(),
             onOk: () => {
               selected = [...buff];
+              manager.selected.setSelected(selected);
+
               manager.container.hide();
             },
           },
