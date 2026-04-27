@@ -32,9 +32,10 @@
       }
     </style>
   </head>
-  <body>
+  <body class="gcp-css">
+    <div style="padding: 20px;">
     <h1>SelectedListManager WebComponent Demo</h1>
-    <button id="init-btn" class="gcp-css">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
+    <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
     <div
@@ -172,7 +173,7 @@
                     ></selected-list>
                 </center-resizer>
 
-                <div style="margin-top: 10px;">
+                <div style="margin-top: 10px; margin-bottom: 20px;">
                     Input Value: <pre data-role="input-value-out" id="input-value-out-${instanceId}" style="display: inline; background: #eee; padding: 2px 5px;"></pre>
                     (onChange triggers: <span data-role="onchange-counter" id="onchange-counter-${instanceId}" style="font-weight: bold;">0</span>,
                     onFocus triggers: <span data-role="onfocus-counter" id="onfocus-counter-${instanceId}" style="font-weight: bold;">0</span>,
@@ -180,28 +181,57 @@
                 </div>
 
                 <div class="controls">
-                    <input type="text" data-role="new-item-input" id="new-item-input-${instanceId}" placeholder="New item label" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 150px;">
-                    <button class="gcp-css" data-role="add-btn" id="add-btn-${instanceId}">Add Item</button>
+                    <div class="input-wrapper" style="max-width: 300px; margin-bottom: 0;">
+                        <input type="text" data-role="new-item-input" id="new-item-input-${instanceId}" placeholder=" ">
+                        <label for="new-item-input-${instanceId}">New item label</label>
+                    </div>
+                    <button data-role="add-btn" id="add-btn-${instanceId}">Add Item</button>
                 </div>
 
-                <div class="controls">
-                    <label><input type="checkbox" data-role="error-cb" id="error-cb-${instanceId}" ${states.error ? "checked" : ""}> Error State</label>
-                    <label><input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}" ${states.disabled ? "checked" : ""}> Disabled State</label>
-                    <label><input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}" ${states.loading ? "checked" : ""}> Loading State</label>
-                    <label><input type="checkbox" data-role="input-field-cb" id="input-field-cb-${instanceId}" ${states.showInput !== false ? "checked" : ""}> Show Input Field</label>
+                <div class="controls" style="margin-top: 20px;">
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="error-cb" id="error-cb-${instanceId}" ${states.error ? "checked" : ""}>
+                            <div class="content-cell">
+                                <label for="error-cb-${instanceId}">Error State</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}" ${states.disabled ? "checked" : ""}>
+                            <div class="content-cell">
+                                <label for="disabled-cb-${instanceId}">Disabled State</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}" ${states.loading ? "checked" : ""}>
+                            <div class="content-cell">
+                                <label for="loading-cb-${instanceId}">Loading State</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="input-field-cb" id="input-field-cb-${instanceId}" ${states.showInput !== false ? "checked" : ""}>
+                            <div class="content-cell">
+                                <label for="input-field-cb-${instanceId}">Show Input Field</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="controls">
-                    <input type="text" data-role="inject-input-value" id="inject-input-value-${instanceId}" placeholder="Inject input value" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 150px;">
-                    <button class="gcp-css" data-role="inject-btn" id="inject-btn-${instanceId}">Set Input Value</button>
+                <div class="controls" style="margin-top: 20px;">
+                    <div class="input-wrapper" style="max-width: 300px; margin-bottom: 0;">
+                        <input type="text" data-role="inject-label-value" id="inject-label-value-${instanceId}" placeholder=" ">
+                        <label for="inject-label-value-${instanceId}">Inject label value</label>
+                    </div>
+                    <button data-role="inject-label-btn" id="inject-label-btn-${instanceId}">Set Label Value</button>
                 </div>
 
-                <div class="controls">
-                    <input type="text" data-role="inject-label-value" id="inject-label-value-${instanceId}" placeholder="Inject label value" style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 150px;">
-                    <button class="gcp-css" data-role="inject-label-btn" id="inject-label-btn-${instanceId}">Set Label Value</button>
-                </div>
-
-                <div class="controls">
+                <div class="controls" style="margin-top: 20px;">
                     <pre data-role="list-dump" style="background: #f9f9f9; border: 1px solid #ddd; padding: 10px; width: 100%; box-sizing: border-box; overflow: auto;"></pre>
                 </div>
             `;
@@ -216,8 +246,6 @@
         const disabledCb = group.querySelector('[data-role="disabled-cb"]');
         const loadingCb = group.querySelector('[data-role="loading-cb"]');
         const inputFieldCb = group.querySelector('[data-role="input-field-cb"]');
-        const injectInput = group.querySelector('[data-role="inject-input-value"]');
-        const injectBtn = group.querySelector('[data-role="inject-btn"]');
         const injectLabelInput = group.querySelector('[data-role="inject-label-value"]');
         const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
         const onChangeCounter = group.querySelector('[data-role="onchange-counter"]');
@@ -344,11 +372,6 @@
           syncUrl();
         });
 
-        injectBtn.addEventListener("click", () => {
-          sl.setValue(injectInput.value);
-          injectInput.value = "";
-        });
-
         injectLabelBtn.addEventListener("click", () => {
           sl.setLabel(injectLabelInput.value);
           injectLabelInput.value = "";
@@ -417,5 +440,6 @@
       window.addEventListener("popstate", loadFromUrl);
       loadFromUrl();
     </script>
+    </div>
   </body>
 </html>
