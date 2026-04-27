@@ -49,23 +49,23 @@ set -e
 S="\\\\"      
 cat <<EEE
 
-/bin/bash transpile.sh choice.js/select.ts
+/bin/bash transpile.sh select.ts
 
-/bin/bash transpile.sh choice.js/composition/SelectedListManager.ts
+/bin/bash transpile.sh composition/SelectedListManager.ts
 
 /bin/bash transpile.sh \${S}
-  choice.js/select.ts \${S}
-  choice.js/composition/select-section/SelectedListManager.ts \${S}
-  choice.js/composition/options-section/OptionsListManager.ts \${S}
-  choice.js/composition/select-section/selected-list.ts \${S}
-  choice.js/composition/options-section/options-list.ts \${S}
+  select.ts \${S}
+  composition/select-section/SelectedListManager.ts \${S}
+  composition/options-section/OptionsListManager.ts \${S}
+  composition/select-section/selected-list.ts \${S}
+  composition/options-section/options-list.ts \${S}
   js/CenterResizer.ts \${S}
-  choice.js/composition/list-up-down-navi/ListManager.ts \${S}
-  choice.js/composition/manager/SelectManager.ts \${S}
-  choice.js/composition/container/ContainerManager.ts \${S}
-  choice.js/composition/unbind/clickOutside.ts \${S}
-  choice.js/composition/manager/helpers.ts \${S}
-  choice.js/composition/Module.ts \${S}
+  composition/list-up-down-navi/ListManager.ts \${S}
+  composition/manager/SelectManager.ts \${S}
+  composition/container/ContainerManager.ts \${S}
+  composition/unbind/clickOutside.ts \${S}
+  composition/manager/helpers.ts \${S}
+  composition/Module.ts \${S}
   js/CenterAndHeightResizer.ts
 
 EEE

@@ -1,4 +1,4 @@
-// choice.js/composition/container/ContainerManager.js
+// composition/container/ContainerManager.js
 var ContainerManager = class {
   parent;
   target;
@@ -55,7 +55,7 @@ var ContainerManager = class {
   }
 };
 
-// choice.js/composition/options-section/OptionsListManager.js
+// composition/options-section/OptionsListManager.js
 var OptionsListManager = class {
   propOptions;
   propParentElement;
@@ -396,7 +396,7 @@ var OptionsListManager = class {
   }
 };
 
-// choice.js/composition/select-section/SelectedListManager.js
+// composition/select-section/SelectedListManager.js
 var SelectedListManager = class {
   propParentElement;
   propContainer;
@@ -629,7 +629,7 @@ var SelectedListManager = class {
   }
 };
 
-// choice.js/composition/unbind/clickOutside.js
+// composition/unbind/clickOutside.js
 function clickOutside(targets, callback) {
   const targetList = Array.isArray(targets) ? targets : [targets];
   const handler = (e) => {
@@ -648,7 +648,7 @@ function clickOutside(targets, callback) {
   };
 }
 
-// choice.js/composition/manager/helpers.js
+// composition/manager/helpers.js
 function selectedAddDeduplicatedItem(selected, item) {
   const tmp = [...selected];
   const found = tmp.some((i) => String(i.id) === String(item.id));
@@ -696,7 +696,7 @@ function deduplicateArrayById(arr) {
   return arr.filter((item, index) => arr.findIndex((i) => String(i.id) === String(item.id)) === index);
 }
 
-// choice.js/composition/manager/SelectManager.js
+// composition/manager/SelectManager.js
 var SelectManager = class {
   container;
   selected;
@@ -741,7 +741,7 @@ var SelectManager = class {
   }
 };
 
-// choice.js/composition/Module.ts
+// composition/Module.ts
 /** @es.ts 
 {
    mode: "bundle",
