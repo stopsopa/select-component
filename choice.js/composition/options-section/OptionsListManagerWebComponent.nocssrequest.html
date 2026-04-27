@@ -133,9 +133,10 @@
 
       // 1. If using a bundler like Vite/Webpack:
       // OptionsList.cssText = (await import("./OptionsListManager.css?raw")).default;
-      const css1 = await fetch("../../floating-label-pattern.css").then((r) => r.text());
+      // const css1 = await fetch("../../floating-label-pattern.css").then((r) => r.text());
       const css2 = await fetch("./OptionsListManager.css").then((r) => r.text());
-      OptionsList.cssText = css1 + "\n" + css2;
+      // OptionsList.cssText = css1 + "\n" + css2;
+      OptionsList.cssText = css2;
 
       document.getElementById("reload-link").href = window.location.pathname;
 
