@@ -9,6 +9,7 @@
  */
 class CenterResizer extends HTMLElement {
   leftDiv;
+  centerDiv;
   rightDiv;
   resizerLeft;
   resizerRight;
@@ -27,7 +28,7 @@ class CenterResizer extends HTMLElement {
           align-items: stretch;
         }
         .center-div {
-          flex-grow: 1;
+          flex-shrink: 0;
           min-width: 0;
           padding-left: 15px;
           padding-right: 15px;
@@ -36,6 +37,9 @@ class CenterResizer extends HTMLElement {
         .side-div {
           flex-shrink: 0;
           box-sizing: border-box;
+        }
+        #right-div {
+          flex-grow: 1;
         }
         .resizer {
           width: 8px;
@@ -68,7 +72,7 @@ class CenterResizer extends HTMLElement {
       <div class="flex">
         <div class="side-div" id="left-div"></div>
         <div class="resizer" id="resizer-left"></div>
-        <div class="center-div">
+        <div class="center-div" id="center-div">
           <slot></slot>
         </div>
         <div class="resizer" id="resizer-right"></div>
@@ -78,19 +82,20 @@ class CenterResizer extends HTMLElement {
   }
   connectedCallback() {
     this.leftDiv = this.shadowRoot.getElementById("left-div");
+    this.centerDiv = this.shadowRoot.getElementById("center-div");
     this.rightDiv = this.shadowRoot.getElementById("right-div");
     this.resizerLeft = this.shadowRoot.getElementById("resizer-left");
     this.resizerRight = this.shadowRoot.getElementById("resizer-right");
     const attrLeft = this.getAttribute("left");
-    const attrRight = this.getAttribute("center");
+    const attrCenter = this.getAttribute("center");
     if (attrLeft) {
       this.leftDiv.style.width = attrLeft;
     }
-    if (attrRight) {
-      this.rightDiv.style.width = attrRight;
+    if (attrCenter) {
+      this.centerDiv.style.width = attrCenter;
     }
     this.setupResizer(this.resizerLeft, this.leftDiv, false);
-    this.setupResizer(this.resizerRight, this.rightDiv, true);
+    this.setupResizer(this.resizerRight, this.centerDiv, false);
   }
   setupResizer(handle, target, isRightSide) {
     handle.addEventListener("mousedown", (e) => {

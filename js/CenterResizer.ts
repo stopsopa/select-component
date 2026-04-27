@@ -9,6 +9,7 @@
  */
 export class CenterResizer extends HTMLElement {
   leftDiv!: HTMLElement;
+  centerDiv!: HTMLElement;
   rightDiv!: HTMLElement;
   resizerLeft!: HTMLElement;
   resizerRight!: HTMLElement;
@@ -29,7 +30,7 @@ export class CenterResizer extends HTMLElement {
           align-items: stretch;
         }
         .center-div {
-          flex-grow: 1;
+          flex-shrink: 0;
           min-width: 0;
           padding-left: 15px;
           padding-right: 15px;
@@ -38,6 +39,9 @@ export class CenterResizer extends HTMLElement {
         .side-div {
           flex-shrink: 0;
           box-sizing: border-box;
+        }
+        #right-div {
+          flex-grow: 1;
         }
         .resizer {
           width: 8px;
@@ -70,7 +74,7 @@ export class CenterResizer extends HTMLElement {
       <div class="flex">
         <div class="side-div" id="left-div"></div>
         <div class="resizer" id="resizer-left"></div>
-        <div class="center-div">
+        <div class="center-div" id="center-div">
           <slot></slot>
         </div>
         <div class="resizer" id="resizer-right"></div>
@@ -81,22 +85,23 @@ export class CenterResizer extends HTMLElement {
 
   connectedCallback() {
     this.leftDiv = this.shadowRoot!.getElementById("left-div") as HTMLElement;
+    this.centerDiv = this.shadowRoot!.getElementById("center-div") as HTMLElement;
     this.rightDiv = this.shadowRoot!.getElementById("right-div") as HTMLElement;
     this.resizerLeft = this.shadowRoot!.getElementById("resizer-left") as HTMLElement;
     this.resizerRight = this.shadowRoot!.getElementById("resizer-right") as HTMLElement;
     const attrLeft = this.getAttribute("left");
-    const attrRight = this.getAttribute("center");
+    const attrCenter = this.getAttribute("center");
 
     if (attrLeft) {
       this.leftDiv.style.width = attrLeft;
     }
 
-    if (attrRight) {
-      this.rightDiv.style.width = attrRight;
+    if (attrCenter) {
+      this.centerDiv.style.width = attrCenter;
     }
 
     this.setupResizer(this.resizerLeft, this.leftDiv, false);
-    this.setupResizer(this.resizerRight, this.rightDiv, true);
+    this.setupResizer(this.resizerRight, this.centerDiv, false);
   }
 
   setupResizer(handle: HTMLElement, target: HTMLElement, isRightSide: boolean) {
