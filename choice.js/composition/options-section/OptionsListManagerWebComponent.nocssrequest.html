@@ -65,7 +65,8 @@
       }
     </style>
   </head>
-  <body>
+  <body class="gcp-css">
+    <div style="padding: 20px;">
     <h1>Load CSS in esm</h1>
     <ace-editor lang="javascript">
       <script type="ace">
@@ -83,7 +84,7 @@
       </script>
     </ace-editor>
     <hr />
-    <button id="init-btn" class="gcp-css">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
+    <button id="init-btn">Initialize Component</button> | <a href="" id="reload-link">reload</a> |
     <a href=".">up ..</a>
 
     <div
@@ -216,47 +217,69 @@
                 </div>
 
                 <div class="controls">
-                    <button class="gcp-css" data-role="add-btn">Add Random Option</button>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
-                        <input type="checkbox" data-role="loading-cb"> Loading Spinner
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
-                        <input type="checkbox" data-role="disabled-cb"> Disabled State
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
-                        <input type="checkbox" data-role="footer-cb" checked> Show Footer
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 14px;">
-                        <input type="checkbox" data-role="filter-cb" checked> Show Filter
-                    </label>
-                    <button class="gcp-css white" data-role="focus-btn">Focus Input (via Method)</button>
-                    <button class="gcp-css white" data-role="empty-btn">Set Custom Empty (Attr)</button>
-                    <button class="gcp-css white" data-role="reset-empty-btn">Reset Empty</button>
-                    <button class="gcp-css white" data-role="render-btn">Set Custom Render (Attr)</button>
-                    <button class="gcp-css white" data-role="reset-render-btn">Reset Render</button>
-                    <button class="gcp-css white" data-role="clear-btn">Clear Options</button>
-                    <button class="gcp-css white" data-role="attach-window-btn">Attach Arrows to Window</button>
-                    <button class="gcp-css white" data-role="detach-window-btn">Detach Arrows from Window</button>
+                    <button data-role="add-btn">Add Random Option</button>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="loading-cb" id="loading-cb-${instanceId}">
+                            <div class="content-cell">
+                                <label for="loading-cb-${instanceId}">Loading Spinner</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="disabled-cb" id="disabled-cb-${instanceId}">
+                            <div class="content-cell">
+                                <label for="disabled-cb-${instanceId}">Disabled State</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="footer-cb" id="footer-cb-${instanceId}" checked>
+                            <div class="content-cell">
+                                <label for="footer-cb-${instanceId}">Show Footer</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="checkbox-wrapper" style="margin-bottom: 0;">
+                        <div class="checkbox-row">
+                            <input type="checkbox" data-role="filter-cb" id="filter-cb-${instanceId}" checked>
+                            <div class="content-cell">
+                                <label for="filter-cb-${instanceId}">Show Filter</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="white" data-role="focus-btn">Focus Input (via Method)</button>
+                    <button class="white" data-role="empty-btn">Set Custom Empty (Attr)</button>
+                    <button class="white" data-role="reset-empty-btn">Reset Empty</button>
+                    <button class="white" data-role="render-btn">Set Custom Render (Attr)</button>
+                    <button class="white" data-role="reset-render-btn">Reset Render</button>
+                    <button class="white" data-role="clear-btn">Clear Options</button>
+                    <button class="white" data-role="attach-window-btn">Attach Arrows to Window</button>
+                    <button class="white" data-role="detach-window-btn">Detach Arrows from Window</button>
                 </div>
 
                 <div class="controls">
                     <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
                         <div style="display: flex; gap: 5px; align-items: center;">
-                            <input type="text" data-role="inject-input" placeholder="Value..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 80px;">
-                            <button class="gcp-css" data-role="inject-btn">Set Value</button>
-                        </div>
-                        <div style="display: flex; gap: 5px; align-items: center;">
-                            <input type="text" data-role="inject-label" placeholder="Label..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 80px;">
-                            <button class="gcp-css" data-role="inject-label-btn">Set Label</button>
+                            <div class="input-wrapper" style="max-width: 300px; margin-bottom: 0;">
+                                <input type="text" data-role="inject-label" id="inject-label-${instanceId}" placeholder=" ">
+                                <label for="inject-label-${instanceId}">Inject label</label>
+                            </div>
+                            <button data-role="inject-label-btn">Set Label</button>
                         </div>
                         <div style="display: flex; gap: 5px; align-items: center;" data-role="mh-presets-container">
                             <div style="display: flex; gap: 2px;">
-                                <button class="gcp-css white" data-role="maxheight-down" style="padding: 0 8px; min-width: auto;">▼</button>
-                                <input type="text" data-role="maxheight-input" placeholder="Max height..." style="padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 80px;">
-                                <button class="gcp-css white" data-role="maxheight-up" style="padding: 0 8px; min-width: auto;">▲</button>
+                                <button class="white" data-role="maxheight-down" style="padding: 0 8px; min-width: auto;">▼</button>
+                                <div class="input-wrapper" style="max-width: 150px; margin-bottom: 0;">
+                                    <input type="text" data-role="maxheight-input" id="maxheight-input-${instanceId}" placeholder=" ">
+                                    <label for="maxheight-input-${instanceId}">Max height</label>
+                                </div>
+                                <button class="white" data-role="maxheight-up" style="padding: 0 8px; min-width: auto;">▲</button>
                             </div>
-                            <button class="gcp-css" data-role="maxheight-btn">Set</button>
-                            ${maxHeightPresets.map((val) => `<button class="gcp-css white" data-role="mh-preset" data-value="${val}">${val || "Reset"}</button>`).join("")}
+                            <button data-role="maxheight-btn">Set</button>
+                            ${maxHeightPresets.map((val) => `<button class="white" data-role="mh-preset" data-value="${val}">${val || "Reset"}</button>`).join("")}
                         </div>
                     </div>
                 </div>
@@ -292,8 +315,6 @@
         const clearBtn = group.querySelector('[data-role="clear-btn"]');
         const attachWindowBtn = group.querySelector('[data-role="attach-window-btn"]');
         const detachWindowBtn = group.querySelector('[data-role="detach-window-btn"]');
-        const injectInput = group.querySelector('[data-role="inject-input"]');
-        const injectBtn = group.querySelector('[data-role="inject-btn"]');
         const injectLabelInput = group.querySelector('[data-role="inject-label"]');
         const injectLabelBtn = group.querySelector('[data-role="inject-label-btn"]');
         const maxHeightInput = group.querySelector('[data-role="maxheight-input"]');
@@ -452,13 +473,7 @@
           ol.detachArrowsUpAndDown(window);
         });
 
-        injectBtn.addEventListener("click", () => {
-          ol.setAttribute("value", injectInput.value);
-          searchValOut.textContent = injectInput.value || "-";
-          syncUrl();
-        });
-
-        injectInput.addEventListener("input", () => syncUrl());
+        injectLabelInput.addEventListener("input", () => syncUrl());
 
         injectLabelInput.addEventListener("input", () => syncUrl());
         injectLabelBtn.addEventListener("click", () => {
@@ -595,5 +610,6 @@
       src="https://stopsopa.github.io/ace-editor-webcomponent/ace-web-component.js"
       data-main-ace="https://stopsopa.github.io/ace-editor-webcomponent/noprettier/ace/ace-builds-1.43.4/src-min-noconflict/ace.js"
     ></script>
+    </div>
   </body>
 </html>
