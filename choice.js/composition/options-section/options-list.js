@@ -3,12 +3,12 @@ import { OptionsListManager } from "./OptionsListManager.js";
  * Injects CSS into the Shadow DOM.
  * Priority:
  * 1. OptionsList.cssText (Bundler string injection)
- * 2. <meta name="options-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+ * 2. <meta name="select-component" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
  * 3. OptionsList.defaultCssUrls (Global JS property)
  *
  * Example of Global HTML Declaration in the main document <head>:
  * <head>
- *   <meta name="options-list-css" content="OptionsListManager.css" />
+ *   <meta name="select-component" content="OptionsListManager.css" />
  * </head>
  */
 class OptionsList extends HTMLElement {
@@ -154,7 +154,7 @@ class OptionsList extends HTMLElement {
       style.textContent = OptionsList.cssText;
     } else {
       let urls = [];
-      const metaTag = document.querySelector('meta[name="options-list-css"]');
+      const metaTag = document.querySelector('meta[name="select-component"]');
       if (metaTag && metaTag.getAttribute("content")) {
         urls = metaTag.getAttribute("content").split(",").map((s) => s.trim());
       } else {

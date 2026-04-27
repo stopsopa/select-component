@@ -4,12 +4,12 @@ import { OptionsListManager, OptionsListElement, OptionsListManagerOptions } fro
  * Injects CSS into the Shadow DOM.
  * Priority:
  * 1. OptionsList.cssText (Bundler string injection)
- * 2. <meta name="options-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+ * 2. <meta name="select-component" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
  * 3. OptionsList.defaultCssUrls (Global JS property)
  *
  * Example of Global HTML Declaration in the main document <head>:
  * <head>
- *   <meta name="options-list-css" content="OptionsListManager.css" />
+ *   <meta name="select-component" content="OptionsListManager.css" />
  * </head>
  */
 export class OptionsList extends HTMLElement {
@@ -176,7 +176,7 @@ export class OptionsList extends HTMLElement {
     // Scenario B: Load from URLs (Global Meta Tag > Default Static Property)
     else {
       let urls: string[] = [];
-      const metaTag = document.querySelector('meta[name="options-list-css"]');
+      const metaTag = document.querySelector('meta[name="select-component"]');
 
       if (metaTag && metaTag.getAttribute("content")) {
         urls = metaTag

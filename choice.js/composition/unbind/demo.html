@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ClickOutside Demo</title>
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
     <style>
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -35,7 +36,8 @@
       }
     </style>
   </head>
-  <body>
+  <body class="gcp-css">
+    <div style="padding: 20px">
     <h1>ClickOutside Demo</h1>
     <a href=".">up ..</a>
     
@@ -95,5 +97,6 @@
       });
       box2.addEventListener("click", () => box2.classList.add("active"));
     </script>
+    </div>
   </body>
 </html>

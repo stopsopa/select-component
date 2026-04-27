@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SelectedListManager WebComponent Templates Demo</title>
     <!-- Global CSS configuration for the SelectedList component -->
-    <meta name="selected-list-css" content="SelectedListManager.css" />
+    <link rel="stylesheet" href="../../floating-label-pattern.css" />
     <style>
-      input {
-        border: 1px solid red !important;
-      }
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         padding: 20px;
@@ -144,12 +141,12 @@
         import "../../../js/CenterResizer.js";
         import { SelectedList } from "./selected-list.js";
 
-        // // 1. If using a bundler like Vite/Webpack:
-        // // OptionsList.cssText = (await import("./OptionsListManager.css?raw")).default;
-        // // const css1 = await fetch("../../floating-label-pattern.css").then((r) => r.text());
-        // const css2 = await fetch("./SelectedListManager.css").then((r) => r.text());
-        // // OptionsList.cssText = css1 + "\n" + css2;
-        // SelectedList.cssText = css2;
+        // 1. If using a bundler like Vite/Webpack:
+        // OptionsList.cssText = (await import("./OptionsListManager.css?raw")).default;
+        // const css1 = await fetch("../../floating-label-pattern.css").then((r) => r.text());
+        const css2 = await fetch("./SelectedListManager.css").then((r) => r.text());
+        // OptionsList.cssText = css1 + "\n" + css2;
+        SelectedList.cssText = css2;
 
         document.getElementById("reload-link").href = window.location.pathname;
 

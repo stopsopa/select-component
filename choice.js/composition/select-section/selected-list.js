@@ -3,12 +3,12 @@ import { SelectedListManager } from "./SelectedListManager.js";
  * Injects CSS into the Shadow DOM.
  * Priority:
  * 1. SelectedList.cssText (Bundler string injection)
- * 2. <meta name="selected-list-css" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
+ * 2. <meta name="select-component" content="/path1.css, /path2.css"> (Global HTML declaration in main document)
  * 3. SelectedList.defaultCssUrls (Global JS property)
  *
  * Example of Global HTML Declaration in the main document <head>:
  * <head>
- *   <meta name="selected-list-css" content="SelectedListManager.css">
+ *   <meta name="select-component" content="SelectedListManager.css">
  * </head>
  */
 class SelectedList extends HTMLElement {
@@ -149,7 +149,7 @@ class SelectedList extends HTMLElement {
       style.textContent = SelectedList.cssText;
     } else {
       let urls = [];
-      const metaTag = document.querySelector('meta[name="selected-list-css"]');
+      const metaTag = document.querySelector('meta[name="select-component"]');
       if (metaTag && metaTag.getAttribute("content")) {
         urls = metaTag.getAttribute("content").split(",").map((s) => s.trim());
       } else {
