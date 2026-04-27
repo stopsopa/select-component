@@ -71,6 +71,8 @@
         const parentDiv = group.querySelector("center-and-height-resizer > div");
         const manager = new ContainerManager(parentDiv);
 
+        manager.setPosition(group.querySelector(".position-select").value);
+
         const target = manager.getTarget();
         target.classList.add("show-target");
         target.innerHTML = `<textarea>Target textarea</textarea>`;
