@@ -204,8 +204,8 @@ const init = (initialOptions = [], states = {}) => {
       updateDump(nextOptions);
       syncUrl();
     },
-    onOk: () => inc("onok-count"),
     onCancel: () => inc("oncancel-count"),
+    onOk: () => inc("onok-count"),
     onHighlightChange: (id) => {
       inc("onhighlight-count");
       syncUrl();

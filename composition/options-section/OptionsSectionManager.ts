@@ -606,8 +606,6 @@ export class OptionsSectionManager<T extends Item = Item> {
       this.propParentElement.appendChild(this.propFilterContainer);
       this.propParentElement.appendChild(this.propOptionsContainer);
       this.propParentElement.appendChild(this.propFooterContainer);
-
-      this._bindEvents();
     }
 
     this._updateOptionsDisplay();
