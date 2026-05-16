@@ -217,9 +217,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     syncUrl();
   });
 
-  mgr.getSubscriber().bind("onItemPick", (item: OptionItem) => {
+  mgr.getSubscriber().bind("onItemPick", (item) => {
     inc("onpick-count");
-    const nextOptions = mgr.getOptions().map((o: any) => {
+    const nextOptions = mgr.getOptions().map((o) => {
       if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
       return o;
     });
@@ -230,12 +230,12 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
   mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
-  mgr.getSubscriber().bind("onHighlightChange", (id: any) => {
+  mgr.getSubscriber().bind("onHighlightChange", (id) => {
     inc("onhighlight-count");
     syncUrl();
   });
 
-  mgr.getSubscriber().bind("onComponentChange", (opt: any) => {
+  mgr.getSubscriber().bind("onComponentChange", (opt) => {
     disabledOptCb.checked = !!opt.disabled;
     loadingOptCb.checked = !!opt.loading;
     footerOptCb.checked = opt.showFooter !== false;

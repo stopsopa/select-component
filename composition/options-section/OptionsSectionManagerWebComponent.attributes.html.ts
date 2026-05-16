@@ -217,9 +217,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     syncUrl();
   });
 
-  sub.bind("onItemPick", (item: OptionItem) => {
+  sub.bind("onItemPick", (item) => {
     inc("onpick-count");
-    const nextOptions = wc.options.map((o: any) => {
+    const nextOptions = wc.options.map((o) => {
       if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
       return o;
     });

@@ -208,7 +208,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
       valueInputOpt.value = e.target.value;
       syncUrl();
     },
-    onItemPick: (item: OptionItem) => {
+    onItemPick: (item) => {
       inc("onpick-count");
       const nextOptions = mgr.getOptions().map((o) => {
         if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
