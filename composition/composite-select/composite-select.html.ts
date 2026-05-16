@@ -372,8 +372,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     mgr.options.setFocus();
   };
 
-  const onChangeEventFactory = (stopPopupInput: boolean) =>
-    debounce(async (e: InputChangeEvent, previousValue: string | undefined) => {
+  const onChangeEventFactory = (stopPopupInput: boolean): NonNullable<typeof mgr.selected.propOptions.onInputChange> =>
+    debounce(async (e, previousValue) => {
       const { search, popupInput } = localDetermineSearch();
 
       if (popupInput === true) {

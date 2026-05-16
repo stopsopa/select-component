@@ -317,7 +317,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   }
 
   const onChangeEventFactory = (stopPopupInput: boolean) =>
-    debounce(async (e: InputChangeEvent, previousValue: string | undefined) => {
+    debounce(async (e, previousValue) => {
       const { search, popupInput } = localDetermineSearch();
 
       if (popupInput === true) {
