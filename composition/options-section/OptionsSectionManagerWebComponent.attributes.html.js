@@ -187,14 +187,15 @@ const init = (initialOptions = [], states = {}) => {
     updateUrlDisplay(url.toString());
   };
   ol.options = initialOptions;
-  ol.addEventListener("onInputChange", (e) => {
+  const mgr = ol.getManager();
+  const sub = mgr.getSubscriber();
+  sub.bind("onInputChange", (e) => {
     inc("onchange-count");
-    valueInputOpt.value = e.detail.value;
+    valueInputOpt.value = e.target.value;
     syncUrl();
   });
-  ol.addEventListener("onItemPick", (e) => {
+  sub.bind("onItemPick", (item) => {
     inc("onpick-count");
-    const item = e.detail.item;
     const nextOptions = ol.options.map((o) => {
       if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
       return o;
@@ -203,14 +204,12 @@ const init = (initialOptions = [], states = {}) => {
     updateDump(nextOptions);
     syncUrl();
   });
-  ol.addEventListener("onOk", () => inc("onok-count"));
-  ol.addEventListener("onCancel", () => inc("oncancel-count"));
-  ol.addEventListener("onHighlightChange", (e) => {
+  sub.bind("onOk", () => inc("onok-count"));
+  sub.bind("onCancel", () => inc("oncancel-count"));
+  sub.bind("onHighlightChange", () => {
     inc("onhighlight-count");
     syncUrl();
   });
-  // Get manager instance
-  const mgr = ol.getManager();
   updateDump(ol.options);
   disabledOptCb.addEventListener("change", () => {
     ol.setDisabled(disabledOptCb.checked);

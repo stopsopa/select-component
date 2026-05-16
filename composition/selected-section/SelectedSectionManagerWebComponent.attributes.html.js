@@ -37,11 +37,6 @@ const init = (initialSelected = [], states = {}) => {
           ${states.disabled ? "disabled" : ""}
           ${states.loading ? "loading" : ""}
           ${states.showInput !== false ? "show-input" : ""}
-          onFocus="this.handleDemoFocus(event)"
-          onClear="this.handleDemoClear(event)"
-          onInputChange="this.handleDemoInputChange(event)"
-          onDelete="this.handleDemoDelete(event)"
-          onChange="this.handleDemoChange(event)"
         ></selected-section>
       </center-resizer>
     </div>
@@ -160,22 +155,22 @@ const init = (initialSelected = [], states = {}) => {
     updateUrlDisplay(url.toString());
   };
   sl.setAttribute("selected", JSON.stringify(initialSelected));
-  const slAny = sl;
-  slAny.handleDemoFocus = () => {
+  const mgr = sl.getManager();
+  const sub = mgr.getSubscriber();
+  sub.bind("onFocus", () => {
     inc("onfocus-count");
-  };
-  slAny.handleDemoClear = () => {
+  });
+  sub.bind("onClear", () => {
     inc("onclear-count");
     sl.setAttribute("selected", "[]");
     sl.setAttribute("value", "");
     syncUrl();
-  };
-  slAny.handleDemoInputChange = (e) => {
+  });
+  sub.bind("onInputChange", (e) => {
     inc("onchange-count");
-    const val = e.detail.value;
+    const val = e.target.value;
     valueInputSel.value = val;
-    const originalEvent = e.detail.originalEvent;
-    if (originalEvent && originalEvent.key === "Enter" && val.trim() !== "") {
+    if (e.key === "Enter" && val.trim() !== "") {
       const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
       const id = getNextId();
       setNextId(id + 1);
@@ -184,27 +179,24 @@ const init = (initialSelected = [], states = {}) => {
       sl.setAttribute("value", "");
       syncUrl();
     }
-    if (originalEvent && originalEvent.key === "Backspace" && val === "") {
+    if (e.key === "Backspace" && val === "" && JSON.parse(sl.getAttribute("selected") || "[]").length > 0) {
       const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
-      if (currentSelected.length > 0) {
-        currentSelected.pop();
-        sl.setAttribute("selected", JSON.stringify(currentSelected));
-        syncUrl();
-      }
+      currentSelected.pop();
+      sl.setAttribute("selected", JSON.stringify(currentSelected));
+      syncUrl();
     }
-  };
-  slAny.handleDemoDelete = (e) => {
+  });
+  sub.bind("onDelete", (idToDelete) => {
     inc("ondelete-count");
-    const idToDelete = String(e.detail.id);
     const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
-    const nextSelected = currentSelected.filter((i) => String(i.id) !== idToDelete);
+    const nextSelected = currentSelected.filter((i) => String(i.id) !== String(idToDelete));
     sl.setAttribute("selected", JSON.stringify(nextSelected));
     syncUrl();
-  };
-  slAny.handleDemoChange = (e) => {
+  });
+  sub.bind("onChange", (selected) => {
     inc("onitemchange-count");
-    updateDump(e.detail.selected);
-  };
+    updateDump(selected);
+  });
   sl.getManager()
     ?.getSubscriber()
     .bind("onComponentChange", (opt) => {

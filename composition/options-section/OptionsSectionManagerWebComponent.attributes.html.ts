@@ -201,15 +201,17 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   ol.options = initialOptions;
 
-  ol.addEventListener("onInputChange", (e: any) => {
+  const mgr = ol.getManager()!;
+  const sub = mgr.getSubscriber();
+
+  sub.bind("onInputChange", (e: Event) => {
     inc("onchange-count");
-    valueInputOpt.value = e.detail.value;
+    valueInputOpt.value = (e.target as HTMLInputElement).value;
     syncUrl();
   });
 
-  ol.addEventListener("onItemPick", (e: any) => {
+  sub.bind("onItemPick", (item: OptionItem) => {
     inc("onpick-count");
-    const item = e.detail.item;
     const nextOptions = ol.options.map((o: any) => {
       if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
       return o;
@@ -219,15 +221,12 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     syncUrl();
   });
 
-  ol.addEventListener("onOk", () => inc("onok-count"));
-  ol.addEventListener("onCancel", () => inc("oncancel-count"));
-  ol.addEventListener("onHighlightChange", (e: any) => {
+  sub.bind("onOk", () => inc("onok-count"));
+  sub.bind("onCancel", () => inc("oncancel-count"));
+  sub.bind("onHighlightChange", () => {
     inc("onhighlight-count");
     syncUrl();
   });
-
-  // Get manager instance
-  const mgr = ol.getManager()!;
 
   updateDump(ol.options);
 
