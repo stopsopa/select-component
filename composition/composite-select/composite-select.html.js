@@ -225,7 +225,7 @@ const init = (initialSelected = [], states = {}) => {
     }
   }
   // this is pretty important because this is where we are deciding about type for the web component
-  const cs = section.querySelector("composite-select");
+  const wc = section.querySelector("composite-select");
   // this is pretty important because this is where we are deciding about type for the web component
   const resizer = section.querySelector('[data-role="resizer"]');
   const destroyBtn = section.querySelector('[data-role="destroy"]');
@@ -269,7 +269,7 @@ const init = (initialSelected = [], states = {}) => {
       el.textContent = String(parseInt(el.textContent || "0", 10) + 1);
     }
   };
-  const mgr = cs.getManager();
+  const mgr = wc.getManager();
   const updateDump = (list) => {
     dump.textContent = JSON.stringify(list, null, 2);
   };

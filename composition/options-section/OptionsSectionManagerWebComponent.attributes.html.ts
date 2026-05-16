@@ -140,7 +140,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const ol = section.querySelector("options-section") as OptionsSection<OptionItem>;
+  const wc = section.querySelector("options-section") as OptionsSection<OptionItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -188,7 +188,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
-      options: ol.options,
+      options: wc.options,
       left: resizer.getAttribute("left") || "50px",
       center: resizer.getAttribute("center") || "350px",
       height: resizer.getAttribute("height") || "",
@@ -200,15 +200,15 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
       label: labelInputOpt.value || "",
       value: valueInputOpt.value || "",
       maxHeight: mhInput.value || "",
-      highlight: String(ol.highlight || ""),
+      highlight: String(wc.highlight || ""),
     });
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
 
-  ol.options = initialOptions;
+  wc.options = initialOptions;
 
-  mgr = ol.getManager()!;
+  mgr = wc.getManager()!;
   const sub = mgr.getSubscriber();
 
   sub.bind("onInputChange", (e: Event) => {
@@ -219,77 +219,77 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   sub.bind("onItemPick", (item: OptionItem) => {
     inc("onpick-count");
-    const nextOptions = ol.options.map((o: any) => {
+    const nextOptions = wc.options.map((o: any) => {
       if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
       return o;
     });
-    ol.options = nextOptions;
+    wc.options = nextOptions;
     updateDump(nextOptions);
     syncUrl();
   });
 
-  sub.bind("onOk", () => inc("onok-count"));
   sub.bind("onCancel", () => inc("oncancel-count"));
+  sub.bind("onOk", () => inc("onok-count"));
   sub.bind("onHighlightChange", () => {
     inc("onhighlight-count");
     syncUrl();
   });
 
-  updateDump(ol.options);
+  updateDump(wc.options);
 
   disabledOptCb.addEventListener("change", () => {
-    ol.setDisabled(disabledOptCb.checked);
+    wc.setDisabled(disabledOptCb.checked);
     syncUrl();
   });
 
   loadingOptCb.addEventListener("change", () => {
-    ol.setLoading(loadingOptCb.checked);
+    wc.setLoading(loadingOptCb.checked);
     syncUrl();
   });
 
   footerOptCb.addEventListener("change", () => {
-    ol.setShowFooter(footerOptCb.checked);
+    wc.setShowFooter(footerOptCb.checked);
     syncUrl();
   });
 
   filterOptCb.addEventListener("change", () => {
-    ol.setShowFilter(filterOptCb.checked);
+    wc.setShowFilter(filterOptCb.checked);
     syncUrl();
   });
 
   emptyListCb.addEventListener("change", () => {
-    ol.setValue(ol.value); // Trigger re-search
+    wc.setValue(wc.value); // Trigger re-search
     syncUrl();
   });
 
   labelInputOpt.addEventListener("input", () => {
-    ol.setLabel(labelInputOpt.value);
+    wc.setLabel(labelInputOpt.value);
     syncUrl();
   });
 
   valueInputOpt.addEventListener("input", () => {
-    ol.setValue(valueInputOpt.value);
+    wc.setValue(valueInputOpt.value);
     syncUrl();
   });
 
-  focusBtn.addEventListener("click", () => ol.setFocus());
+  focusBtn.addEventListener("click", () => wc.setFocus());
 
   addBtn.addEventListener("click", () => {
     const id = getNextId();
     setNextId(id + 1);
-    const next = [...ol.options, { id, label: `Attr Option ${id}` }];
-    ol.options = next;
+    const next = [...wc.options, { id, label: `Attr Option ${id}` }];
+    wc.options = next;
     syncUrl();
   });
 
   clearBtn.addEventListener("click", () => {
-    ol.options = [];
+    wc.options = [];
     syncUrl();
   });
 
   const setMH = (val: string) => {
     mhInput.value = val;
-    ol.maxHeight = val;
+    wc.maxHeight = val;
     syncUrl();
   };
 
@@ -308,7 +308,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem((item: any) => {
+    wc.setRenderItem((item: any) => {
       const el = document.createElement("div");
       el.className = "element";
       el.dataset.id = String(item.id);
@@ -320,21 +320,21 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optStringRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem(
+    wc.setRenderItem(
       (item: any) => `<div class="element" data-id="${item.id}" style="color: blue;">STRING ATTR: ${item.label}</div>`,
     );
   });
 
   optDefaultRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem();
+    wc.setRenderItem();
   });
 
   optEmptyBtn.addEventListener("click", () => {
-    ol.setRenderEmpty(() => `<div style="color: blue; padding: 20px;">ATTR: NOTHING FOUND!</div>`);
+    wc.setRenderEmpty(() => `<div style="color: blue; padding: 20px;">ATTR: NOTHING FOUND!</div>`);
   });
 
   optDefaultEmptyBtn.addEventListener("click", () => {
-    ol.setRenderEmpty();
+    wc.setRenderEmpty();
   });
 
   resizer.addEventListener("onLeft", () => syncUrl());
@@ -342,15 +342,15 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   resizer.addEventListener("onHeight", () => syncUrl());
 
   destroyBtn.addEventListener("click", () => {
-    ol.getManager()?.destroy();
+    wc.getManager()?.destroy();
     section.remove();
   });
 
   if (states.highlight) {
-    ol.highlightAndScrollToElementOnTheList(states.highlight);
+    wc.highlightAndScrollToElementOnTheList(states.highlight);
   }
 
-  return ol;
+  return wc;
 };
 
 const initBtn = document.getElementById("init-btn");

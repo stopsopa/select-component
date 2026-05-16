@@ -113,7 +113,7 @@ const init = (initialSelected = [], states = {}) => {
     <pre data-role="dump" style="background:#f8f8f8;padding:10px;border:1px solid #eee;border-radius:4px;font-size:12px;margin:0;overflow:auto;"></pre>
   `;
   document.getElementById("instances-area").appendChild(section);
-  const sl = section.querySelector("selected-section");
+  const wc = section.querySelector("selected-section");
   const resizer = section.querySelector('[data-role="resizer"]');
   const destroyBtn = section.querySelector('[data-role="destroy"]');
   const dump = section.querySelector('[data-role="dump"]');
@@ -155,7 +155,7 @@ const init = (initialSelected = [], states = {}) => {
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
-  mgr = sl.getManager();
+  mgr = wc.getManager();
   mgr.setSelected(initialSelected);
   const sub = mgr.getSubscriber();
   sub.bind("onFocus", () => {

@@ -229,12 +229,12 @@ export class SelectedSectionManager<T extends Item> {
     this.propInputElement!.value = value;
 
     if (triggerOnChange) {
-      const event = new Event("input");
-      Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
+      const e = new Event("input");
+      Object.defineProperty(e, "target", { writable: false, value: this.propInputElement });      
       if (this.propOptions.onInputChange) {
-        this.propOptions.onInputChange.call(this, event, previousValue);
+        this.propOptions.onInputChange.call(this, e, previousValue);
       }
-      this._subscriber.trigger("onInputChange", event, previousValue);
+      this._subscriber.trigger("onInputChange", e, previousValue);
     }
     this._triggerOnComponentChange("setValue");
   }

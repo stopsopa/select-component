@@ -131,7 +131,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const sl = section.querySelector("selected-section") as SelectedSection<DemoItem>;
+  const wc = section.querySelector("selected-section") as SelectedSection<DemoItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -180,7 +180,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  mgr = sl.getManager()!;
+  mgr = wc.getManager()!;
 
   mgr.setSelected(initialSelected);
 

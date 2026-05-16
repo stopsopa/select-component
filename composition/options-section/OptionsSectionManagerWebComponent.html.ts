@@ -138,7 +138,8 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const ol = section.querySelector("options-section") as OptionsSection<OptionItem>;
+  const wc = section.querySelector("options-section") as OptionsSection<OptionItem>;
+  
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -204,7 +205,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     updateUrlDisplay(url.toString());
   };
 
-  mgr = ol.getManager()!;
+  mgr = wc.getManager()!;
 
   mgr.setOptions(initialOptions);
   mgr.setMaxHeight(states.maxHeight || "");
@@ -227,8 +228,8 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     syncUrl();
   });
 
-  mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
   mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
+  mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
   mgr.getSubscriber().bind("onHighlightChange", (id: any) => {
     inc("onhighlight-count");
     syncUrl();

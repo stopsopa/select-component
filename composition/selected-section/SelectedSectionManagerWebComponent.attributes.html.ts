@@ -124,7 +124,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const sl = section.querySelector("selected-section") as SelectedSection<DemoItem>;
+  const wc = section.querySelector("selected-section") as SelectedSection<DemoItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -173,50 +173,50 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  sl.setAttribute("selected", JSON.stringify(initialSelected));
+  wc.setAttribute("selected", JSON.stringify(initialSelected));
 
-  mgr = sl.getManager()!;
+  mgr = wc.getManager()!;
   const sub = mgr.getSubscriber();
 
   sub.bind("onFocus", () => {
     inc("onfocus-count");
   });
 
-  sub.bind("onInputChange", (e: any) => {
+  sub.bind("onInputChange", (e) => {
     inc("onchange-count");
     const val = e.target.value;
     valueInputSel.value = val;
 
     if (e.key === "Enter" && val.trim() !== "") {
-      const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+      const currentSelected = JSON.parse(wc.getAttribute("selected") || "[]");
       const id = getNextId();
       setNextId(id + 1);
       const newItem = { id, label: val.trim() };
-      sl.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
-      sl.setAttribute("value", "");
+      wc.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
+      wc.setAttribute("value", "");
       syncUrl();
     }
 
-    if (e.key === "Backspace" && val === "" && (JSON.parse(sl.getAttribute("selected") || "[]") as any[]).length > 0) {
-      const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]") as any[];
+    if (e.key === "Backspace" && val === "" && (JSON.parse(wc.getAttribute("selected") || "[]") as any[]).length > 0) {
+      const currentSelected = JSON.parse(wc.getAttribute("selected") || "[]") as any[];
       currentSelected.pop();
-      sl.setAttribute("selected", JSON.stringify(currentSelected));
+      wc.setAttribute("selected", JSON.stringify(currentSelected));
       syncUrl();
     }
   });
 
   sub.bind("onDelete", (idToDelete: string) => {
     inc("ondelete-count");
-    const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+    const currentSelected = JSON.parse(wc.getAttribute("selected") || "[]");
     const nextSelected = currentSelected.filter((i: any) => String(i.id) !== String(idToDelete));
-    sl.setAttribute("selected", JSON.stringify(nextSelected));
+    wc.setAttribute("selected", JSON.stringify(nextSelected));
     syncUrl();
   });
 
   sub.bind("onClear", () => {
     inc("onclear-count");
-    sl.setAttribute("selected", "[]");
-    sl.setAttribute("value", "");
+    wc.setAttribute("selected", "[]");
+    wc.setAttribute("value", "");
     syncUrl();
   });
 
@@ -225,7 +225,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateDump(selected);
   });
 
-  sl.getManager()
+  wc.getManager()
     ?.getSubscriber()
     .bind("onComponentChange", (opt: any) => {
       disabledSelCb.checked = !!opt.disabled;
@@ -239,58 +239,58 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   updateDump(initialSelected);
 
   disabledSelCb.addEventListener("change", () => {
-    if (disabledSelCb.checked) sl.setAttribute("disabled", "");
-    else sl.removeAttribute("disabled");
+    if (disabledSelCb.checked) wc.setAttribute("disabled", "");
+    else wc.removeAttribute("disabled");
     syncUrl();
   });
 
   loadingSelCb.addEventListener("change", () => {
-    if (loadingSelCb.checked) sl.setAttribute("loading", "");
-    else sl.removeAttribute("loading");
+    if (loadingSelCb.checked) wc.setAttribute("loading", "");
+    else wc.removeAttribute("loading");
     syncUrl();
   });
 
   errorSelCb.addEventListener("change", () => {
-    if (errorSelCb.checked) sl.setAttribute("error", "");
-    else sl.removeAttribute("error");
+    if (errorSelCb.checked) wc.setAttribute("error", "");
+    else wc.removeAttribute("error");
     syncUrl();
   });
 
   showInputSelCb.addEventListener("change", () => {
-    if (showInputSelCb.checked) sl.setAttribute("show-input", "");
-    else sl.removeAttribute("show-input");
+    if (showInputSelCb.checked) wc.setAttribute("show-input", "");
+    else wc.removeAttribute("show-input");
     syncUrl();
   });
 
   labelInputSel.addEventListener("input", () => {
-    sl.setAttribute("label", labelInputSel.value);
+    wc.setAttribute("label", labelInputSel.value);
     syncUrl();
   });
 
   valueInputSel.addEventListener("input", () => {
-    sl.setAttribute("value", valueInputSel.value);
+    wc.setAttribute("value", valueInputSel.value);
     syncUrl();
   });
 
-  focusBtn.addEventListener("click", () => sl.setFocus());
+  focusBtn.addEventListener("click", () => wc.setFocus());
 
   addBtn.addEventListener("click", () => {
-    const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+    const currentSelected = JSON.parse(wc.getAttribute("selected") || "[]");
     const id = getNextId();
     setNextId(id + 1);
     const newItem = { id, label: `Attr Item ${id}` };
-    sl.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
+    wc.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
     syncUrl();
   });
 
   clearBtn.addEventListener("click", () => {
-    sl.setAttribute("selected", "[]");
-    sl.setAttribute("value", "");
+    wc.setAttribute("selected", "[]");
+    wc.setAttribute("value", "");
     syncUrl();
   });
 
   optRenderBtn.addEventListener("click", () => {
-    sl.getManager()?.setRenderItem((item: any, def: any) => {
+    wc.getManager()?.setRenderItem((item: any, def: any) => {
       const el = def(item);
       if (item.color) {
         el.style.border = `1px solid ${item.color}`;
@@ -312,7 +312,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   section.querySelectorAll('[data-role="template-btn"]').forEach((btn) => {
     btn.addEventListener("click", () => {
       const b = btn as HTMLButtonElement;
-      const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
+      const currentSelected = JSON.parse(wc.getAttribute("selected") || "[]");
       const id = getNextId();
       setNextId(id + 1);
       const newItem = {
@@ -321,13 +321,13 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         color: b.dataset.color,
         img: b.dataset.img,
       };
-      sl.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
+      wc.setAttribute("selected", JSON.stringify([...currentSelected, newItem]));
       syncUrl();
     });
   });
 
   optStringRenderBtn.addEventListener("click", () => {
-    sl.getManager()?.setRenderItem((item: any) => {
+    wc.getManager()?.setRenderItem((item: any) => {
       const el = document.createElement("div");
       el.className = "element";
       el.dataset.id = String(item.id);
@@ -337,18 +337,18 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   });
 
   optDefaultRenderBtn.addEventListener("click", () => {
-    sl.getManager()?.setRenderItem();
+    wc.getManager()?.setRenderItem();
   });
 
   resizer.addEventListener("onLeft", () => syncUrl());
   resizer.addEventListener("onCenter", () => syncUrl());
 
   destroyBtn.addEventListener("click", () => {
-    sl.getManager()?.destroy();
+    wc.getManager()?.destroy();
     section.remove();
   });
 
-  return sl.getManager();
+  return wc.getManager();
 };
 
 const initBtn = document.getElementById("init-btn");

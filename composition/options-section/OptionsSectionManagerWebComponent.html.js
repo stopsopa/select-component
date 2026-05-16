@@ -129,7 +129,7 @@ const init = (initialOptions = [], states = {}) => {
     <pre data-role="dump" style="background:#f8f8f8;padding:10px;border:1px solid #eee;border-radius:4px;font-size:12px;margin:0;overflow:auto;"></pre>
   `;
   document.getElementById("instances-area").appendChild(section);
-  const ol = section.querySelector("options-section");
+  const wc = section.querySelector("options-section");
   const resizer = section.querySelector('[data-role="resizer"]');
   const destroyBtn = section.querySelector('[data-role="destroy"]');
   const dump = section.querySelector('[data-role="dump"]');
@@ -186,7 +186,7 @@ const init = (initialOptions = [], states = {}) => {
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
-  mgr = ol.getManager();
+  mgr = wc.getManager();
   mgr.setOptions(initialOptions);
   mgr.setMaxHeight(states.maxHeight || "");
   mgr.setValue(states.value || "");
@@ -205,8 +205,8 @@ const init = (initialOptions = [], states = {}) => {
     updateDump(nextOptions);
     syncUrl();
   });
-  mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
   mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
+  mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
   mgr.getSubscriber().bind("onHighlightChange", (id) => {
     inc("onhighlight-count");
     syncUrl();

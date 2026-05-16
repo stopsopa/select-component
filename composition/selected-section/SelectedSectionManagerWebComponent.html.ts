@@ -124,7 +124,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const sl = section.querySelector("selected-section") as SelectedSection<DemoItem>;
+  const wc = section.querySelector("selected-section") as SelectedSection<DemoItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -173,7 +173,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  mgr = sl.getManager()!;
+  mgr = wc.getManager()!;
 
   mgr.setSelected(initialSelected);
 
@@ -183,7 +183,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     inc("onfocus-count");
   });
 
-  sub.bind("onInputChange", (e: Event) => {
+  sub.bind("onInputChange", (e) => {
     inc("onchange-count");
     valueInputSel.value = (e.target as HTMLInputElement).value;
 
@@ -210,7 +210,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     syncUrl();
   });
 
-  sub.bind("onDelete", (id: string) => {
+  sub.bind("onDelete", (id) => {
     inc("ondelete-count");
     mgr.setSelected(mgr.getSelected().filter((i: any) => String(i.id) !== String(id)));
     syncUrl();
@@ -222,12 +222,12 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     syncUrl();
   });
 
-  sub.bind("onChange", (items: DemoItem[]) => {
+  sub.bind("onChange", (items) => {
     inc("onitemchange-count");
     updateDump(items);
   });
 
-  sub.bind("onComponentChange", (opt: any) => {
+  sub.bind("onComponentChange", (opt) => {
     disabledSelCb.checked = !!opt.disabled;
     loadingSelCb.checked = !!opt.loading;
     errorSelCb.checked = !!opt.error;

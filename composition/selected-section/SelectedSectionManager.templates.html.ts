@@ -178,7 +178,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     onFocus: () => {
       inc("onfocus-count");
     },
-    onInputChange: (e: Event) => {
+    onInputChange: (e) => {
       inc("onchange-count");
       valueInputSel.value = (e.target as HTMLInputElement).value;
 
@@ -204,7 +204,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
       syncUrl();
     },
-    onDelete: (id: string | number) => {
+    onDelete: (id) => {
       inc("ondelete-count");
       mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
       syncUrl();
@@ -214,7 +214,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       mgr.setSelected([]);
       syncUrl();
     },
-    onChange: (items: DemoItem[]) => {
+    onChange: (items) => {
       inc("onitemchange-count");
       updateDump(items);
     },

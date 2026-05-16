@@ -245,7 +245,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   }
 
   // this is pretty important because this is where we are deciding about type for the web component
-  const cs = section.querySelector("composite-select") as CompositeSelect<DemoItem>;
+  const wc = section.querySelector("composite-select") as CompositeSelect<DemoItem>;
   // this is pretty important because this is where we are deciding about type for the web component
 
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
@@ -299,7 +299,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     }
   };
 
-  const mgr = cs.getManager()!;
+  const mgr = wc.getManager()!;
 
   const updateDump = (list: DemoItem[]) => {
     dump.textContent = JSON.stringify(list, null, 2);
