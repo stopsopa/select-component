@@ -355,7 +355,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   const found = deduplicateArrayById(searchNames(search) as DemoItem[]);
   mgr.options.setOptions(sortById(found));
 
-  mgr.selected.propOptions.onFocus = (e: FocusEvent) => {
+  mgr.selected.propOptions.onFocus = (e) => {
     const { search } = localDetermineSearch();
 
     const selected = mgr.selected.getSelected();
