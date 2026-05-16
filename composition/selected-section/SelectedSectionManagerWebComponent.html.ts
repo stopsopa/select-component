@@ -190,7 +190,11 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       }
     }
 
-    if ((e as KeyboardEvent).key === "Backspace" && (e.target as HTMLInputElement).value === "" && mgr.getSelected().length > 0) {
+    if (
+      (e as KeyboardEvent).key === "Backspace" &&
+      (e.target as HTMLInputElement).value === "" &&
+      mgr.getSelected().length > 0
+    ) {
       const selected = [...mgr.getSelected()];
       selected.pop();
       mgr.setSelected(selected);
@@ -354,10 +358,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial 1" },
-      { id: 2, label: "Initial 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial 1" },
+        { id: 2, label: "Initial 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -376,5 +383,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-
-

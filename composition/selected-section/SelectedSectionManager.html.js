@@ -154,51 +154,50 @@ const init = (initialSelected = [], states = {}) => {
     error: !!states.error,
     showInput: states.showInput !== false,
     value: states.value || "",
-  });
-  const sub = mgr.getSubscriber();
-  sub.bind("onInputChange", (e) => {
-    inc("onchange-count");
-    valueInputSel.value = e.target.value;
-    if (e.key === "Enter") {
-      const val = e.target.value.trim();
-      if (val) {
-        const id = getNextId();
-        setNextId(id + 1);
-        mgr.setSelected([...mgr.getSelected(), { id, label: val }]);
-        mgr.setValue("");
+    onInputChange: (e) => {
+      inc("onchange-count");
+      valueInputSel.value = e.target.value;
+      if (e.key === "Enter") {
+        const val = e.target.value.trim();
+        if (val) {
+          const id = getNextId();
+          setNextId(id + 1);
+          mgr.setSelected([...mgr.getSelected(), { id, label: val }]);
+          mgr.setValue("");
+        }
       }
-    }
-    if (e.key === "Backspace" && e.target.value === "" && mgr.getSelected().length > 0) {
-      const selected = [...mgr.getSelected()];
-      selected.pop();
-      mgr.setSelected(selected);
-    }
-    syncUrl();
-  });
-  sub.bind("onDelete", (id) => {
-    inc("ondelete-count");
-    mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
-    syncUrl();
-  });
-  sub.bind("onClear", () => {
-    inc("onclear-count");
-    mgr.setSelected([]);
-    syncUrl();
-  });
-  sub.bind("onChange", (items) => {
-    inc("onitemchange-count");
-    updateDump(items);
-  });
-  sub.bind("onFocus", () => {
-    inc("onfocus-count");
-  });
-  sub.bind("onComponentChange", (opt) => {
-    disabledSelCb.checked = !!opt.disabled;
-    loadingSelCb.checked = !!opt.loading;
-    errorSelCb.checked = !!opt.error;
-    showInputSelCb.checked = opt.showInput !== false;
-    labelInputSel.value = opt.label || "";
-    valueInputSel.value = opt.value || "";
+      if (e.key === "Backspace" && e.target.value === "" && mgr.getSelected().length > 0) {
+        const selected = [...mgr.getSelected()];
+        selected.pop();
+        mgr.setSelected(selected);
+      }
+      syncUrl();
+    },
+    onDelete: (id) => {
+      inc("ondelete-count");
+      mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
+      syncUrl();
+    },
+    onClear: () => {
+      inc("onclear-count");
+      mgr.setSelected([]);
+      syncUrl();
+    },
+    onChange: (items) => {
+      inc("onitemchange-count");
+      updateDump(items);
+    },
+    onFocus: () => {
+      inc("onfocus-count");
+    },
+    onComponentChange: (opt) => {
+      disabledSelCb.checked = !!opt.disabled;
+      loadingSelCb.checked = !!opt.loading;
+      errorSelCb.checked = !!opt.error;
+      showInputSelCb.checked = opt.showInput !== false;
+      labelInputSel.value = opt.label || "";
+      valueInputSel.value = opt.value || "";
+    },
   });
   updateDump(mgr.getSelected());
   disabledSelCb.addEventListener("change", () => {

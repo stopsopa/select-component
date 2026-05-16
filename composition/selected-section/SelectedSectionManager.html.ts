@@ -171,62 +171,57 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     error: !!states.error,
     showInput: states.showInput !== false,
     value: states.value || "",
-  });
+    onInputChange: (e: Event) => {
+      inc("onchange-count");
+      valueInputSel.value = (e.target as HTMLInputElement).value;
 
-  const sub = mgr.getSubscriber();
-  
-
-  sub.bind("onInputChange", (e: Event) => {
-    inc("onchange-count");
-    valueInputSel.value = (e.target as HTMLInputElement).value;
-
-    if ((e as KeyboardEvent).key === "Enter") {
-      const val = (e.target as HTMLInputElement).value.trim();
-      if (val) {
-        const id = getNextId();
-        setNextId(id + 1);
-        mgr.setSelected([...mgr.getSelected(), { id, label: val }]);
-        mgr.setValue("");
+      if ((e as KeyboardEvent).key === "Enter") {
+        const val = (e.target as HTMLInputElement).value.trim();
+        if (val) {
+          const id = getNextId();
+          setNextId(id + 1);
+          mgr.setSelected([...mgr.getSelected(), { id, label: val }]);
+          mgr.setValue("");
+        }
       }
-    }
 
-    if ((e as KeyboardEvent).key === "Backspace" && (e.target as HTMLInputElement).value === "" && mgr.getSelected().length > 0) {
-      const selected = [...mgr.getSelected()];
-      selected.pop();
-      mgr.setSelected(selected);
-    }
+      if (
+        (e as KeyboardEvent).key === "Backspace" &&
+        (e.target as HTMLInputElement).value === "" &&
+        mgr.getSelected().length > 0
+      ) {
+        const selected = [...mgr.getSelected()];
+        selected.pop();
+        mgr.setSelected(selected);
+      }
 
-    syncUrl();
-  });
-
-  sub.bind("onDelete", (id: string) => {
-    inc("ondelete-count");
-    mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
-    syncUrl();
-  });
-
-  sub.bind("onClear", () => {
-    inc("onclear-count");
-    mgr.setSelected([]);
-    syncUrl();
-  });
-
-  sub.bind("onChange", (items: DemoItem[]) => {
-    inc("onitemchange-count");
-    updateDump(items);
-  });
-
-  sub.bind("onFocus", () => {
-    inc("onfocus-count");
-  });
-
-  sub.bind("onComponentChange", (opt) => {
-    disabledSelCb.checked = !!opt.disabled;
-    loadingSelCb.checked = !!opt.loading;
-    errorSelCb.checked = !!opt.error;
-    showInputSelCb.checked = opt.showInput !== false;
-    labelInputSel.value = opt.label || "";
-    valueInputSel.value = opt.value || "";
+      syncUrl();
+    },
+    onDelete: (id: string | number) => {
+      inc("ondelete-count");
+      mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
+      syncUrl();
+    },
+    onClear: () => {
+      inc("onclear-count");
+      mgr.setSelected([]);
+      syncUrl();
+    },
+    onChange: (items: DemoItem[]) => {
+      inc("onitemchange-count");
+      updateDump(items);
+    },
+    onFocus: () => {
+      inc("onfocus-count");
+    },
+    onComponentChange: (opt) => {
+      disabledSelCb.checked = !!opt.disabled;
+      loadingSelCb.checked = !!opt.loading;
+      errorSelCb.checked = !!opt.error;
+      showInputSelCb.checked = opt.showInput !== false;
+      labelInputSel.value = opt.label || "";
+      valueInputSel.value = opt.value || "";
+    },
   });
 
   updateDump(mgr.getSelected());
@@ -354,10 +349,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial 1" },
-      { id: 2, label: "Initial 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial 1" },
+        { id: 2, label: "Initial 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -376,5 +374,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-
-

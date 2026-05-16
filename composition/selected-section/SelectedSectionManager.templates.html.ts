@@ -164,7 +164,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  const mgr = new SelectedSectionManager<DemoItem>(container, {
+  let mgr: SelectedSectionManager<DemoItem>;
+  mgr = new SelectedSectionManager<DemoItem>(container, {
     selected: initialSelected,
     label: states.label || "Select options",
     disabled: !!states.disabled,
@@ -172,60 +173,54 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     error: !!states.error,
     showInput: states.showInput !== false,
     value: states.value || "",
-  });
+    onInputChange: (e: Event) => {
+      inc("onchange-count");
+      valueInputSel.value = (e.target as HTMLInputElement).value;
 
-  mgr.propOptions.onInputChange = (e: Event) => {
-    inc("onchange-count");
-    valueInputSel.value = (e.target as HTMLInputElement).value;
-
-    if ((e as KeyboardEvent).key === "Enter") {
-      const val = (e.target as HTMLInputElement).value.trim();
-      if (val) {
-        const id = getNextId();
-        setNextId(id + 1);
-        mgr.setSelected([...mgr.getSelected(), { id, label: val }]);
-        mgr.setValue("");
+      if ((e as KeyboardEvent).key === "Enter") {
+        const val = (e.target as HTMLInputElement).value.trim();
+        if (val) {
+          const id = getNextId();
+          setNextId(id + 1);
+          mgr.setSelected([...mgr.getSelected(), { id, label: val }]);
+          mgr.setValue("");
+        }
       }
-    }
 
-    if ((e as KeyboardEvent).key === "Backspace" && (e.target as HTMLInputElement).value === "" && mgr.getSelected().length > 0) {
-      const selected = [...mgr.getSelected()];
-      selected.pop();
-      mgr.setSelected(selected);
-    }
+      if ((e as KeyboardEvent).key === "Backspace" && (e.target as HTMLInputElement).value === "" && mgr.getSelected().length > 0) {
+        const selected = [...mgr.getSelected()];
+        selected.pop();
+        mgr.setSelected(selected);
+      }
 
-    syncUrl();
-  };
-
-  mgr.propOptions.onDelete = (id: string) => {
-    inc("ondelete-count");
-    mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
-    syncUrl();
-  };
-
-  mgr.propOptions.onClear = () => {
-    inc("onclear-count");
-    mgr.setSelected([]);
-    syncUrl();
-  };
-
-  mgr.propOptions.onChange = (items: DemoItem[]) => {
-    inc("onitemchange-count");
-    updateDump(items);
-  };
-
-  mgr.propOptions.onFocus = () => {
-    inc("onfocus-count");
-  };
-
-  mgr.propOptions.onComponentChange = (opt) => {
-    disabledSelCb.checked = !!opt.disabled;
-    loadingSelCb.checked = !!opt.loading;
-    errorSelCb.checked = !!opt.error;
-    showInputSelCb.checked = opt.showInput !== false;
-    labelInputSel.value = opt.label || "";
-    valueInputSel.value = opt.value || "";
-  };
+      syncUrl();
+    },
+    onDelete: (id: string | number) => {
+      inc("ondelete-count");
+      mgr.setSelected(mgr.getSelected().filter((i) => String(i.id) !== String(id)));
+      syncUrl();
+    },
+    onClear: () => {
+      inc("onclear-count");
+      mgr.setSelected([]);
+      syncUrl();
+    },
+    onChange: (items: DemoItem[]) => {
+      inc("onitemchange-count");
+      updateDump(items);
+    },
+    onFocus: () => {
+      inc("onfocus-count");
+    },
+    onComponentChange: (opt) => {
+      disabledSelCb.checked = !!opt.disabled;
+      loadingSelCb.checked = !!opt.loading;
+      errorSelCb.checked = !!opt.error;
+      showInputSelCb.checked = opt.showInput !== false;
+      labelInputSel.value = opt.label || "";
+      valueInputSel.value = opt.value || "";
+    },
+  });
 
   updateDump(mgr.getSelected());
 
