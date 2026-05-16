@@ -154,6 +154,9 @@ const init = (initialSelected = [], states = {}) => {
     error: !!states.error,
     showInput: states.showInput !== false,
     value: states.value || "",
+    onFocus: () => {
+      inc("onfocus-count");
+    },
     onInputChange: (e) => {
       inc("onchange-count");
       valueInputSel.value = e.target.value;
@@ -186,9 +189,6 @@ const init = (initialSelected = [], states = {}) => {
     onChange: (items) => {
       inc("onitemchange-count");
       updateDump(items);
-    },
-    onFocus: () => {
-      inc("onfocus-count");
     },
     onComponentChange: (opt) => {
       disabledSelCb.checked = !!opt.disabled;

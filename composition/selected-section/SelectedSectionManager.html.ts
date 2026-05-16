@@ -171,6 +171,9 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     error: !!states.error,
     showInput: states.showInput !== false,
     value: states.value || "",
+    onFocus: () => {
+      inc("onfocus-count");
+    },
     onInputChange: (e: Event) => {
       inc("onchange-count");
       valueInputSel.value = (e.target as HTMLInputElement).value;
@@ -210,9 +213,6 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     onChange: (items: DemoItem[]) => {
       inc("onitemchange-count");
       updateDump(items);
-    },
-    onFocus: () => {
-      inc("onfocus-count");
     },
     onComponentChange: (opt) => {
       disabledSelCb.checked = !!opt.disabled;
