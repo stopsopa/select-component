@@ -159,12 +159,6 @@ const init = (initialSelected = [], states = {}) => {
   sub.bind("onFocus", () => {
     inc("onfocus-count");
   });
-  sub.bind("onClear", () => {
-    inc("onclear-count");
-    sl.setAttribute("selected", "[]");
-    sl.setAttribute("value", "");
-    syncUrl();
-  });
   sub.bind("onInputChange", (e) => {
     inc("onchange-count");
     const val = e.target.value;
@@ -190,6 +184,12 @@ const init = (initialSelected = [], states = {}) => {
     const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
     const nextSelected = currentSelected.filter((i) => String(i.id) !== String(idToDelete));
     sl.setAttribute("selected", JSON.stringify(nextSelected));
+    syncUrl();
+  });
+  sub.bind("onClear", () => {
+    inc("onclear-count");
+    sl.setAttribute("selected", "[]");
+    sl.setAttribute("value", "");
     syncUrl();
   });
   sub.bind("onChange", (selected) => {

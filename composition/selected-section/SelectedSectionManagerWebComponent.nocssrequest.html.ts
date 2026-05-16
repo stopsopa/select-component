@@ -182,6 +182,10 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   const sub = mgr.getSubscriber();
 
+  sub.bind("onFocus", () => {
+    inc("onfocus-count");
+  });
+
   sub.bind("onInputChange", (e: Event) => {
     inc("onchange-count");
     valueInputSel.value = (e.target as HTMLInputElement).value;
@@ -220,10 +224,6 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   sub.bind("onChange", (items: DemoItem[]) => {
     inc("onitemchange-count");
     updateDump(items);
-  });
-
-  sub.bind("onFocus", () => {
-    inc("onfocus-count");
   });
 
   sub.bind("onComponentChange", (opt: any) => {

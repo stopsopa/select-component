@@ -155,6 +155,9 @@ const init = (initialSelected = [], states = {}) => {
   const mgr = sl.getManager();
   mgr.setSelected(initialSelected);
   const sub = mgr.getSubscriber();
+  sub.bind("onFocus", () => {
+    inc("onfocus-count");
+  });
   sub.bind("onInputChange", (e) => {
     inc("onchange-count");
     valueInputSel.value = e.target.value;
@@ -187,9 +190,6 @@ const init = (initialSelected = [], states = {}) => {
   sub.bind("onChange", (items) => {
     inc("onitemchange-count");
     updateDump(items);
-  });
-  sub.bind("onFocus", () => {
-    inc("onfocus-count");
   });
   sub.bind("onComponentChange", (opt) => {
     disabledSelCb.checked = !!opt.disabled;

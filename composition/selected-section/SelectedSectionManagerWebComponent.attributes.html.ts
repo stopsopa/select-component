@@ -179,13 +179,6 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     inc("onfocus-count");
   });
 
-  sub.bind("onClear", () => {
-    inc("onclear-count");
-    sl.setAttribute("selected", "[]");
-    sl.setAttribute("value", "");
-    syncUrl();
-  });
-
   sub.bind("onInputChange", (e: any) => {
     inc("onchange-count");
     const val = e.target.value;
@@ -217,19 +210,28 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     syncUrl();
   });
 
+  sub.bind("onClear", () => {
+    inc("onclear-count");
+    sl.setAttribute("selected", "[]");
+    sl.setAttribute("value", "");
+    syncUrl();
+  });
+
   sub.bind("onChange", (selected: DemoItem[]) => {
     inc("onitemchange-count");
     updateDump(selected);
   });
 
-  sl.getManager()?.getSubscriber().bind("onComponentChange", (opt: any) => {
-    disabledSelCb.checked = !!opt.disabled;
-    loadingSelCb.checked = !!opt.loading;
-    errorSelCb.checked = !!opt.error;
-    showInputSelCb.checked = opt.showInput !== false;
-    labelInputSel.value = opt.label || "";
-    valueInputSel.value = opt.value || "";
-  });
+  sl.getManager()
+    ?.getSubscriber()
+    .bind("onComponentChange", (opt: any) => {
+      disabledSelCb.checked = !!opt.disabled;
+      loadingSelCb.checked = !!opt.loading;
+      errorSelCb.checked = !!opt.error;
+      showInputSelCb.checked = opt.showInput !== false;
+      labelInputSel.value = opt.label || "";
+      valueInputSel.value = opt.value || "";
+    });
 
   updateDump(initialSelected);
 
@@ -362,10 +364,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial 1" },
-      { id: 2, label: "Initial 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial 1" },
+        { id: 2, label: "Initial 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -384,4 +389,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-
