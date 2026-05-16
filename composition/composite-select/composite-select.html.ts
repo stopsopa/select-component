@@ -420,7 +420,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   mgr.selected.propOptions.onInputChange = onChangeEventFactory(true);
   mgr.options.propOptions.onInputChange = onChangeEventFactory(false);
 
-  mgr.selected.propOptions.onDelete = (id: string) => {
+  mgr.selected.propOptions.onDelete = (id) => {
     let selected = mgr.selected.getSelected();
 
     selected = selected.filter((i) => String(i.id) !== String(id));
@@ -435,7 +435,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     syncUrl();
   };
 
-  mgr.options.propOptions.onItemPick = (item: any) => {
+  mgr.options.propOptions.onItemPick = (item) => {
     inc("onpick-count");
 
     if (mgr.options.getShowFooter()) {
@@ -485,7 +485,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     mgr.selected.setShowDelete(true);
   };
 
-  mgr.selected.propOptions.onChange = (items: DemoItem[]) => {
+  mgr.selected.propOptions.onChange = (items) => {
     updateDump(items);
   };
 

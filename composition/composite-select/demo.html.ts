@@ -372,7 +372,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       loading: !!states.loadingSel,
       error: !!states.errorSel,
       showInput: states.showInputSel !== false,
-      onFocus: (e: FocusEvent) => {
+      onFocus: (e) => {
         const { search } = localDetermineSearch();
 
         const selected = mgr.selected.getSelected();
@@ -389,7 +389,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         mgr.options.setFocus();
       },
       onInputChange: onChangeEventFactory(true),
-      onDelete: (id: string | number) => {
+      onDelete: (id) => {
         let selected = mgr.selected.getSelected();
 
         selected = selected.filter((i) => String(i.id) !== String(id));
@@ -402,7 +402,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         mgr.selected.setSelected([]);
         syncUrl();
       },
-      onChange: (items: DemoItem[]) => {
+      onChange: (items) => {
         updateDump(items);
       },
       onComponentChange: (opt, reason) => {
