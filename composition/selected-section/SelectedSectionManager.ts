@@ -88,7 +88,9 @@ export class SelectedSectionManager<T extends Item> {
 
     this.render();
 
-    this._bindEvents();
+    Promise.resolve().then(() => {
+      this._bindEvents();
+    });
   }
 
   public getSubscriber() {

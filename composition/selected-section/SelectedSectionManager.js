@@ -52,7 +52,9 @@ export class SelectedSectionManager {
       ...rest,
     };
     this.render();
-    this._bindEvents();
+    Promise.resolve().then(() => {
+      this._bindEvents();
+    });
   }
   getSubscriber() {
     return this._subscriber;

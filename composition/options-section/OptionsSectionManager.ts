@@ -90,11 +90,15 @@ export class OptionsSectionManager<T extends Item = Item> {
       ...rest,
     };
 
-    if (this.propOptions.maxHeight) {
-      this.setMaxHeight(this.propOptions.maxHeight);
-    }
-
     this.render();
+
+    Promise.resolve().then(() => {
+      if (this.propOptions.maxHeight) {
+        this.setMaxHeight(this.propOptions.maxHeight);
+      }
+
+      this._bindEvents();
+    });
   }
 
   public getSubscriber() {
@@ -611,6 +615,6 @@ export class OptionsSectionManager<T extends Item = Item> {
     this._updateDisabledDisplay();
     this._updateFooterDisplay();
     this._updateFilterDisplay();
-    this.setValue(this.propOptions.value || "");
+    // this.setValue(this.propOptions.value || "");
   }
 }

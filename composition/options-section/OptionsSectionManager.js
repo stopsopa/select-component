@@ -46,10 +46,13 @@ export class OptionsSectionManager {
       onClear,
       ...rest,
     };
-    if (this.propOptions.maxHeight) {
-      this.setMaxHeight(this.propOptions.maxHeight);
-    }
     this.render();
+    Promise.resolve().then(() => {
+      if (this.propOptions.maxHeight) {
+        this.setMaxHeight(this.propOptions.maxHeight);
+      }
+      this._bindEvents();
+    });
   }
   getSubscriber() {
     return this._subscriber;
@@ -482,6 +485,6 @@ export class OptionsSectionManager {
     this._updateDisabledDisplay();
     this._updateFooterDisplay();
     this._updateFilterDisplay();
-    this.setValue(this.propOptions.value || "");
+    // this.setValue(this.propOptions.value || "");
   }
 }
