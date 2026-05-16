@@ -209,11 +209,6 @@ const init = (initialOptions = [], states = {}) => {
     inc("onhighlight-count");
     syncUrl();
   });
-  mgr.propOptions.searchNames = (searchValue, options) => {
-    if (emptyListCb.checked) return [];
-    const val = searchValue.toLowerCase();
-    return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-  };
   mgr.getSubscriber().bind("onComponentChange", (opt) => {
     disabledOptCb.checked = !!opt.disabled;
     loadingOptCb.checked = !!opt.loading;
@@ -241,7 +236,7 @@ const init = (initialOptions = [], states = {}) => {
     syncUrl();
   });
   emptyListCb.addEventListener("change", () => {
-    mgr.setValue(mgr.getValue()); // Trigger re-search
+    mgr.setValue(mgr.getValue() || ""); // Trigger re-search
     syncUrl();
   });
   labelInputOpt.addEventListener("input", () => {
@@ -358,6 +353,4 @@ const loadFromUrl = () => {
   updateUrlDisplay();
 };
 window.addEventListener("popstate", loadFromUrl);
-loadFromUrl();
-mUrl;
 loadFromUrl();

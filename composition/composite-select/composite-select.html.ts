@@ -61,8 +61,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
           selected-label="${states.labelSel || "Select Fruit"}"
           options-label="${states.labelOpt || "Search fruits..."}"
           options-max-height="300px"
-          ${states.setShowFooter !== false ? "options-show-footer" : ""}
-          ${states.setShowFilter !== false ? "options-show-filter" : ""}
+          ${states.showFooter !== false ? "options-show-footer" : ""}
+          ${states.showFilter !== false ? "options-show-filter" : ""}
           ${states.disabledSel ? "selected-disabled" : ""}
           ${states.loadingSel ? "selected-loading" : ""}
           ${states.errorSel ? "selected-error" : ""}
@@ -131,14 +131,14 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
       <div class="gcp-css checkbox-wrapper">
         <div class="checkbox-row">
-          <input type="checkbox" id="show-filter-opt-${id}" data-role="show-filter-opt" ${states.setShowFilter !== false ? "checked" : ""}>
-          <div class="content-cell"><label for="show-filter-opt-${id}">Show Filter</label></div>
+          <input type="checkbox" id="show-filter-opt-${id}" data-role="show-filter-opt" ${states.showFilter !== false ? "checked" : ""}>
+          <div class="content-cell"><label for="show-filter-opt-${id}">Filter</label></div>
         </div>
       </div>
 
       <div class="gcp-css checkbox-wrapper">
         <div class="checkbox-row">
-          <input type="checkbox" id="show-footer-opt-${id}" data-role="show-footer-opt" ${states.setShowFooter !== false ? "checked" : ""}>
+          <input type="checkbox" id="show-footer-opt-${id}" data-role="show-footer-opt" ${states.showFooter !== false ? "checked" : ""}>
           <div class="content-cell"><label for="show-footer-opt-${id}">Show Footer</label></div>
         </div>
       </div>

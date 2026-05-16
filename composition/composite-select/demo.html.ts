@@ -110,14 +110,14 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
       <div class="gcp-css checkbox-wrapper">
         <div class="checkbox-row">
-          <input type="checkbox" id="show-filter-opt-${id}" data-role="show-filter-opt" ${states.setShowFilter !== false ? "checked" : ""}>
+          <input type="checkbox" id="show-filter-opt-${id}" data-role="show-filter-opt" ${states.showFilter !== false ? "checked" : ""}>
           <div class="content-cell"><label for="show-filter-opt-${id}">Show Filter</label></div>
         </div>
       </div>
 
       <div class="gcp-css checkbox-wrapper">
         <div class="checkbox-row">
-          <input type="checkbox" id="show-footer-opt-${id}" data-role="show-footer-opt" ${states.setShowFooter !== false ? "checked" : ""}>
+          <input type="checkbox" id="show-footer-opt-${id}" data-role="show-footer-opt" ${states.showFooter !== false ? "checked" : ""}>
           <div class="content-cell"><label for="show-footer-opt-${id}">Show Footer</label></div>
         </div>
       </div>

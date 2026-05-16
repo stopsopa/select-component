@@ -212,11 +212,6 @@ const init = (initialOptions = [], states = {}) => {
       inc("onhighlight-count");
       syncUrl();
     });
-    mgr.propOptions.searchNames = (searchValue, options) => {
-      if (emptyListCb.checked) return [];
-      const val = searchValue.toLowerCase();
-      return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-    };
     if (states.highlight) {
       mgr.highlightAndScrollToElementOnTheList(states.highlight);
     }

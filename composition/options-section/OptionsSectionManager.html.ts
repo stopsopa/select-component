@@ -221,11 +221,6 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
       inc("onhighlight-count");
       syncUrl();
     },
-    searchNames: (searchValue: string, options: OptionItem[]) => {
-      if (emptyListCb.checked) return [];
-      const val = searchValue.toLowerCase();
-      return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-    },
     onComponentChange: (opt) => {
       disabledOptCb.checked = !!opt.disabled;
       loadingOptCb.checked = !!opt.loading;
@@ -260,7 +255,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   emptyListCb.addEventListener("change", () => {
-    mgr.setValue(mgr.getValue()); // Trigger re-search
+    mgr.setValue(mgr.getValue() || ""); // Trigger re-search
     syncUrl();
   });
 

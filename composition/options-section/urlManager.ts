@@ -24,6 +24,7 @@ export type DemoState = {
   value: string;
   label: string;
   highlight: string;
+  emptyList: boolean;
 };
 
 let internalIdCounter = 1;
@@ -57,6 +58,7 @@ export const urlStateConfig = urlManipulationFactory<DemoState>({
   value: createStringParam("s", ""),
   label: createStringParam("a", ""),
   highlight: createStringParam("y", ""),
+  emptyList: createBooleanParam("el"),
 });
 
 export const getNextId = () => internalIdCounter++;

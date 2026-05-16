@@ -226,13 +226,8 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     syncUrl();
   });
 
-  // Use getManager() only to set searchNames since it's not exposed via attributes/events easily
+  // Get manager instance
   const mgr = ol.getManager()!;
-  mgr.propOptions.searchNames = (searchValue: string, options: OptionItem[]) => {
-    if (emptyListCb.checked) return [];
-    const val = searchValue.toLowerCase();
-    return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-  };
 
   updateDump(ol.options);
 

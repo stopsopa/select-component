@@ -208,11 +208,6 @@ const init = (initialOptions = [], states = {}) => {
       inc("onhighlight-count");
       syncUrl();
     },
-    searchNames: (searchValue, options) => {
-      if (emptyListCb.checked) return [];
-      const val = searchValue.toLowerCase();
-      return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-    },
     onComponentChange: (opt) => {
       disabledOptCb.checked = !!opt.disabled;
       loadingOptCb.checked = !!opt.loading;
@@ -241,7 +236,7 @@ const init = (initialOptions = [], states = {}) => {
     syncUrl();
   });
   emptyListCb.addEventListener("change", () => {
-    mgr.setValue(mgr.getValue()); // Trigger re-search
+    mgr.setValue(mgr.getValue() || ""); // Trigger re-search
     syncUrl();
   });
   labelInputOpt.addEventListener("input", () => {

@@ -227,12 +227,6 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     syncUrl();
   });
 
-  mgr.propOptions.searchNames = (searchValue: string, options: OptionItem[]) => {
-    if (emptyListCb.checked) return [];
-    const val = searchValue.toLowerCase();
-    return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-  };
-
   mgr.getSubscriber().bind("onComponentChange", (opt: any) => {
     disabledOptCb.checked = !!opt.disabled;
     loadingOptCb.checked = !!opt.loading;
@@ -266,7 +260,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   emptyListCb.addEventListener("change", () => {
-    mgr.setValue(mgr.getValue()); // Trigger re-search
+    mgr.setValue(mgr.getValue() || ""); // Trigger re-search
     syncUrl();
   });
 
@@ -401,6 +395,4 @@ const loadFromUrl = () => {
 };
 
 window.addEventListener("popstate", loadFromUrl);
-loadFromUrl();
-mUrl);
 loadFromUrl();

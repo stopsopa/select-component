@@ -209,13 +209,8 @@ const init = (initialOptions = [], states = {}) => {
     inc("onhighlight-count");
     syncUrl();
   });
-  // Use getManager() only to set searchNames since it's not exposed via attributes/events easily
+  // Get manager instance
   const mgr = ol.getManager();
-  mgr.propOptions.searchNames = (searchValue, options) => {
-    if (emptyListCb.checked) return [];
-    const val = searchValue.toLowerCase();
-    return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-  };
   updateDump(ol.options);
   disabledOptCb.addEventListener("change", () => {
     ol.setDisabled(disabledOptCb.checked);

@@ -21,6 +21,7 @@ export type DemoState = {
   loading: boolean;
   showInput: boolean;
   label: string;
+  value: string;
 };
 
 let internalIdCounter = 1;
@@ -54,6 +55,7 @@ export const urlStateConfig = urlManipulationFactory<DemoState>({
   loading: createBooleanParam("o"),
   showInput: createBooleanParam("i", "1", "0", true),
   label: createStringParam("as", "Select options"),
+  value: createStringParam("s", ""),
 });
 
 export const getNextId = () => internalIdCounter++;

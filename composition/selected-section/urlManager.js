@@ -34,6 +34,7 @@ export const urlStateConfig = urlManipulationFactory({
   loading: createBooleanParam("o"),
   showInput: createBooleanParam("i", "1", "0", true),
   label: createStringParam("as", "Select options"),
+  value: createStringParam("s", ""),
 });
 export const getNextId = () => internalIdCounter++;
 export const setNextId = (id) => {

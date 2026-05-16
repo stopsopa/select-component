@@ -231,12 +231,6 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
       syncUrl();
     });
 
-    mgr.propOptions.searchNames = (searchValue: string, options: OptionItem[]) => {
-      if (emptyListCb.checked) return [];
-      const val = searchValue.toLowerCase();
-      return options.filter((o) => (o.label || "").toLowerCase().includes(val));
-    };
-
     if (states.highlight) {
       mgr.highlightAndScrollToElementOnTheList(states.highlight);
     }
