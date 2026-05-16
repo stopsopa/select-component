@@ -4,6 +4,7 @@ import {
   createBooleanParam,
   createArrayParam,
 } from "../composite-select/urlManager.js";
+import { getSafeFreeOffset } from "../composite-select/namesSource.js";
 
 export type DemoItem = {
   id: number;
@@ -24,7 +25,7 @@ export type DemoState = {
   value: string;
 };
 
-let internalIdCounter = 1;
+let internalIdCounter = getSafeFreeOffset();
 
 export const urlStateConfig = urlManipulationFactory<DemoState>({
   selected: createArrayParam<DemoItem>(

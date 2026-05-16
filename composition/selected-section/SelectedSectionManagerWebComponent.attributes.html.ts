@@ -2,6 +2,7 @@ import "../../../js/CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
 import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
+import { getSafeFreeOffset } from "../composite-select/namesSource.js";
 import type { DemoItem, DemoState } from "./urlManager.js";
 const imgData: Record<string, string[]> = await fetch("../img/img.json").then((r) => r.json());
 
@@ -360,7 +361,7 @@ const loadFromUrl = () => {
   if (!instancesArea) return;
   instancesArea.innerHTML = "";
   instanceCounter = 0;
-  setNextId(1);
+  setNextId(getSafeFreeOffset());
 
   const urlParams = new URLSearchParams(window.location.search);
   const allIds = urlStateConfig.getAllIds(urlParams);

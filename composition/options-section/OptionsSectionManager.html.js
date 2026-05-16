@@ -1,6 +1,7 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
+import { getSafeFreeOffset } from "../composite-select/namesSource.js";
 const reloadLink = document.getElementById("reload-link");
 if (reloadLink) {
   reloadLink.href = window.location.pathname;
@@ -330,7 +331,7 @@ const loadFromUrl = () => {
     instancesArea.innerHTML = "";
   }
   instanceCounter = 0;
-  setNextId(1);
+  setNextId(getSafeFreeOffset());
   const urlParams = new URLSearchParams(window.location.search);
   const allIds = urlStateConfig.getAllIds(urlParams);
   if (allIds.length === 0) {

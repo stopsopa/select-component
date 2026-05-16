@@ -2,6 +2,7 @@ import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
 import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
+import { getSafeFreeOffset } from "../composite-select/namesSource.js";
 import type { OptionItem, DemoState } from "./urlManager.js";
 
 const css2 = await fetch("./OptionsSectionManager.css").then((r) => r.text());
@@ -368,7 +369,7 @@ const loadFromUrl = () => {
   if (!instancesArea) return;
   instancesArea.innerHTML = "";
   instanceCounter = 0;
-  setNextId(1);
+  setNextId(getSafeFreeOffset());
 
   const urlParams = new URLSearchParams(window.location.search);
   const allIds = urlStateConfig.getAllIds(urlParams);
