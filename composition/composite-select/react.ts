@@ -142,11 +142,11 @@ export const CompositeSelect = React.forwardRef(
           }
           if (selectedOnChangeValue) {
             unbinds.push(
-              selSub.bind("onInputChange", (e: Event, previousValue?: string) =>
+              selSub.bind("onInputChange", (e, previousValue) =>
                 selectedOnChangeValue({
                   originalEvent: e,
-                  value: (e.target as any).value,
-                  key: (e as any).key,
+                  value: e.target.value,
+                  key: e.key || "",
                   previousValue,
                 }),
               ),
@@ -171,10 +171,10 @@ export const CompositeSelect = React.forwardRef(
           }
           if (optionsOnInputChange) {
             unbinds.push(
-              optSub.bind("onInputChange", (e: Event, previousValue?: string) =>
+              optSub.bind("onInputChange", (e, previousValue) =>
                 optionsOnInputChange({
                   originalEvent: e,
-                  value: (e.target as any).value,
+                  value: e.target.value,
                   previousValue,
                 }),
               ),

@@ -1,8 +1,7 @@
 import { markSearchWithSpan } from "../composite-select/helpers.js";
-import type { Item } from "../types.js";
+import type { Item, InputChangeEvent } from "../types.js";
 import createSubscriber from "../createSubscriber.js";
 
-export type OptionsSectionInputChangeEvent = Event & { target: HTMLInputElement };
 
 export type OptionsSectionManagerOptions<T extends Item> = {
   options?: T[];
@@ -10,7 +9,7 @@ export type OptionsSectionManagerOptions<T extends Item> = {
   value?: string;
   label?: string;
   onItemPick?: (item: T) => void;
-  onInputChange?: (e: OptionsSectionInputChangeEvent, previousValue: string | undefined, origin: string) => void;
+  onInputChange?: (e: InputChangeEvent, previousValue: string | undefined, origin: string) => void;
   onCancel?: () => void;
   onOk?: () => void;
   onHighlightChange?: (id: string | number | null) => void;
@@ -32,7 +31,7 @@ export type OptionsSectionManagerOptions<T extends Item> = {
 
 export type OptionsSectionManagerEvents<T extends Item> = {
   onItemPick: [item: T];
-  onInputChange: [e: OptionsSectionInputChangeEvent, previousValue: string | undefined, origin: string];
+  onInputChange: [e: InputChangeEvent, previousValue: string | undefined, origin: string];
   onCancel: [];
   onOk: [];
   onHighlightChange: [id: string | number | null];
@@ -152,7 +151,7 @@ export class OptionsSectionManager<T extends Item = Item> {
       this.propInputElement.addEventListener("input", (e) => {
         const previousValue = this.propOptions.value;
         this.propOptions.value = this.propInputElement!.value;
-        this._triggerOnInputChange(e as unknown as OptionsSectionInputChangeEvent, previousValue, "input");
+        this._triggerOnInputChange(e as unknown as InputChangeEvent, previousValue, "input");
       });
 
       this.propInputElement.addEventListener("focus", (e) => {
@@ -234,7 +233,7 @@ export class OptionsSectionManager<T extends Item = Item> {
         this.pickHighlighted();
       } else if (this.propInputElement!.value === "") {
         e.stopPropagation();
-        this._triggerOnInputChange(e as unknown as OptionsSectionInputChangeEvent, this.propOptions.value, "enter");
+        this._triggerOnInputChange(e as unknown as InputChangeEvent, this.propOptions.value, "enter");
       }
     } else if (e.key === "Escape") {
       e.preventDefault();
@@ -242,7 +241,7 @@ export class OptionsSectionManager<T extends Item = Item> {
       this.highlightAndScrollToElementOnTheList(null);
     } else if (e.key === "Backspace" && this.propInputElement!.value === "") {
       e.stopPropagation();
-      this._triggerOnInputChange(e as unknown as OptionsSectionInputChangeEvent, this.propOptions.value, "backspace");
+      this._triggerOnInputChange(e as unknown as InputChangeEvent, this.propOptions.value, "backspace");
     }
   }
 
@@ -328,7 +327,7 @@ export class OptionsSectionManager<T extends Item = Item> {
    * when the input value changes.
    */
   protected _triggerOnInputChange(
-    e: OptionsSectionInputChangeEvent,
+    e: InputChangeEvent,
     previousValue: string | undefined,
     origin: string,
   ) {
@@ -396,7 +395,7 @@ export class OptionsSectionManager<T extends Item = Item> {
       this.propInputElement.value = value;
     }
     if (triggerOnChange) {
-      const event = new Event("input") as OptionsSectionInputChangeEvent;
+      const event = new Event("input") as InputChangeEvent;
       Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
       this._triggerOnInputChange(event, previousValue, "setValue");
     }
@@ -440,7 +439,7 @@ export class OptionsSectionManager<T extends Item = Item> {
       }
       this._subscriber.trigger("onClear");
 
-      const event = new Event("input") as OptionsSectionInputChangeEvent;
+      const event = new Event("input") as InputChangeEvent;
       Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
       this._triggerOnInputChange(event, previousValue, "clear");
     }

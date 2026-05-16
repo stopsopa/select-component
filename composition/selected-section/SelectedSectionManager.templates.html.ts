@@ -180,10 +180,10 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     },
     onInputChange: (e) => {
       inc("onchange-count");
-      valueInputSel.value = (e.target as HTMLInputElement).value;
+      valueInputSel.value = e.target.value;
 
-      if ((e as KeyboardEvent).key === "Enter") {
-        const val = (e.target as HTMLInputElement).value.trim();
+      if (e.key === "Enter") {
+        const val = e.target.value.trim();
         if (val) {
           const id = getNextId();
           setNextId(id + 1);
@@ -193,8 +193,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       }
 
       if (
-        (e as KeyboardEvent).key === "Backspace" &&
-        (e.target as HTMLInputElement).value === "" &&
+        e.key === "Backspace" &&
+        e.target.value === "" &&
         mgr.getSelected().length > 0
       ) {
         const selected = [...mgr.getSelected()];

@@ -371,7 +371,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   };
 
   const onChangeEventFactory = (stopPopupInput: boolean) =>
-    debounce(async (e: Event, previousValue: string | undefined) => {
+    debounce(async (e, previousValue) => {
       const { search, popupInput } = localDetermineSearch();
 
       if (popupInput === true) {
@@ -383,10 +383,10 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         return;
       }
 
-      const value = (e.target as HTMLInputElement)?.value;
+      const value = e.target.value;
 
-      if (!popupInput && (e as KeyboardEvent).type === "keydown") {
-        const key = (e as KeyboardEvent).key;
+      if (!popupInput && e.type === "keydown") {
+        const key = e.key;
         if (key === "Backspace" && value === "" && mgr.selected.getSelected().length > 0) {
           const selItems = mgr.selected.getSelected();
           selItems.pop();

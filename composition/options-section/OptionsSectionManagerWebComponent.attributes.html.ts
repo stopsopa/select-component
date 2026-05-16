@@ -211,9 +211,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   mgr = wc.getManager()!;
   const sub = mgr.getSubscriber();
 
-  sub.bind("onInputChange", (e: Event) => {
+  sub.bind("onInputChange", (e) => {
     inc("onchange-count");
-    valueInputOpt.value = (e.target as HTMLInputElement).value;
+    valueInputOpt.value = e.target.value;
     syncUrl();
   });
 

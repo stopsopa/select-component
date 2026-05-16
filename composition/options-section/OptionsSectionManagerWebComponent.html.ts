@@ -211,9 +211,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   mgr.setMaxHeight(states.maxHeight || "");
   mgr.setValue(states.value || "");
 
-  mgr.getSubscriber().bind("onInputChange", (e: Event) => {
+  mgr.getSubscriber().bind("onInputChange", (e) => {
     inc("onchange-count");
-    valueInputOpt.value = (e.target as HTMLInputElement).value;
+    valueInputOpt.value = e.target.value;
     syncUrl();
   });
 

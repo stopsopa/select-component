@@ -4,3 +4,5 @@ export type Item = {
   selected?: boolean;
   [key: string]: any;
 };
+
+export type InputChangeEvent = Omit<KeyboardEvent, "target"> & { target: HTMLInputElement };

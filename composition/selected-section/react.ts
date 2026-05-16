@@ -98,11 +98,11 @@ export const SelectedSection = React.forwardRef(
 
           if (onInputChange) {
             unbinds.push(
-              sub.bind("onInputChange", (e: Event, previousValue: string | undefined) =>
+              sub.bind("onInputChange", (e, previousValue) =>
                 onInputChange!({
                   originalEvent: e,
-                  value: (e.target as HTMLInputElement).value,
-                  key: (e as KeyboardEvent).key,
+                  value: e.target.value,
+                  key: e.key || "",
                   previousValue,
                 }),
               ),

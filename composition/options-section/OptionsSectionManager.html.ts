@@ -203,9 +203,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     label: states.label || "Search...",
     value: states.value || "",
     maxHeight: states.maxHeight || "",
-    onInputChange: (e: Event) => {
+    onInputChange: (e) => {
       inc("onchange-count");
-      valueInputOpt.value = (e.target as HTMLInputElement).value;
+      valueInputOpt.value = e.target.value;
       syncUrl();
     },
     onItemPick: (item: OptionItem) => {

@@ -1,4 +1,4 @@
-import type { Item } from "../types.js";
+import type { Item, InputChangeEvent } from "../types.js";
 import createSubscriber from "../createSubscriber.js";
 
 export type SelectedSectionManagerOptions<T extends Item> = {
@@ -9,7 +9,7 @@ export type SelectedSectionManagerOptions<T extends Item> = {
   renderList?: (selected: T[], defaultRender: (selected: T[]) => HTMLElement[]) => HTMLElement[];
   onDelete?: (id: string) => void;
   onClear?: () => void;
-  onInputChange?: (e: Event, previousValue: string | undefined) => void;
+  onInputChange?: (e: InputChangeEvent, previousValue: string | undefined) => void;
   onChange?: (selected: T[]) => void;
   onFocus?: (e: FocusEvent) => void;
   label?: string;
@@ -24,7 +24,7 @@ export type SelectedSectionManagerOptions<T extends Item> = {
 export type SelectedSectionManagerEvents<T extends Item> = {
   onDelete: [id: string];
   onClear: [];
-  onInputChange: [e: Event, previousValue: string | undefined];
+  onInputChange: [e: InputChangeEvent, previousValue: string | undefined];
   onChange: [selected: T[]];
   onComponentChange: [s: SelectedSectionManagerOptions<T>, reason: string];
   onFocus: [e: FocusEvent];
@@ -54,7 +54,7 @@ export class SelectedSectionManager<T extends Item> {
       renderList = (selected, def) => def(selected),
       onDelete = (id: string) => {},
       onClear = () => {},
-      onInputChange = (e: Event, previousValue: string | undefined) => {},
+      onInputChange = (e: InputChangeEvent, previousValue: string | undefined) => {},
       onChange = (selected: T[]) => {},
       onComponentChange = (s: SelectedSectionManagerOptions<T>, reason: string) => {},
       disabled = false,
@@ -128,9 +128,9 @@ export class SelectedSectionManager<T extends Item> {
         const previousValue = this.propOptions.value;
         this.propOptions.value = this.propInputElement!.value;
         if (this.propOptions.onInputChange) {
-          this.propOptions.onInputChange.call(this, e, previousValue);
+          this.propOptions.onInputChange.call(this, e as InputChangeEvent, previousValue);
         }
-        this._subscriber.trigger("onInputChange", e, previousValue);
+        this._subscriber.trigger("onInputChange", e as InputChangeEvent, previousValue);
       }
     });
 
@@ -157,9 +157,9 @@ export class SelectedSectionManager<T extends Item> {
         if (isEnter || isBackspaceOnEmpty) {
           const previousValue = this.propOptions.value;
           if (this.propOptions.onInputChange) {
-            this.propOptions.onInputChange.call(this, e, previousValue);
+            this.propOptions.onInputChange.call(this, e as InputChangeEvent, previousValue);
           }
-          this._subscriber.trigger("onInputChange", e, previousValue);
+          this._subscriber.trigger("onInputChange", e as InputChangeEvent, previousValue);
         }
       }
     });
@@ -229,8 +229,8 @@ export class SelectedSectionManager<T extends Item> {
     this.propInputElement!.value = value;
 
     if (triggerOnChange) {
-      const e = new Event("input");
-      Object.defineProperty(e, "target", { writable: false, value: this.propInputElement });      
+      const e = new Event("input") as InputChangeEvent;
+      Object.defineProperty(e, "target", { writable: false, value: this.propInputElement });
       if (this.propOptions.onInputChange) {
         this.propOptions.onInputChange.call(this, e, previousValue);
       }
