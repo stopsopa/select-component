@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
+import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { OptionItem, DemoState } from "./urlManager.js";
 
@@ -174,8 +175,14 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   };
 
   const updateDump = (options: OptionItem[]) => {
-    dump.textContent = JSON.stringify(options.filter((o) => o.selected), null, 2);
+    dump.textContent = JSON.stringify(
+      options.filter((o) => o.selected),
+      null,
+      2,
+    );
   };
+
+  let mgr: OptionsSectionManager<OptionItem>;
 
   const syncUrl = () => {
     const url = new URL(window.location.href);
@@ -200,7 +207,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   ol.options = initialOptions;
 
-  const mgr = ol.getManager()!;
+  mgr = ol.getManager()!;
   const sub = mgr.getSubscriber();
 
   sub.bind("onInputChange", (e: Event) => {
@@ -312,7 +319,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optStringRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem((item: any) => `<div class="element" data-id="${item.id}" style="color: blue;">STRING ATTR: ${item.label}</div>`);
+    ol.setRenderItem(
+      (item: any) => `<div class="element" data-id="${item.id}" style="color: blue;">STRING ATTR: ${item.label}</div>`,
+    );
   });
 
   optDefaultRenderBtn.addEventListener("click", () => {
@@ -364,10 +373,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial Attr 1" },
-      { id: 2, label: "Initial Attr 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial Attr 1" },
+        { id: 2, label: "Initial Attr 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -386,4 +398,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-

@@ -147,6 +147,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     dump.textContent = JSON.stringify(list, null, 2);
   };
 
+  let mgr: SelectedSectionManager<DemoItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -164,7 +166,6 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  let mgr: SelectedSectionManager<DemoItem>;
   mgr = new SelectedSectionManager<DemoItem>(container, {
     selected: initialSelected,
     label: states.label || "Select options",
@@ -190,7 +191,11 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         }
       }
 
-      if ((e as KeyboardEvent).key === "Backspace" && (e.target as HTMLInputElement).value === "" && mgr.getSelected().length > 0) {
+      if (
+        (e as KeyboardEvent).key === "Backspace" &&
+        (e.target as HTMLInputElement).value === "" &&
+        mgr.getSelected().length > 0
+      ) {
         const selected = [...mgr.getSelected()];
         selected.pop();
         mgr.setSelected(selected);
@@ -273,12 +278,15 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       const b = btn as HTMLButtonElement;
       const id = getNextId();
       setNextId(id + 1);
-      mgr.setSelected([...mgr.getSelected(), {
-        id,
-        label: b.dataset.img ? b.dataset.img.split(".")[0] : `Template ${id}`,
-        color: b.dataset.color,
-        img: b.dataset.img,
-      }]);
+      mgr.setSelected([
+        ...mgr.getSelected(),
+        {
+          id,
+          label: b.dataset.img ? b.dataset.img.split(".")[0] : `Template ${id}`,
+          color: b.dataset.color,
+          img: b.dataset.img,
+        },
+      ]);
       syncUrl();
     });
   });
@@ -369,10 +377,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial 1" },
-      { id: 2, label: "Initial 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial 1" },
+        { id: 2, label: "Initial 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -391,4 +402,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-

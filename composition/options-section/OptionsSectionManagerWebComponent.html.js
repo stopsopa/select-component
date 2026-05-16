@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
+import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const reloadLink = document.getElementById("reload-link");
 if (reloadLink) {
@@ -163,6 +164,7 @@ const init = (initialOptions = [], states = {}) => {
       2,
     );
   };
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -183,7 +185,7 @@ const init = (initialOptions = [], states = {}) => {
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
-  const mgr = ol.getManager();
+  mgr = ol.getManager();
   mgr.setOptions(initialOptions);
   mgr.setMaxHeight(states.maxHeight || "");
   mgr.setValue(states.value || "");

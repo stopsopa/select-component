@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
+import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const reloadLink = document.getElementById("reload-link");
 if (reloadLink) {
@@ -165,6 +166,7 @@ const init = (initialOptions = [], states = {}) => {
       2,
     );
   };
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -186,7 +188,7 @@ const init = (initialOptions = [], states = {}) => {
     updateUrlDisplay(url.toString());
   };
   ol.options = initialOptions;
-  const mgr = ol.getManager();
+  mgr = ol.getManager();
   const sub = mgr.getSubscriber();
   sub.bind("onInputChange", (e) => {
     inc("onchange-count");

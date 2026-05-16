@@ -170,6 +170,8 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     dump.textContent = JSON.stringify(options.filter((o) => o.selected), null, 2);
   };
 
+  let mgr: OptionsSectionManager<OptionItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -191,7 +193,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     updateUrlDisplay(url.toString());
   };
 
-  const mgr = new OptionsSectionManager<OptionItem>(container, {
+  mgr = new OptionsSectionManager<OptionItem>(container, {
     options: initialOptions,
     loading: !!states.loading,
     disabled: !!states.disabled,

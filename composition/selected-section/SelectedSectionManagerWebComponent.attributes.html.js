@@ -1,5 +1,6 @@
 import "../../../js/CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
+import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const imgData = await fetch("../img/img.json").then((r) => r.json());
 const reloadLink = document.getElementById("reload-link");
@@ -136,9 +137,9 @@ const init = (initialSelected = [], states = {}) => {
   const updateDump = (list) => {
     dump.textContent = JSON.stringify(list, null, 2);
   };
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
-    const mgr = sl.getManager();
     urlStateConfig.toUrl(url, id, {
       selected: mgr ? mgr.getSelected() : [],
       left: resizer.getAttribute("left") || "50px",
@@ -154,7 +155,7 @@ const init = (initialSelected = [], states = {}) => {
     updateUrlDisplay(url.toString());
   };
   sl.setAttribute("selected", JSON.stringify(initialSelected));
-  const mgr = sl.getManager();
+  mgr = sl.getManager();
   const sub = mgr.getSubscriber();
   sub.bind("onFocus", () => {
     inc("onfocus-count");

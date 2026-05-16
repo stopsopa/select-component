@@ -1,5 +1,6 @@
 import "../../../js/CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
+import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { DemoItem, DemoState } from "./urlManager.js";
 const imgData: Record<string, string[]> = await fetch("../img/img.json").then((r) => r.json());
@@ -152,6 +153,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     dump.textContent = JSON.stringify(list, null, 2);
   };
 
+  let mgr: SelectedSectionManager<DemoItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -169,7 +172,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  const mgr = sl.getManager()!;
+  mgr = sl.getManager()!;
 
   mgr.setSelected(initialSelected);
 

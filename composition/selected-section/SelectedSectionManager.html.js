@@ -130,6 +130,7 @@ const init = (initialSelected = [], states = {}) => {
   const updateDump = (list) => {
     dump.textContent = JSON.stringify(list, null, 2);
   };
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -146,7 +147,7 @@ const init = (initialSelected = [], states = {}) => {
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
-  const mgr = new SelectedSectionManager(container, {
+  mgr = new SelectedSectionManager(container, {
     selected: initialSelected,
     label: states.label || "Select options",
     disabled: !!states.disabled,

@@ -1,5 +1,6 @@
 import "../../../js/CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
+import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { DemoItem, DemoState } from "./urlManager.js";
 const imgData: Record<string, string[]> = await fetch("../img/img.json").then((r) => r.json());
@@ -159,6 +160,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     dump.textContent = JSON.stringify(list, null, 2);
   };
 
+  let mgr: SelectedSectionManager<DemoItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -176,7 +179,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  const mgr = sl.getManager()!;
+  mgr = sl.getManager()!;
 
   mgr.setSelected(initialSelected);
 
@@ -200,7 +203,11 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       }
     }
 
-    if ((e as KeyboardEvent).key === "Backspace" && (e.target as HTMLInputElement).value === "" && mgr.getSelected().length > 0) {
+    if (
+      (e as KeyboardEvent).key === "Backspace" &&
+      (e.target as HTMLInputElement).value === "" &&
+      mgr.getSelected().length > 0
+    ) {
       const selected = [...mgr.getSelected()];
       selected.pop();
       mgr.setSelected(selected);
@@ -360,10 +367,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial 1" },
-      { id: 2, label: "Initial 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial 1" },
+        { id: 2, label: "Initial 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -382,5 +392,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-
-

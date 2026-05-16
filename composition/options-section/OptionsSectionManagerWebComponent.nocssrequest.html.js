@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
+import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const css2 = await fetch("./OptionsSectionManager.css").then((r) => r.text());
 OptionsSection.cssText = css2;
@@ -188,33 +189,31 @@ const init = (initialOptions = [], states = {}) => {
     updateUrlDisplay(url.toString());
   };
   ol.options = initialOptions;
-  setTimeout(() => {
-    const mgr = ol.getManager();
-    mgr.getSubscriber().bind("onInputChange", (e) => {
-      inc("onchange-count");
-      valueInputOpt.value = e.target.value;
-      syncUrl();
+  const mgr = ol.getManager();
+  mgr.getSubscriber().bind("onInputChange", (e) => {
+    inc("onchange-count");
+    valueInputOpt.value = e.target.value;
+    syncUrl();
+  });
+  mgr.getSubscriber().bind("onItemPick", (item) => {
+    inc("onpick-count");
+    const nextOptions = ol.options.map((o) => {
+      if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
+      return o;
     });
-    mgr.getSubscriber().bind("onItemPick", (item) => {
-      inc("onpick-count");
-      const nextOptions = ol.options.map((o) => {
-        if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
-        return o;
-      });
-      ol.options = nextOptions;
-      updateDump(nextOptions);
-      syncUrl();
-    });
-    mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
-    mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
-    mgr.getSubscriber().bind("onHighlightChange", (id) => {
-      inc("onhighlight-count");
-      syncUrl();
-    });
-    if (states.highlight) {
-      mgr.highlightAndScrollToElementOnTheList(states.highlight);
-    }
-  }, 0);
+    ol.options = nextOptions;
+    updateDump(nextOptions);
+    syncUrl();
+  });
+  mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
+  mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
+  mgr.getSubscriber().bind("onHighlightChange", (id) => {
+    inc("onhighlight-count");
+    syncUrl();
+  });
+  if (states.highlight) {
+    mgr.highlightAndScrollToElementOnTheList(states.highlight);
+  }
   updateDump(ol.options);
   disabledOptCb.addEventListener("change", () => {
     ol.setDisabled(disabledOptCb.checked);

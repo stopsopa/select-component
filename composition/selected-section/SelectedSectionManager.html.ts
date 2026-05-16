@@ -146,6 +146,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     dump.textContent = JSON.stringify(list, null, 2);
   };
 
+  let mgr: SelectedSectionManager<DemoItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -163,7 +165,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     updateUrlDisplay(url.toString());
   };
 
-  const mgr = new SelectedSectionManager<DemoItem>(container, {
+  mgr = new SelectedSectionManager<DemoItem>(container, {
     selected: initialSelected,
     label: states.label || "Select options",
     disabled: !!states.disabled,

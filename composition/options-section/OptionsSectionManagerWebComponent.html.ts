@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
+import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { OptionItem, DemoState } from "./urlManager.js";
 
@@ -172,8 +173,14 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   };
 
   const updateDump = (options: OptionItem[]) => {
-    dump.textContent = JSON.stringify(options.filter((o) => o.selected), null, 2);
+    dump.textContent = JSON.stringify(
+      options.filter((o) => o.selected),
+      null,
+      2,
+    );
   };
+
+  let mgr: OptionsSectionManager<OptionItem>;
 
   const syncUrl = () => {
     const url = new URL(window.location.href);
@@ -196,7 +203,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     updateUrlDisplay(url.toString());
   };
 
-  const mgr = ol.getManager()!;
+  mgr = ol.getManager()!;
 
   mgr.setOptions(initialOptions);
   mgr.setMaxHeight(states.maxHeight || "");
@@ -321,7 +328,9 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optStringRenderBtn.addEventListener("click", () => {
-    mgr.setRenderItem((item: any) => `<div class="element" data-id="${item.id}" style="color: green;">STRING WC: ${item.label}</div>`);
+    mgr.setRenderItem(
+      (item: any) => `<div class="element" data-id="${item.id}" style="color: green;">STRING WC: ${item.label}</div>`,
+    );
   });
 
   optDefaultRenderBtn.addEventListener("click", () => {
@@ -373,10 +382,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial WC 1" },
-      { id: 2, label: "Initial WC 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial WC 1" },
+        { id: 2, label: "Initial WC 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);

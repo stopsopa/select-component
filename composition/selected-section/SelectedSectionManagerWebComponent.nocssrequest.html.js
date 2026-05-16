@@ -1,5 +1,6 @@
 import "../../../js/CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
+import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const imgData = await fetch("../img/img.json").then((r) => r.json());
 // 1. If using a bundler like Vite/Webpack:
@@ -142,6 +143,7 @@ const init = (initialSelected = [], states = {}) => {
   const updateDump = (list) => {
     dump.textContent = JSON.stringify(list, null, 2);
   };
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -158,7 +160,7 @@ const init = (initialSelected = [], states = {}) => {
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
-  const mgr = sl.getManager();
+  mgr = sl.getManager();
   mgr.setSelected(initialSelected);
   const sub = mgr.getSubscriber();
   sub.bind("onFocus", () => {

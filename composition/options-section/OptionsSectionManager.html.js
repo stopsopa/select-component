@@ -158,6 +158,7 @@ const init = (initialOptions = [], states = {}) => {
       2,
     );
   };
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -178,7 +179,7 @@ const init = (initialOptions = [], states = {}) => {
     window.history.replaceState({}, "", url);
     updateUrlDisplay(url.toString());
   };
-  const mgr = new OptionsSectionManager(container, {
+  mgr = new OptionsSectionManager(container, {
     options: initialOptions,
     loading: !!states.loading,
     disabled: !!states.disabled,

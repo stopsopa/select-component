@@ -1,5 +1,6 @@
 import "../../../js/CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
+import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { DemoItem, DemoState } from "./urlManager.js";
 const imgData: Record<string, string[]> = await fetch("../img/img.json").then((r) => r.json());
@@ -152,9 +153,10 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     dump.textContent = JSON.stringify(list, null, 2);
   };
 
+  let mgr: SelectedSectionManager<DemoItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
-    const mgr = sl.getManager();
     urlStateConfig.toUrl(url, id, {
       selected: mgr ? mgr.getSelected() : [],
       left: resizer.getAttribute("left") || "50px",
@@ -172,7 +174,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   sl.setAttribute("selected", JSON.stringify(initialSelected));
 
-  const mgr = sl.getManager()!;
+  mgr = sl.getManager()!;
   const sub = mgr.getSubscriber();
 
   sub.bind("onFocus", () => {

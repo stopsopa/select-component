@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
+import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { OptionItem, DemoState } from "./urlManager.js";
 
@@ -177,7 +178,11 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   };
 
   const updateDump = (options: OptionItem[]) => {
-    dump.textContent = JSON.stringify(options.filter((o) => o.selected), null, 2);
+    dump.textContent = JSON.stringify(
+      options.filter((o) => o.selected),
+      null,
+      2,
+    );
   };
 
   const syncUrl = () => {
@@ -203,37 +208,35 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   ol.options = initialOptions;
 
-  setTimeout(() => {
-    const mgr = ol.getManager()!;
+  const mgr = ol.getManager()!;
 
-    mgr.getSubscriber().bind("onInputChange", (e: Event) => {
-      inc("onchange-count");
-      valueInputOpt.value = (e.target as HTMLInputElement).value;
-      syncUrl();
+  mgr.getSubscriber().bind("onInputChange", (e: Event) => {
+    inc("onchange-count");
+    valueInputOpt.value = (e.target as HTMLInputElement).value;
+    syncUrl();
+  });
+
+  mgr.getSubscriber().bind("onItemPick", (item: OptionItem) => {
+    inc("onpick-count");
+    const nextOptions = ol.options.map((o: any) => {
+      if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
+      return o;
     });
+    ol.options = nextOptions;
+    updateDump(nextOptions);
+    syncUrl();
+  });
 
-    mgr.getSubscriber().bind("onItemPick", (item: OptionItem) => {
-      inc("onpick-count");
-      const nextOptions = ol.options.map((o: any) => {
-        if (String(o.id) === String(item.id)) return { ...o, selected: !o.selected };
-        return o;
-      });
-      ol.options = nextOptions;
-      updateDump(nextOptions);
-      syncUrl();
-    });
+  mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
+  mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
+  mgr.getSubscriber().bind("onHighlightChange", (id: any) => {
+    inc("onhighlight-count");
+    syncUrl();
+  });
 
-    mgr.getSubscriber().bind("onOk", () => inc("onok-count"));
-    mgr.getSubscriber().bind("onCancel", () => inc("oncancel-count"));
-    mgr.getSubscriber().bind("onHighlightChange", (id: any) => {
-      inc("onhighlight-count");
-      syncUrl();
-    });
-
-    if (states.highlight) {
-      mgr.highlightAndScrollToElementOnTheList(states.highlight);
-    }
-  }, 0);
+  if (states.highlight) {
+    mgr.highlightAndScrollToElementOnTheList(states.highlight);
+  }
 
   updateDump(ol.options);
 
@@ -320,7 +323,10 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optStringRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem((item: any) => `<div class="element" data-id="${item.id}" style="color: orange;">STRING NOCSS: ${item.label}</div>`);
+    ol.setRenderItem(
+      (item: any) =>
+        `<div class="element" data-id="${item.id}" style="color: orange;">STRING NOCSS: ${item.label}</div>`,
+    );
   });
 
   optDefaultRenderBtn.addEventListener("click", () => {
@@ -368,10 +374,13 @@ const loadFromUrl = () => {
   const allIds = urlStateConfig.getAllIds(urlParams);
 
   if (allIds.length === 0) {
-    init([
-      { id: 1, label: "Initial NoCSS 1" },
-      { id: 2, label: "Initial NoCSS 2" },
-    ], {});
+    init(
+      [
+        { id: 1, label: "Initial NoCSS 1" },
+        { id: 2, label: "Initial NoCSS 2" },
+      ],
+      {},
+    );
   } else {
     allIds.forEach((id) => {
       const state = urlStateConfig.fromUrl(urlParams, id);
@@ -390,4 +399,3 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
-
