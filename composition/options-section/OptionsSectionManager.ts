@@ -26,6 +26,7 @@ export type OptionsSectionManagerOptions<T extends Item> = {
   ) => string | HTMLElement;
   renderList?: (list: T[], defaultRender: (list: T[]) => (string | HTMLElement)[]) => (string | HTMLElement)[];
   onClear?: () => void;
+  onFocus?: (e: FocusEvent) => void;
   onComponentChange?: (s: OptionsSectionManagerOptions<T>, reason: string) => void;
 };
 
@@ -36,6 +37,7 @@ export type OptionsSectionManagerEvents<T extends Item> = {
   onOk: [];
   onHighlightChange: [id: string | number | null];
   onClear: [];
+  onFocus: [e: FocusEvent];
   onComponentChange: [s: OptionsSectionManagerOptions<T>, reason: string];
 };
 
@@ -53,6 +55,7 @@ export class OptionsSectionManager<T extends Item = Item> {
   public propCancelButton!: HTMLButtonElement;
   public propClearButton!: HTMLButtonElement;
   public propHighlightedId: string | number | null = null;
+  private _skipNextFocusEvent = false;
   protected _attachedElements = new Map<any, (e: KeyboardEvent) => void>();
   protected _subscriber = createSubscriber<OptionsSectionManagerEvents<T>>();
 
@@ -143,13 +146,20 @@ export class OptionsSectionManager<T extends Item = Item> {
   protected _bindEvents() {
     if (this.propInputElement) {
       this.propInputElement.addEventListener("input", (e) => {
-        console.log("op lis man key:", e);
         const previousValue = this.propOptions.value;
         this.propOptions.value = this.propInputElement!.value;
         this._triggerOnInputChange(e as unknown as OptionsSectionInputChangeEvent, previousValue, "input");
       });
 
-      this.propInputElement.addEventListener("focus", () => {
+      this.propInputElement.addEventListener("focus", (e) => {
+        if (this._skipNextFocusEvent) {
+          this._skipNextFocusEvent = false;
+          return;
+        }
+        if (this.propOptions.onFocus) {
+          this.propOptions.onFocus.call(this, e);
+        }
+        this._subscriber.trigger("onFocus", e);
         this.attachArrowsUpAndDown();
       });
 
@@ -375,8 +385,17 @@ export class OptionsSectionManager<T extends Item = Item> {
     this._triggerOnComponentChange("setLoading");
   }
 
-  public setValue(value: string) {
-    this.propInputElement!.value = this.propOptions.value = value;
+  public setValue(value: string, triggerOnChange: boolean = true) {
+    const previousValue = this.propOptions.value;
+    this.propOptions.value = value;
+    if (this.propInputElement) {
+      this.propInputElement.value = value;
+    }
+    if (triggerOnChange) {
+      const event = new Event("input") as OptionsSectionInputChangeEvent;
+      Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
+      this._triggerOnInputChange(event, previousValue, "setValue");
+    }
     this._triggerOnComponentChange("setValue");
   }
   // getters
@@ -408,17 +427,19 @@ export class OptionsSectionManager<T extends Item = Item> {
     return this.propHighlightedId;
   }
 
-  public clearSearch() {
+  public clearSearch(triggerOnClear: boolean = true, triggerOnChange: boolean = true) {
     const previousValue = this.propOptions.value;
-    this.setValue("");
-    if (this.propOptions.onClear) {
-      this.propOptions.onClear();
-    }
-    this._subscriber.trigger("onClear");
+    this.setValue("", triggerOnChange);
+    if (triggerOnClear) {
+      if (this.propOptions.onClear) {
+        this.propOptions.onClear();
+      }
+      this._subscriber.trigger("onClear");
 
-    const event = new Event("input") as OptionsSectionInputChangeEvent;
-    Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
-    this._triggerOnInputChange(event, previousValue, "clear");
+      const event = new Event("input") as OptionsSectionInputChangeEvent;
+      Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
+      this._triggerOnInputChange(event, previousValue, "clear");
+    }
   }
 
   public setLabel(label: string) {
@@ -476,7 +497,10 @@ export class OptionsSectionManager<T extends Item = Item> {
     this._triggerOnComponentChange("setRenderList");
   }
 
-  public setFocus() {
+  public setFocus(triggerOnFocus: boolean = true) {
+    if (!triggerOnFocus) {
+      this._skipNextFocusEvent = true;
+    }
     this.propInputElement!.focus();
   }
   public setBlur() {

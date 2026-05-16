@@ -14,6 +14,7 @@ export class OptionsSectionManager {
   propCancelButton;
   propClearButton;
   propHighlightedId = null;
+  _skipNextFocusEvent = false;
   _attachedElements = new Map();
   _subscriber = createSubscriber();
   constructor(bindElement, options = {}) {
@@ -87,12 +88,19 @@ export class OptionsSectionManager {
   _bindEvents() {
     if (this.propInputElement) {
       this.propInputElement.addEventListener("input", (e) => {
-        console.log("op lis man key:", e);
         const previousValue = this.propOptions.value;
         this.propOptions.value = this.propInputElement.value;
         this._triggerOnInputChange(e, previousValue, "input");
       });
-      this.propInputElement.addEventListener("focus", () => {
+      this.propInputElement.addEventListener("focus", (e) => {
+        if (this._skipNextFocusEvent) {
+          this._skipNextFocusEvent = false;
+          return;
+        }
+        if (this.propOptions.onFocus) {
+          this.propOptions.onFocus.call(this, e);
+        }
+        this._subscriber.trigger("onFocus", e);
         this.attachArrowsUpAndDown();
       });
       this.propInputElement.addEventListener("blur", () => {
@@ -285,8 +293,17 @@ export class OptionsSectionManager {
     this._updateLoadingDisplay();
     this._triggerOnComponentChange("setLoading");
   }
-  setValue(value) {
-    this.propInputElement.value = this.propOptions.value = value;
+  setValue(value, triggerOnChange = true) {
+    const previousValue = this.propOptions.value;
+    this.propOptions.value = value;
+    if (this.propInputElement) {
+      this.propInputElement.value = value;
+    }
+    if (triggerOnChange) {
+      const event = new Event("input");
+      Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
+      this._triggerOnInputChange(event, previousValue, "setValue");
+    }
     this._triggerOnComponentChange("setValue");
   }
   // getters
@@ -317,16 +334,18 @@ export class OptionsSectionManager {
   getHighlightedId() {
     return this.propHighlightedId;
   }
-  clearSearch() {
+  clearSearch(triggerOnClear = true, triggerOnChange = true) {
     const previousValue = this.propOptions.value;
-    this.setValue("");
-    if (this.propOptions.onClear) {
-      this.propOptions.onClear();
+    this.setValue("", triggerOnChange);
+    if (triggerOnClear) {
+      if (this.propOptions.onClear) {
+        this.propOptions.onClear();
+      }
+      this._subscriber.trigger("onClear");
+      const event = new Event("input");
+      Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
+      this._triggerOnInputChange(event, previousValue, "clear");
     }
-    this._subscriber.trigger("onClear");
-    const event = new Event("input");
-    Object.defineProperty(event, "target", { writable: false, value: this.propInputElement });
-    this._triggerOnInputChange(event, previousValue, "clear");
   }
   setLabel(label) {
     this.propOptions.label = label;
@@ -369,7 +388,10 @@ export class OptionsSectionManager {
     this._updateOptionsDisplay();
     this._triggerOnComponentChange("setRenderList");
   }
-  setFocus() {
+  setFocus(triggerOnFocus = true) {
+    if (!triggerOnFocus) {
+      this._skipNextFocusEvent = true;
+    }
     this.propInputElement.focus();
   }
   setBlur() {

@@ -9,6 +9,7 @@ export class SelectedSectionManager {
   propClearButton;
   propLoaderElement = null;
   propLabelElement = null;
+  _skipNextFocusEvent = false;
   _subscriber = createSubscriber();
   constructor(parentElement, options = {}) {
     this.propParentElement = parentElement;
@@ -92,6 +93,10 @@ export class SelectedSectionManager {
     this.propParentElement.addEventListener("focusin", (e) => {
       const target = e.target;
       if (target === this.propInputElement) {
+        if (this._skipNextFocusEvent) {
+          this._skipNextFocusEvent = false;
+          return;
+        }
         if (this.propOptions.onFocus) {
           this.propOptions.onFocus.call(this, e);
         }
@@ -173,15 +178,20 @@ export class SelectedSectionManager {
     }
     this._triggerOnComponentChange("setValue");
   }
-  setFocus() {
+  setFocus(triggerOnFocus = true) {
+    if (!triggerOnFocus) {
+      this._skipNextFocusEvent = true;
+    }
     this.propInputElement.focus();
   }
-  clearSearch(triggerOnChange = true) {
+  clearSearch(triggerOnClear = true, triggerOnChange = true) {
     this.setValue("", triggerOnChange);
-    if (this.propOptions.onClear) {
-      this.propOptions.onClear.call(this);
+    if (triggerOnClear) {
+      if (this.propOptions.onClear) {
+        this.propOptions.onClear.call(this);
+      }
+      this._subscriber.trigger("onClear");
     }
-    this._subscriber.trigger("onClear");
     this._triggerOnComponentChange("onClear");
   }
   setLabel(label) {

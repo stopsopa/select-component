@@ -40,6 +40,7 @@ export class SelectedSectionManager<T extends Item> {
   public propClearButton!: HTMLButtonElement;
   public propLoaderElement: HTMLElement | null = null;
   public propLabelElement: HTMLLabelElement | null = null;
+  private _skipNextFocusEvent = false;
   protected _subscriber = createSubscriber<SelectedSectionManagerEvents<T>>();
 
   constructor(parentElement: HTMLElement, options: SelectedSectionManagerOptions<T> = {}) {
@@ -134,6 +135,10 @@ export class SelectedSectionManager<T extends Item> {
     this.propParentElement.addEventListener("focusin", (e) => {
       const target = e.target as HTMLElement;
       if (target === this.propInputElement) {
+        if (this._skipNextFocusEvent) {
+          this._skipNextFocusEvent = false;
+          return;
+        }
         if (this.propOptions.onFocus) {
           this.propOptions.onFocus.call(this, e as FocusEvent);
         }
@@ -232,16 +237,21 @@ export class SelectedSectionManager<T extends Item> {
     this._triggerOnComponentChange("setValue");
   }
 
-  public setFocus() {
+  public setFocus(triggerOnFocus: boolean = true) {
+    if (!triggerOnFocus) {
+      this._skipNextFocusEvent = true;
+    }
     this.propInputElement!.focus();
   }
 
-  clearSearch(triggerOnChange: boolean = true) {
+  clearSearch(triggerOnClear: boolean = true, triggerOnChange: boolean = true) {
     this.setValue("", triggerOnChange);
-    if (this.propOptions.onClear) {
-      this.propOptions.onClear.call(this);
+    if (triggerOnClear) {
+      if (this.propOptions.onClear) {
+        this.propOptions.onClear.call(this);
+      }
+      this._subscriber.trigger("onClear");
     }
-    this._subscriber.trigger("onClear");
     this._triggerOnComponentChange("onClear");
   }
 
