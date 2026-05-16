@@ -1,5 +1,5 @@
 import "../../../js/CenterAndHeightResizer.js";
-import "./options-section.js";
+import { OptionsSection } from "./options-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const reloadLink = document.getElementById("reload-link");
 if (reloadLink) {
@@ -286,13 +286,13 @@ const init = (initialOptions = [], states = {}) => {
     );
   });
   optDefaultRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem(null);
+    ol.setRenderItem();
   });
   optEmptyBtn.addEventListener("click", () => {
     ol.setRenderEmpty(() => `<div style="color: blue; padding: 20px;">ATTR: NOTHING FOUND!</div>`);
   });
   optDefaultEmptyBtn.addEventListener("click", () => {
-    ol.setRenderEmpty(null);
+    ol.setRenderEmpty();
   });
   resizer.addEventListener("onLeft", () => syncUrl());
   resizer.addEventListener("onCenter", () => syncUrl());

@@ -1,5 +1,5 @@
 import "../../../js/CenterAndHeightResizer.js";
-import "./options-section.js";
+import { OptionsSection } from "./options-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const reloadLink = document.getElementById("reload-link");
 if (reloadLink) {

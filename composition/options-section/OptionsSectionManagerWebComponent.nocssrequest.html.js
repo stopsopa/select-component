@@ -291,13 +291,13 @@ const init = (initialOptions = [], states = {}) => {
     );
   });
   optDefaultRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem(null);
+    ol.setRenderItem();
   });
   optEmptyBtn.addEventListener("click", () => {
     ol.setRenderEmpty(() => `<div style="color: orange; padding: 20px;">NOCSS: NOTHING FOUND!</div>`);
   });
   optDefaultEmptyBtn.addEventListener("click", () => {
-    ol.setRenderEmpty(null);
+    ol.setRenderEmpty();
   });
   resizer.addEventListener("onLeft", () => syncUrl());
   resizer.addEventListener("onCenter", () => syncUrl());

@@ -1,5 +1,5 @@
 import "../../../js/CenterResizer.js";
-import "./selected-section.js";
+import { SelectedSection } from "./selected-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { DemoItem, DemoState } from "./urlManager.js";
 const imgData: Record<string, string[]> = await fetch("../img/img.json").then((r) => r.json());
@@ -128,7 +128,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const sl = section.querySelector('[data-role="sl"]') as any;
+  const sl = section.querySelector('[data-role="sl"]') as SelectedSection<DemoItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -177,19 +177,20 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   };
 
   sl.setAttribute("selected", JSON.stringify(initialSelected));
+  const slAny = sl as any;
 
-  sl.handleDemoFocus = () => {
+  slAny.handleDemoFocus = () => {
     inc("onfocus-count");
   };
 
-  sl.handleDemoClear = () => {
+  slAny.handleDemoClear = () => {
     inc("onclear-count");
     sl.setAttribute("selected", "[]");
     sl.setAttribute("value", "");
     syncUrl();
   };
 
-  sl.handleDemoInputChange = (e: any) => {
+  slAny.handleDemoInputChange = (e: any) => {
     inc("onchange-count");
     const val = e.detail.value;
     valueInputSel.value = val;
@@ -215,7 +216,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     }
   };
 
-  sl.handleDemoDelete = (e: any) => {
+  slAny.handleDemoDelete = (e: any) => {
     inc("ondelete-count");
     const idToDelete = String(e.detail.id);
     const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
@@ -224,7 +225,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     syncUrl();
   };
 
-  sl.handleDemoChange = (e: any) => {
+  slAny.handleDemoChange = (e: any) => {
     inc("onitemchange-count");
     updateDump(e.detail.selected);
   };

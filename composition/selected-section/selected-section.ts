@@ -14,9 +14,9 @@ import type { Item } from "../types.js";
  *   <meta name="select-component" content="SelectedSectionManager.css">
  * </head>
  */
-export class SelectedSection extends HTMLElement {
-  private _manager: SelectedSectionManager<Item> | null = null;
-  private _options: SelectedSectionManagerOptions<Item> = {};
+export class SelectedSection<T extends Item = Item> extends HTMLElement {
+  private _manager: SelectedSectionManager<T> | null = null;
+  private _options: SelectedSectionManagerOptions<T> = {};
   private _mountPoint!: HTMLElement;
   private _stylesInjected = false;
 
@@ -51,10 +51,10 @@ export class SelectedSection extends HTMLElement {
       disabled: this.hasAttribute("disabled"),
       error: this.hasAttribute("error"),
       loading: this.hasAttribute("loading"),
-      selected: this._parseJSON(this.getAttribute("selected")) ?? [],
+      selected: (this._parseJSON(this.getAttribute("selected")) as T[]) ?? [],
     };
 
-    this._manager = new SelectedSectionManager(this._mountPoint, this._options);
+    this._manager = new SelectedSectionManager<T>(this._mountPoint, this._options);
   }
 
   disconnectedCallback() {
@@ -89,7 +89,7 @@ export class SelectedSection extends HTMLElement {
       case "selected": {
         const parsed = this._parseJSON(newValue);
         if (parsed !== undefined) {
-          this._manager.setSelected(parsed);
+          this._manager.setSelected(parsed as T[]);
         }
         break;
       }
@@ -136,7 +136,7 @@ export class SelectedSection extends HTMLElement {
   }
 
   // Proxied methods
-  public setSelected(list: Item[]) {
+  public setSelected(list: T[]) {
     this._manager?.setSelected(list);
   }
 
@@ -168,12 +168,12 @@ export class SelectedSection extends HTMLElement {
     this.toggleAttribute("show-input", state);
   }
 
-  public setRenderItem(renderer?: (item: Item, defaultRender: (item: Item) => HTMLElement) => HTMLElement) {
+  public setRenderItem(renderer?: (item: T, defaultRender: (item: T) => HTMLElement) => HTMLElement) {
     this._manager?.setRenderItem(renderer);
   }
 
   public setRenderList(
-    renderer?: (selected: Item[], defaultRender: (selected: Item[]) => HTMLElement[]) => HTMLElement[],
+    renderer?: (selected: T[], defaultRender: (selected: T[]) => HTMLElement[]) => HTMLElement[],
   ) {
     this._manager?.setRenderList(renderer);
   }
@@ -187,7 +187,7 @@ export class SelectedSection extends HTMLElement {
     return this._manager?.getSelected() || [];
   }
 
-  set selected(val: Item[]) {
+  set selected(val: T[]) {
     this.setSelected(val);
   }
 

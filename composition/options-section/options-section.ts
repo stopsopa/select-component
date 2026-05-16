@@ -14,7 +14,7 @@ import type { Item } from "../types.js";
  *   <meta name="select-component" content="OptionsSectionManager.css" />
  * </head>
  */
-export class OptionsSection extends HTMLElement {
+export class OptionsSection<T extends Item = Item> extends HTMLElement {
   /**
    * Bundlers can inject raw CSS string here to avoid HTTP requests entirely.
    * e.g., OptionsSection.cssText = import('./OptionsSectionManager.css?raw');
@@ -22,8 +22,8 @@ export class OptionsSection extends HTMLElement {
   static cssText: string = "";
   static defaultCssUrls: string[] = [];
 
-  private _manager: OptionsSectionManager<Item> | null = null;
-  private _options: OptionsSectionManagerOptions<Item> = {};
+  private _manager: OptionsSectionManager<T> | null = null;
+  private _options: OptionsSectionManagerOptions<T> = {};
   private _stylesInjected: boolean = false;
   private _mountPoint!: HTMLElement;
 
@@ -46,7 +46,7 @@ export class OptionsSection extends HTMLElement {
     if (this._manager) return;
 
     this._options = {
-      options: this._parseJSON(this.getAttribute("options")) ?? [],
+      options: (this._parseJSON(this.getAttribute("options")) as T[]) ?? [],
       loading: this.hasAttribute("loading"),
       value: this.getAttribute("value") || "",
       label: this.getAttribute("label") || "",
@@ -56,7 +56,7 @@ export class OptionsSection extends HTMLElement {
       showFilter: this.hasAttribute("show-filter"),
     };
 
-    this._manager = new OptionsSectionManager(this._mountPoint, this._options);
+    this._manager = new OptionsSectionManager<T>(this._mountPoint, this._options);
   }
 
   disconnectedCallback() {
@@ -72,7 +72,7 @@ export class OptionsSection extends HTMLElement {
       case "options": {
         const parsed = this._parseJSON(newValue);
         if (parsed !== undefined) {
-          this._manager.setOptions(parsed);
+          this._manager.setOptions(parsed as T[]);
         }
         break;
       }
@@ -157,7 +157,7 @@ export class OptionsSection extends HTMLElement {
     this.toggleAttribute("show-filter", show);
   }
 
-  public setOptions(options: Item[]) {
+  public setOptions(options: T[]) {
     // we don't necessarily want to stringify options back to attribute for performance and avoiding circularity
     // but we can if we want to stay in sync. SelectedSection doesn't seem to do it for 'list'.
     // this.setAttribute("options", JSON.stringify(options));
@@ -182,8 +182,8 @@ export class OptionsSection extends HTMLElement {
 
   public setRenderItem(
     renderer?: (
-      item: Item,
-      defaultRender: (item: Item, searchValue: string | undefined) => string | HTMLElement,
+      item: T,
+      defaultRender: (item: T, searchValue: string | undefined) => string | HTMLElement,
       searchValue: string | undefined,
     ) => string | HTMLElement,
   ) {
@@ -191,7 +191,7 @@ export class OptionsSection extends HTMLElement {
   }
 
   public setRenderList(
-    renderer?: (list: Item[], defaultRender: (list: Item[]) => (string | HTMLElement)[]) => (string | HTMLElement)[],
+    renderer?: (list: T[], defaultRender: (list: T[]) => (string | HTMLElement)[]) => (string | HTMLElement)[],
   ) {
     this._manager?.setRenderList(renderer);
   }
@@ -216,7 +216,7 @@ export class OptionsSection extends HTMLElement {
     return this._manager?.propOptions.options || [];
   }
 
-  set options(val: Item[]) {
+  set options(val: T[]) {
     this.setOptions(val);
   }
 

@@ -1,5 +1,5 @@
 import "../../../js/CenterAndHeightResizer.js";
-import "./options-section.js";
+import { OptionsSection } from "./options-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { OptionItem, DemoState } from "./urlManager.js";
 
@@ -137,7 +137,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const ol = section.querySelector('[data-role="ol"]') as any;
+  const ol = section.querySelector('[data-role="ol"]') as OptionsSection<OptionItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;

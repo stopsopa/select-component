@@ -1,5 +1,5 @@
 import "../../../js/CenterResizer.js";
-import "./selected-section.js";
+import { SelectedSection } from "./selected-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import type { DemoItem, DemoState } from "./urlManager.js";
 const imgData: Record<string, string[]> = await fetch("../img/img.json").then((r) => r.json());
@@ -123,7 +123,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const sl = section.querySelector('[data-role="sl"]') as any;
+  const sl = section.querySelector('[data-role="sl"]') as SelectedSection<DemoItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;

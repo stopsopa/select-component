@@ -1,5 +1,5 @@
 import "../../../js/CenterResizer.js";
-import "./selected-section.js";
+import { SelectedSection } from "./selected-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const imgData = await fetch("../img/img.json").then((r) => r.json());
 const reloadLink = document.getElementById("reload-link");

@@ -1,5 +1,5 @@
 import "../../../js/CenterResizer.js";
-import "./selected-section.js";
+import { SelectedSection } from "./selected-section.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 const imgData = await fetch("../img/img.json").then((r) => r.json());
 const reloadLink = document.getElementById("reload-link");
@@ -160,16 +160,17 @@ const init = (initialSelected = [], states = {}) => {
     updateUrlDisplay(url.toString());
   };
   sl.setAttribute("selected", JSON.stringify(initialSelected));
-  sl.handleDemoFocus = () => {
+  const slAny = sl;
+  slAny.handleDemoFocus = () => {
     inc("onfocus-count");
   };
-  sl.handleDemoClear = () => {
+  slAny.handleDemoClear = () => {
     inc("onclear-count");
     sl.setAttribute("selected", "[]");
     sl.setAttribute("value", "");
     syncUrl();
   };
-  sl.handleDemoInputChange = (e) => {
+  slAny.handleDemoInputChange = (e) => {
     inc("onchange-count");
     const val = e.detail.value;
     valueInputSel.value = val;
@@ -192,7 +193,7 @@ const init = (initialSelected = [], states = {}) => {
       }
     }
   };
-  sl.handleDemoDelete = (e) => {
+  slAny.handleDemoDelete = (e) => {
     inc("ondelete-count");
     const idToDelete = String(e.detail.id);
     const currentSelected = JSON.parse(sl.getAttribute("selected") || "[]");
@@ -200,7 +201,7 @@ const init = (initialSelected = [], states = {}) => {
     sl.setAttribute("selected", JSON.stringify(nextSelected));
     syncUrl();
   };
-  sl.handleDemoChange = (e) => {
+  slAny.handleDemoChange = (e) => {
     inc("onitemchange-count");
     updateDump(e.detail.selected);
   };

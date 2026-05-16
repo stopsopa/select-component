@@ -142,7 +142,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const ol = section.querySelector('[data-role="ol"]') as any;
+  const ol = section.querySelector('[data-role="ol"]') as OptionsSection<OptionItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;
@@ -325,7 +325,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optDefaultRenderBtn.addEventListener("click", () => {
-    ol.setRenderItem(null);
+    ol.setRenderItem();
   });
 
   optEmptyBtn.addEventListener("click", () => {
@@ -333,7 +333,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
   });
 
   optDefaultEmptyBtn.addEventListener("click", () => {
-    ol.setRenderEmpty(null);
+    ol.setRenderEmpty();
   });
 
   resizer.addEventListener("onLeft", () => syncUrl());
