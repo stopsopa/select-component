@@ -31,7 +31,6 @@ const init = (initialSelected = [], states = {}) => {
     <div class="resizer-container">
       <center-resizer data-role="resizer" left="${resizerLeft}" center="${resizerCenter}" style="padding: 12px;">
         <selected-section
-          data-role="sl"
           label="${states.label || "Select options"}"
           ${states.error ? "error" : ""}
           ${states.disabled ? "disabled" : ""}
@@ -112,7 +111,7 @@ const init = (initialSelected = [], states = {}) => {
     <pre data-role="dump" style="background:#f8f8f8;padding:10px;border:1px solid #eee;border-radius:4px;font-size:12px;margin:0;overflow:auto;"></pre>
   `;
   document.getElementById("instances-area").appendChild(section);
-  const sl = section.querySelector('[data-role="sl"]');
+  const sl = section.querySelector("selected-section");
   const resizer = section.querySelector('[data-role="resizer"]');
   const destroyBtn = section.querySelector('[data-role="destroy"]');
   const dump = section.querySelector('[data-role="dump"]');

@@ -32,7 +32,6 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
     <div class="resizer-container">
       <center-and-height-resizer data-role="resizer" left="${resizerLeft}" center="${resizerCenter}" ${resizerHeight ? `height="${resizerHeight}"` : ""}>
         <options-section
-          data-role="ol"
           label="${states.label || "Search options..."}"
           ${states.loading ? "loading" : ""}
           ${states.disabled ? "disabled" : ""}
@@ -137,7 +136,7 @@ const init = (initialOptions: OptionItem[] = [], states: Partial<DemoState> = {}
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const ol = section.querySelector('[data-role="ol"]') as OptionsSection<OptionItem>;
+  const ol = section.querySelector("options-section") as OptionsSection<OptionItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;

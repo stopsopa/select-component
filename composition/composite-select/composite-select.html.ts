@@ -57,7 +57,6 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         style="padding: 12px;"
       >
         <composite-select
-          data-role="cs"
           selected-label="${states.labelSel || "Select Fruit"}"
           options-label="${states.labelOpt || "Search fruits..."}"
           options-max-height="300px"
@@ -246,7 +245,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   }
 
   // this is pretty important because this is where we are deciding about type for the web component
-  const cs = section.querySelector('[data-role="cs"]') as CompositeSelect<DemoItem>;
+  const cs = section.querySelector("composite-select") as CompositeSelect<DemoItem>;
   // this is pretty important because this is where we are deciding about type for the web component
 
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;

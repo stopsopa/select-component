@@ -47,7 +47,6 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     <div class="resizer-container">
       <center-resizer data-role="resizer" left="${resizerLeft}" center="${resizerCenter}" style="padding: 12px;">
         <selected-section
-          data-role="sl"
           label="${states.label || "Select options"}"
           ${states.error ? "error" : ""}
           ${states.disabled ? "disabled" : ""}
@@ -130,7 +129,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
   document.getElementById("instances-area")!.appendChild(section);
 
-  const sl = section.querySelector('[data-role="sl"]') as SelectedSection<DemoItem>;
+  const sl = section.querySelector("selected-section") as SelectedSection<DemoItem>;
   const resizer = section.querySelector('[data-role="resizer"]') as HTMLElement;
   const destroyBtn = section.querySelector('[data-role="destroy"]') as HTMLButtonElement;
   const dump = section.querySelector('[data-role="dump"]') as HTMLElement;

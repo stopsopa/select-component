@@ -27,7 +27,6 @@ const init = (initialOptions = [], states = {}) => {
     <div class="resizer-container">
       <center-and-height-resizer data-role="resizer" left="${resizerLeft}" center="${resizerCenter}" ${resizerHeight ? `height="${resizerHeight}"` : ""}>
         <options-section
-          data-role="ol"
           label="${states.label || "Search via attrs..."}"
           value="${states.value || ""}"
           max-height="${states.maxHeight || ""}"
@@ -132,7 +131,7 @@ const init = (initialOptions = [], states = {}) => {
     <pre data-role="dump" style="background:#f8f8f8;padding:10px;border:1px solid #eee;border-radius:4px;font-size:12px;margin:0;overflow:auto;"></pre>
   `;
   document.getElementById("instances-area").appendChild(section);
-  const ol = section.querySelector('[data-role="ol"]');
+  const ol = section.querySelector("options-section");
   const resizer = section.querySelector('[data-role="resizer"]');
   const destroyBtn = section.querySelector('[data-role="destroy"]');
   const dump = section.querySelector('[data-role="dump"]');
