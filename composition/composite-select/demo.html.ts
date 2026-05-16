@@ -280,6 +280,8 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     }
   }
 
+  let mgr: CompositeManager<DemoItem>;
+
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -316,7 +318,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
     return { search: mgr.options.getValue() || "", popupInput: true };
   }
 
-  const onChangeEventFactory = (stopPopupInput: boolean) =>
+  const onChangeEventFactory = (stopPopupInput: boolean): NonNullable<typeof mgr.selected.propOptions.onInputChange> =>
     debounce(async (e, previousValue) => {
       const { search, popupInput } = localDetermineSearch();
 
@@ -362,7 +364,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
       syncUrl();
     }, 500);
 
-  const mgr = new CompositeManager<DemoItem>(container, {
+  mgr = new CompositeManager<DemoItem>(container, {
     select: {
       selected: initialSelected,
       label: states.labelSel || "Select Fruit",

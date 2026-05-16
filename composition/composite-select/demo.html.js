@@ -251,6 +251,7 @@ const init = (initialSelected = [], states = {}) => {
       return rawSearchNames(name, num);
     }
   }
+  let mgr;
   const syncUrl = () => {
     const url = new URL(window.location.href);
     urlStateConfig.toUrl(url, id, {
@@ -320,7 +321,7 @@ const init = (initialSelected = [], states = {}) => {
       mgr.selected.setLoading(false);
       syncUrl();
     }, 500);
-  const mgr = new CompositeManager(container, {
+  mgr = new CompositeManager(container, {
     select: {
       selected: initialSelected,
       label: states.labelSel || "Select Fruit",
