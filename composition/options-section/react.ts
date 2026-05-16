@@ -2,7 +2,7 @@
 import React from "react";
 import "./options-section.js";
 import type { Item } from "../types.js";
-import type { OptionsSectionInputChangeEvent } from "./OptionsSectionManager.js";
+import type { InputChangeEvent } from "../types.js";
 
 export type OptionsSectionProps<T extends Item = Item> = {
   className?: string;
@@ -19,7 +19,7 @@ export type OptionsSectionProps<T extends Item = Item> = {
   "show-footer"?: boolean;
   "show-filter"?: boolean;
   onItemPick?: (item: T) => void;
-  onInputChange?: (e: OptionsSectionInputChangeEvent, previousValue: string | undefined, origin: string) => void;
+  onInputChange?: (e: InputChangeEvent, previousValue: string | undefined, origin: string) => void;
   onCancel?: () => void;
   onOk?: () => void;
   onHighlightChange?: (id: string | number | null) => void;

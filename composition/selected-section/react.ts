@@ -1,7 +1,7 @@
 // @ts-ignore
 import React from "react";
 import "./selected-section.js";
-import type { Item } from "../types.js";
+import type { Item, InputChangeEvent } from "../types.js";
 
 export type SelectedSectionProps<T extends Item = Item> = {
   className?: string;
@@ -98,7 +98,7 @@ export const SelectedSection = React.forwardRef(
 
           if (onInputChange) {
             unbinds.push(
-              sub.bind("onInputChange", (e, previousValue) =>
+              sub.bind("onInputChange", (e: InputChangeEvent, previousValue?: string) =>
                 onInputChange!({
                   originalEvent: e,
                   value: e.target.value,

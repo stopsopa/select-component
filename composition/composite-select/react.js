@@ -70,7 +70,7 @@ export const CompositeSelect = React.forwardRef((props, ref) => {
               selectedOnChangeValue({
                 originalEvent: e,
                 value: e.target.value,
-                key: e.key,
+                key: e.key || "",
                 previousValue,
               }),
             ),

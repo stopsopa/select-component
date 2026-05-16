@@ -1,7 +1,7 @@
 // @ts-ignore
 import React from "react";
 import "./composite-select.js";
-import type { Item } from "../types.js";
+import type { Item, InputChangeEvent } from "../types.js";
 
 type BaseCompositeSelectProps<T extends Item = Item> = {
   className?: string;
@@ -142,7 +142,7 @@ export const CompositeSelect = React.forwardRef(
           }
           if (selectedOnChangeValue) {
             unbinds.push(
-              selSub.bind("onInputChange", (e, previousValue) =>
+              selSub.bind("onInputChange", (e: InputChangeEvent, previousValue?: string) =>
                 selectedOnChangeValue({
                   originalEvent: e,
                   value: e.target.value,
@@ -171,7 +171,7 @@ export const CompositeSelect = React.forwardRef(
           }
           if (optionsOnInputChange) {
             unbinds.push(
-              optSub.bind("onInputChange", (e, previousValue) =>
+              optSub.bind("onInputChange", (e: InputChangeEvent, previousValue?: string) =>
                 optionsOnInputChange({
                   originalEvent: e,
                   value: e.target.value,

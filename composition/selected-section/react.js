@@ -67,7 +67,7 @@ export const SelectedSection = React.forwardRef((props, ref) => {
               onInputChange({
                 originalEvent: e,
                 value: e.target.value,
-                key: e.key,
+                key: e.key || "",
                 previousValue,
               }),
             ),

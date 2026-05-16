@@ -1,5 +1,6 @@
 import "../../../js/CenterAndHeightResizer.js";
 import { CompositeManager } from "./CompositeManager.js";
+import {} from "../types.js";
 import { deduplicateArrayById, sortById, togglePresenceOnTheList, markSelectedByIds } from "./helpers.js";
 import { searchNames as rawSearchNames, getSafeFreeOffset } from "./namesSource.js";
 import debounce from "./debounce.js";
@@ -294,7 +295,7 @@ const init = (initialSelected = [], states = {}) => {
       if (stopPopupInput === popupInput) {
         return;
       }
-      const value = e.target?.value;
+      const value = e.target.value;
       if (!popupInput && e.type === "keydown") {
         const key = e.key;
         if (key === "Backspace" && value === "" && mgr.selected.getSelected().length > 0) {

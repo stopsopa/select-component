@@ -1,5 +1,7 @@
 import "../../../js/CenterAndHeightResizer.js";
 
+import { type InputChangeEvent } from "../types.js";
+
 import { CompositeSelect } from "./composite-select.js";
 
 import { deduplicateArrayById, sortById, togglePresenceOnTheList, markSelectedByIds } from "./helpers.js";
@@ -371,7 +373,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
   };
 
   const onChangeEventFactory = (stopPopupInput: boolean) =>
-    debounce(async (e, previousValue) => {
+    debounce(async (e: InputChangeEvent, previousValue: string | undefined) => {
       const { search, popupInput } = localDetermineSearch();
 
       if (popupInput === true) {
