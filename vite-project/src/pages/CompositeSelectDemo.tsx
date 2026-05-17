@@ -147,7 +147,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
             label: idStr.split(".")[0],
             color: itemColor,
             img: idStr,
-          } as CustomItem;
+          } as unknown as CustomItem;
         }
         // Otherwise, it is a scientist
         return allScientists.find((s) => String(s.id) === idStr);
@@ -175,7 +175,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       (prevOptions) =>
         markSelectedByIds(
           prevOptions,
-          currentSelected.map((i) => i.id),
+          currentSelected.map((i) => i.id) as unknown as number[],
         ) as CustomItem[],
     );
   };
@@ -197,7 +197,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
     const opts = markSelectedByIds(
       found,
-      currentSelected.map((i) => i.id),
+      currentSelected.map((i) => i.id) as unknown as number[],
     ) as CustomItem[];
     setOptions(sortById(opts) as CustomItem[]);
 
@@ -354,7 +354,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       label: img.split(".")[0],
       color,
       img,
-    };
+    } as unknown as CustomItem;
     const newList = [...selectedItems, newItem];
     setSelectedItems(newList);
     setOptions(
@@ -476,7 +476,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <button
           className="gcp-css"
           onClick={() => {
-            getManager()?.selected.setRenderList(function (selected: CustomItem[], defaultRenderList: any) {
+            getManager()?.selected.setRenderList(function (selected: CustomItem[], defaultRenderList: (list: CustomItem[]) => HTMLElement[]) {
               const elements = defaultRenderList(selected);
               const groups: HTMLElement[] = [];
               for (let i = 0; i < elements.length; i += 3) {
@@ -491,7 +491,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
                 groupDiv.style.background = "#e8f0fe";
                 groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
                 const chunk = elements.slice(i, i + 3);
-                chunk.forEach((el: any) => groupDiv.appendChild(el));
+                chunk.forEach((el: HTMLElement) => groupDiv.appendChild(el));
                 groups.push(groupDiv);
               }
               return groups;
