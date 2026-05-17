@@ -406,7 +406,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
 
       await delay(1000);
 
-      const found = deduplicateArrayById(searchNames(search) as DemoItem[]);
+      const found = deduplicateArrayById(searchNames(search));
       const sorted = sortById(found);
       mgr.options.setOptions(sorted);
 

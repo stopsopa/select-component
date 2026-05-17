@@ -3,6 +3,7 @@ import CompositeSelectDemo from './pages/CompositeSelectDemo'
 import CompositeSelectDemoAttr from './pages/CompositeSelectDemoAttr'
 import OptionsSectionDemo from './pages/OptionsSectionDemo'
 import SelectedSectionDemo from './pages/SelectedSectionDemo'
+import UrlSerialiser from './pages/UrlSerialiser'
 import 'composite-select/floating-label-pattern.css'
 import './App.css'
 
@@ -25,6 +26,9 @@ function Home() {
           <li>
             <Link to="/selected-section-demo" className="gcp-css">SelectedSection Section Demo</Link>
           </li>
+          <li>
+            <Link to="/url-serialiser" className="gcp-css">UrlSerialiser Demo</Link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -39,6 +43,7 @@ function App() {
       <Route path="/composite-select-demo-attr" element={<CompositeSelectDemoAttr />} />
       <Route path="/options-section-demo" element={<OptionsSectionDemo />} />
       <Route path="/selected-section-demo" element={<SelectedSectionDemo />} />
+      <Route path="/url-serialiser" element={<UrlSerialiser />} />
     </Routes>
   )
 }
