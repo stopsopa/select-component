@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import {
   predefinedUseUrlString,
   predefinedUseUrlBoolean,
-  predefinedUseUrlStringArray,
+  predefinedUseUrlStringArray
 } from "./useUrlGet";
 
 export default function UrlSerialiser() {
@@ -12,11 +12,11 @@ export default function UrlSerialiser() {
   const page = searchParams.get("page");
   const filter = searchParams.get("filter");
 
-  const [text, setText] = predefinedUseUrlString("text", "");
-  const [radio, setRadio] = predefinedUseUrlString("radio", "option1");
-  const [multiSelect, setMultiSelect] = predefinedUseUrlStringArray("multiSelect", []);
-  const [checkboxA, setCheckboxA] = predefinedUseUrlBoolean("checkboxA", false);
-  const [checkboxB, setCheckboxB] = predefinedUseUrlBoolean("checkboxB", true);
+  const [text, setText] = predefinedUseUrlString("t", "");
+  const [radio, setRadio] = predefinedUseUrlString("r", "option1");
+  const [multiSelect, setMultiSelect] = predefinedUseUrlStringArray("m", []);
+  const [checkboxA, setCheckboxA] = predefinedUseUrlBoolean("ca", false);
+  const [checkboxB, setCheckboxB] = predefinedUseUrlBoolean("cb", true);
 
   useEffect(() => {
     // create style element and put some styles
