@@ -45,7 +45,6 @@ prettier.config.ts
 **/*.html.d.ts
 **/*urlManager*
 **/*namesSource*
-**/*debounce*
 **/*list-up-down-navi*
 vite-project/
 *.ts
