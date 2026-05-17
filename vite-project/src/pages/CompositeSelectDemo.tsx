@@ -5,7 +5,7 @@ import type { CompositeManager } from "composite-select";
 
 import { CompositeSelect as CompositeSelectElement } from "composite-select/composite-select/composite-select";
 
-import { Card, Button } from "@madooei/react-example-package";
+// import { Card, Button } from "@madooei/react-example-package";
 // this will work too thanks to how
 // vite-project/node_modules/@madooei/react-example-package/package.json
 // is configured
@@ -88,14 +88,14 @@ export default function CompositeSelectDemo() {
       </div>
       <hr />
 
-      <Card title="">
+      {/* <Card title="">
         <p>This is a card component from the example package.</p>
         <Button onClick={() => alert("Hello!")}>Click me!</Button>
       </Card>
       <Card title="Card with close button">
         <button>Close</button>
       </Card>
-      <Card title="fsdfds">test</Card>
+      <Card title="fsdfds">test</Card> */}
     </div>
   );
 }

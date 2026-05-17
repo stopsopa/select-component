@@ -1,51 +1,22 @@
-import { useState, useEffect } from "react";
-
-import { useLocation, useSearchParams } from "react-router-dom";
-
-import { createUseQueryParams } from "./createUseQueryParams.tsx";
-
-const useQueryParams = createUseQueryParams({
-  text: {
-    default: "",
-    encode: (value: string) => value,
-    decode: (value: string) => value,
-  },
-  radio: {
-    default: "option1",
-    encode: (value: string) => value,
-    decode: (value: string) => value,
-  },
-  multiSelect: {
-    default: [] as string[],
-    encode: (value: string[]) => JSON.stringify(value),
-    decode: (value: string) => {
-      try {
-        return JSON.parse(value);
-      } catch {
-        return [];
-      }
-    },
-  },
-  checkboxA: {
-    default: false,
-    encode: (value: boolean) => (value ? "true" : "false"),
-    decode: (value: string) => value === "true",
-  },
-  checkboxB: {
-    default: true,
-    encode: (value: boolean) => (value ? "true" : "false"),
-    decode: (value: string) => value === "true",
-  },
-});
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import {
+  predefinedUseUrlString,
+  predefinedUseUrlBoolean,
+  predefinedUseUrlStringArray,
+} from "./useUrlGet";
 
 export default function UrlSerialiser() {
-  const location = useLocation();
   const [searchParams] = useSearchParams();
 
   const page = searchParams.get("page");
   const filter = searchParams.get("filter");
 
-  const { params, diff, setParam, setParams } = useQueryParams(location.search);
+  const [text, setText] = predefinedUseUrlString("text", "");
+  const [radio, setRadio] = predefinedUseUrlString("radio", "option1");
+  const [multiSelect, setMultiSelect] = predefinedUseUrlStringArray("multiSelect", []);
+  const [checkboxA, setCheckboxA] = predefinedUseUrlBoolean("checkboxA", false);
+  const [checkboxB, setCheckboxB] = predefinedUseUrlBoolean("checkboxB", true);
 
   useEffect(() => {
     // create style element and put some styles
@@ -112,10 +83,10 @@ export default function UrlSerialiser() {
             <br />
             <input
               type="text"
-              value={params.text}
+              value={text}
               onChange={(e) => {
-                console.log(`setParam("text", "${e.target.value}")`);
-                setParam("text", e.target.value);
+                console.log(`setText("${e.target.value}")`);
+                setText(e.target.value);
               }}
               className="url-ser-input"
             />
@@ -130,8 +101,8 @@ export default function UrlSerialiser() {
                 <input
                   type="radio"
                   value={opt}
-                  checked={params.radio === opt}
-                  onChange={(e) => setParam("radio", e.target.value)}
+                  checked={radio === opt}
+                  onChange={(e) => setRadio(e.target.value)}
                 />
                 {opt}
               </label>
@@ -143,10 +114,9 @@ export default function UrlSerialiser() {
             <br />
             <select
               multiple
-              value={params.multiSelect}
+              value={multiSelect}
               onChange={(e) =>
-                setParam(
-                  "multiSelect",
+                setMultiSelect(
                   Array.from(e.target.selectedOptions, (option) => option.value),
                 )
               }
@@ -166,16 +136,16 @@ export default function UrlSerialiser() {
             <label className="url-ser-label-margin">
               <input
                 type="checkbox"
-                checked={params.checkboxA}
-                onChange={(e) => setParam("checkboxA", e.target.checked)}
+                checked={checkboxA}
+                onChange={(e) => setCheckboxA(e.target.checked)}
               />
               Checkbox A
             </label>
             <label>
               <input
                 type="checkbox"
-                checked={params.checkboxB}
-                onChange={(e) => setParam("checkboxB", e.target.checked)}
+                checked={checkboxB}
+                onChange={(e) => setCheckboxB(e.target.checked)}
               />
               Checkbox B
             </label>
@@ -185,7 +155,7 @@ export default function UrlSerialiser() {
         <div className="url-ser-dump-container">
           <strong>State Dump:</strong>
           <pre className="url-ser-pre">
-            {JSON.stringify({ url: { page, filter }, hook: { params, diff } }, null, 2)}
+            {JSON.stringify({ url: { page, filter }, hook: { text, radio, multiSelect, checkboxA, checkboxB } }, null, 2)}
           </pre>
         </div>
       </div>
