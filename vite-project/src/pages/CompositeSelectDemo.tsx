@@ -118,6 +118,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
   // Local arrays (we don't pass these via props to avoid stringification)
   const [buffItems, setBuffItems] = useState<CustomItem[]>([]);
+  const [emptyList, setEmptyList] = useState(false);
 
   const getManager = () => csRef.current?.getManager();
 
@@ -143,6 +144,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     mgr: CompositeManager<CustomItem>,
     search: string,
     currentBuff: CustomItem[] = buffItems,
+    overrideEmptyList?: boolean,
   ) => {
     mgr.options.setLoading(true);
     mgr.options.setDisabled(true);
@@ -151,7 +153,8 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
     await delay(500);
 
-    const found = deduplicateArrayById<CustomItem>(searchNames(search));
+    const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
+    const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
     const opts = markSelectedByIds(
       found,
       currentBuff.map((i) => i.id),
@@ -162,6 +165,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     mgr.options.setLoading(false);
     mgr.selected.setDisabled(false);
     mgr.selected.setLoading(false);
+  };
+
+  const handleEmptyListChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setEmptyList(checked);
+    const mgr = getManager();
+    if (mgr) {
+      const { search } = localDetermineSearch(mgr);
+      await fetchOptions(mgr, search, buffItems, checked);
+    }
   };
 
   useEffect(() => {
@@ -288,7 +301,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     );
 
     return () => unsubs.forEach((unsub) => unsub());
-  }, [buffItems]);
+  }, [buffItems, emptyList]);
 
   const addTemplate = (color: string, img: string) => {
     const mgr = getManager();
@@ -481,18 +494,19 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           >
             Add Random Option
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => {
-              const mgr = getManager();
-              if (mgr) {
-                mgr.options.setOptions([]);
-                setBuffItems([]);
-              }
-            }}
-          >
-            Clear Options
-          </button>
+          <div className="gcp-css checkbox-wrapper">
+            <div className="checkbox-row">
+              <input
+                type="checkbox"
+                id={`empty-list-${id}`}
+                checked={emptyList}
+                onChange={handleEmptyListChange}
+              />
+              <div className="content-cell">
+                <label htmlFor={`empty-list-${id}`}>Empty list</label>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
