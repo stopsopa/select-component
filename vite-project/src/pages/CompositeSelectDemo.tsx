@@ -128,10 +128,31 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [options, setOptions] = useState<CustomItem[]>([]);
   const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`empty-${id}`, false);
 
-  // Derive selectedItems by rehydrating the selectedIds from the complete scientist list
+  // Derive selectedItems by rehydrating the selectedIds (scientists and template items)
   const selectedItems = useMemo(() => {
-    const allItems = searchNames("", Infinity);
-    return allItems.filter((item) => selectedIds.includes(String(item.id)));
+    const allScientists = searchNames("", Infinity);
+    return selectedIds
+      .map((idStr) => {
+        // If it contains a dot, it's a template item (e.g. "gmail.png")
+        if (idStr.includes(".")) {
+          let itemColor = "#999";
+          for (const [color, imgs] of Object.entries(imgDataJson)) {
+            if (imgs.includes(idStr)) {
+              itemColor = color;
+              break;
+            }
+          }
+          return {
+            id: idStr,
+            label: idStr.split(".")[0],
+            color: itemColor,
+            img: idStr,
+          } as CustomItem;
+        }
+        // Otherwise, it is a scientist
+        return allScientists.find((s) => String(s.id) === idStr);
+      })
+      .filter(Boolean) as CustomItem[];
   }, [selectedIds]);
 
   const setSelectedItems = useCallback((items: CustomItem[]) => {
@@ -329,7 +350,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
   const addTemplate = (color: string, img: string) => {
     const newItem: CustomItem = {
-      id: globalIdCounter++,
+      id: img,
       label: img.split(".")[0],
       color,
       img,
