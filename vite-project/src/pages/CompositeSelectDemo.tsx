@@ -116,8 +116,9 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [onItemPickCount, setOnItemPickCount] = useState(0);
   const [onCloseCount, setOnCloseCount] = useState(0);
 
-  // Local arrays (we don't pass these via props to avoid stringification)
-  const [buffItems, setBuffItems] = useState<CustomItem[]>([]);
+  // Local arrays and selections managed via React state
+  const [selectedItems, setSelectedItems] = useState<CustomItem[]>([]);
+  const [options, setOptions] = useState<CustomItem[]>([]);
   const [emptyList, setEmptyList] = useState(false);
 
   const getManager = () => csRef.current?.getManager();
@@ -132,18 +133,18 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   }
 
   const updateCheckmarks = (mgr: CompositeManager<CustomItem>, currentSelected: CustomItem[]) => {
-    const currentOptions = mgr.options.getOptions() as CustomItem[];
-    const opts = markSelectedByIds(
-      currentOptions,
-      currentSelected.map((i) => i.id),
-    ) as CustomItem[];
-    mgr.options.setOptions(opts);
+    setOptions((prevOptions) =>
+      markSelectedByIds(
+        prevOptions,
+        currentSelected.map((i) => i.id),
+      ) as CustomItem[],
+    );
   };
 
   const fetchOptions = async (
     mgr: CompositeManager<CustomItem>,
     search: string,
-    currentBuff: CustomItem[] = buffItems,
+    currentSelected: CustomItem[] = selectedItems,
     overrideEmptyList?: boolean,
   ) => {
     mgr.options.setLoading(true);
@@ -157,9 +158,9 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
     const opts = markSelectedByIds(
       found,
-      currentBuff.map((i) => i.id),
+      currentSelected.map((i) => i.id),
     ) as CustomItem[];
-    mgr.options.setOptions(sortById(opts) as CustomItem[]);
+    setOptions(sortById(opts) as CustomItem[]);
 
     mgr.options.setDisabled(false);
     mgr.options.setLoading(false);
@@ -173,13 +174,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     const mgr = getManager();
     if (mgr) {
       const { search } = localDetermineSearch(mgr);
-      await fetchOptions(mgr, search, buffItems, checked);
+      await fetchOptions(mgr, search, selectedItems, checked);
     }
   };
 
   useEffect(() => {
     const mgr = getManager();
-    if (mgr) fetchOptions(mgr, "", buffItems);
+    if (mgr) {
+      const { search } = localDetermineSearch(mgr);
+      fetchOptions(mgr, search, selectedItems);
+    }
   }, []);
 
   useEffect(() => {
@@ -204,18 +208,17 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
         if (!popupInput && (e as KeyboardEvent).type === "keydown") {
           const key = (e as KeyboardEvent).key;
-          if (key === "Backspace" && val === "" && buffItems.length > 0) {
-            const newBuff = [...buffItems];
-            newBuff.pop();
-            setBuffItems(newBuff);
-            mgr.selected.setSelected(newBuff);
-            updateCheckmarks(mgr, newBuff);
+          if (key === "Backspace" && val === "" && selectedItems.length > 0) {
+            const newSelected = [...selectedItems];
+            newSelected.pop();
+            setSelectedItems(newSelected);
+            updateCheckmarks(mgr, newSelected);
             return;
           }
         }
 
         if (!popupInput) mgr.options.setValue(search);
-        await fetchOptions(mgr, search, buffItems);
+        await fetchOptions(mgr, search, selectedItems);
 
         if (!popupInput) mgr.selected.setFocus();
       }),
@@ -224,10 +227,11 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     unsubs.push(
       mgr.selected.getSubscriber().bind("onFocus", () => {
         setOnFocusCount((prev) => prev + 1);
-        const newBuff = [...mgr.selected.getSelected()] as CustomItem[];
-        setBuffItems(newBuff);
-
-        updateCheckmarks(mgr, newBuff);
+        const { search } = localDetermineSearch(mgr);
+        const selIds = selectedItems.map((i) => i.id);
+        const combined = emptyList ? [] : searchNames(search);
+        const opts = markSelectedByIds(combined, selIds) as CustomItem[];
+        setOptions(sortById(opts) as CustomItem[]);
 
         mgr.selected.setShowDelete(false);
         mgr.options.setFocus();
@@ -237,10 +241,9 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     unsubs.push(
       mgr.selected.getSubscriber().bind("onDelete", (id) => {
         setOnDeleteCount((prev) => prev + 1);
-        const newBuff = buffItems.filter((i) => String(i.id) !== String(id));
-        setBuffItems(newBuff);
-        mgr.selected.setSelected(newBuff);
-        updateCheckmarks(mgr, newBuff);
+        const newSelected = selectedItems.filter((i) => String(i.id) !== String(id));
+        setSelectedItems(newSelected);
+        updateCheckmarks(mgr, newSelected);
       }),
     );
 
@@ -248,9 +251,13 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       mgr.selected.getSubscriber().bind("onClear", () => {
         setOnClearCount((prev) => prev + 1);
         if (!confirm("Are you sure?")) return;
-        setBuffItems([]);
-        mgr.selected.setSelected([]);
-        updateCheckmarks(mgr, []);
+        setSelectedItems([]);
+        setOptions((prevOptions) =>
+          markSelectedByIds(
+            prevOptions,
+            [],
+          ) as CustomItem[],
+        );
       }),
     );
 
@@ -258,14 +265,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       mgr.options.getSubscriber().bind("onInputChange", async (e) => {
         setOnInputChangeCount((prev) => prev + 1);
         const search = (e.target as HTMLInputElement).value || "";
-        await fetchOptions(mgr, search, buffItems);
+        await fetchOptions(mgr, search, selectedItems);
       }),
     );
 
     unsubs.push(
       mgr.options.getSubscriber().bind("onOk", () => {
         setOnOkCount((prev) => prev + 1);
-        mgr.selected.setSelected(buffItems);
+        const combined = deduplicateArrayById([...options, ...selectedItems]);
+        const optionsSelected = combined.filter((i) => i.selected);
+        setSelectedItems(optionsSelected);
         mgr.container.hide();
       }),
     );
@@ -287,13 +296,17 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     unsubs.push(
       mgr.options.getSubscriber().bind("onItemPick", (item) => {
         setOnItemPickCount((prev) => prev + 1);
-        const newBuff = togglePresenceOnTheList(buffItems, item as CustomItem) as CustomItem[];
-        setBuffItems(newBuff);
-
         if (mgr.options.getShowFooter()) {
-          updateCheckmarks(mgr, newBuff);
+          const newOptions = options.map((opt) => {
+            if (opt.id === item.id) {
+              return { ...opt, selected: !opt.selected };
+            }
+            return opt;
+          });
+          setOptions(newOptions);
         } else {
-          mgr.selected.setSelected(newBuff);
+          const selectedToggled = togglePresenceOnTheList(selectedItems, item as CustomItem) as CustomItem[];
+          setSelectedItems(selectedToggled);
           mgr.container.hide();
           mgr.selected.setShowDelete(true);
         }
@@ -301,21 +314,23 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     );
 
     return () => unsubs.forEach((unsub) => unsub());
-  }, [buffItems, emptyList]);
+  }, [selectedItems, options, emptyList]);
 
   const addTemplate = (color: string, img: string) => {
-    const mgr = getManager();
-    if (!mgr) return;
     const newItem: CustomItem = {
       id: globalIdCounter++,
       label: img.split(".")[0],
       color,
       img,
     };
-    const newList = [...(mgr.selected.getSelected() as CustomItem[]), newItem];
-    mgr.selected.setSelected(newList);
-    setBuffItems(newList);
-    updateCheckmarks(mgr, newList);
+    const newList = [...selectedItems, newItem];
+    setSelectedItems(newList);
+    setOptions((prevOptions) =>
+      markSelectedByIds(
+        prevOptions,
+        newList.map((i) => i.id),
+      ) as CustomItem[],
+    );
   };
 
   return (
@@ -335,8 +350,12 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       </button>
 
       <div style={{ padding: "20px", background: "#fafafa", border: "1px dashed #ccc", marginBottom: "20px" }}>
-        {/* We rely entirely on the manager API instead of attributes */}
-        <CompositeSelect<CustomItem> ref={csRef} options-max-height="300px"></CompositeSelect>
+        <CompositeSelect<CustomItem>
+          ref={csRef}
+          selected-selected={selectedItems}
+          options-options={options}
+          options-max-height="300px"
+        ></CompositeSelect>
       </div>
 
       <div style={{ marginBottom: "15px", fontSize: "14px" }}>
@@ -478,22 +497,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           >
             Focus Input
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => {
-              const mgr = getManager();
-              if (mgr) {
-                const id = Math.floor(Math.random() * 100000);
-                const currentOptions = mgr.options.getOptions() as CustomItem[];
-                mgr.options.setOptions([
-                  ...currentOptions,
-                  { id: id, label: "Dynamic Option " + id, color: "#999", img: "" } as CustomItem,
-                ]);
-              }
-            }}
-          >
-            Add Random Option
-          </button>
+
           <div className="gcp-css checkbox-wrapper">
             <div className="checkbox-row">
               <input
@@ -728,7 +732,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
       <div style={{ marginBottom: "20px" }}>
         <pre style={{ background: "#f8f8f8", padding: "10px", fontSize: "12px", border: "1px solid #eee" }}>
-          {JSON.stringify(getManager()?.selected.getSelected() || [], null, 2)}
+          {JSON.stringify(selectedItems, null, 2)}
         </pre>
       </div>
 
@@ -744,7 +748,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
             overflow: "auto",
           }}
         >
-          {JSON.stringify(getManager()?.options.getOptions() || [], null, 2)}
+          {JSON.stringify(options, null, 2)}
         </pre>
       </div>
     </div>

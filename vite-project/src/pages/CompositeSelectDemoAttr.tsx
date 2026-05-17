@@ -470,16 +470,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           >
             Focus Input
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => {
-              const id = Math.floor(Math.random() * 100000);
-              const newOpts = [...options, { id: id, label: "Dynamic Option " + id, color: "#999", img: "" } as CustomItem];
-              setOptions(newOpts);
-            }}
-          >
-            Add Random Option
-          </button>
+
           <button
             className="gcp-css"
             onClick={() => {
