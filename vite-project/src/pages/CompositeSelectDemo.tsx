@@ -124,7 +124,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [onCloseCount, setOnCloseCount] = useState(0);
 
   // Local arrays and selections managed via URL (storing only selected ids)
-  const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`sel-${id}`, []);
+  const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`s-${id}`, []);
   const [options, setOptions] = useState<CustomItem[]>([]);
   const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`empty-${id}`, false);
 
