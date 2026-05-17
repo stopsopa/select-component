@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { CompositeSelect } from "composite-select/composite-select/react";
 import type { CompositeManager } from "composite-select";
+import { predefinedUseUrlStringArray, predefinedUseUrlBoolean } from "./useUrlGet";
 
 import { CompositeSelect as CompositeSelectElement } from "composite-select/composite-select/composite-select";
 
@@ -80,14 +81,20 @@ export default function CompositeSelectDemo() {
       <button onClick={addInstance} className="gcp-css">
         Initialize New Instance
       </button>
-
+      <span style={{ padding: "0 10px" }}>|</span>
+      <a href={window.location.href.split("?")[0]} className="gcp-css">
+        off
+      </a>
+      <span style={{ padding: "0 10px" }}>|</span>
+      <a href="./" className="gcp-css">
+        up ..
+      </a>
       <div style={{ display: "flex", flexDirection: "column", gap: "30px", marginTop: "20px" }}>
         {instances.map((id) => (
           <DemoInstance key={id} id={id} onRemove={() => removeInstance(id)} />
         ))}
       </div>
       <hr />
-
       {/* <Card title="">
         <p>This is a card component from the example package.</p>
         <Button onClick={() => alert("Hello!")}>Click me!</Button>
@@ -116,10 +123,20 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [onItemPickCount, setOnItemPickCount] = useState(0);
   const [onCloseCount, setOnCloseCount] = useState(0);
 
-  // Local arrays and selections managed via React state
-  const [selectedItems, setSelectedItems] = useState<CustomItem[]>([]);
+  // Local arrays and selections managed via URL (storing only selected ids)
+  const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`sel-${id}`, []);
   const [options, setOptions] = useState<CustomItem[]>([]);
-  const [emptyList, setEmptyList] = useState(false);
+  const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`empty-${id}`, false);
+
+  // Derive selectedItems by rehydrating the selectedIds from the complete scientist list
+  const selectedItems = useMemo(() => {
+    const allItems = searchNames("", Infinity);
+    return allItems.filter((item) => selectedIds.includes(String(item.id)));
+  }, [selectedIds]);
+
+  const setSelectedItems = useCallback((items: CustomItem[]) => {
+    setSelectedIds(items.map((i) => String(i.id)));
+  }, [setSelectedIds]);
 
   const getManager = () => csRef.current?.getManager();
 
@@ -133,11 +150,12 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   }
 
   const updateCheckmarks = (mgr: CompositeManager<CustomItem>, currentSelected: CustomItem[]) => {
-    setOptions((prevOptions) =>
-      markSelectedByIds(
-        prevOptions,
-        currentSelected.map((i) => i.id),
-      ) as CustomItem[],
+    setOptions(
+      (prevOptions) =>
+        markSelectedByIds(
+          prevOptions,
+          currentSelected.map((i) => i.id),
+        ) as CustomItem[],
     );
   };
 
@@ -182,7 +200,9 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     const mgr = getManager();
     if (mgr) {
       const { search } = localDetermineSearch(mgr);
-      fetchOptions(mgr, search, selectedItems);
+      if (options.length === 0 && !emptyList) {
+        fetchOptions(mgr, search, selectedItems);
+      }
     }
   }, []);
 
@@ -190,12 +210,8 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     const mgr = getManager();
     if (!mgr) return;
 
-    mgr.selected.propOptions.onComponentChange = () => {
-      forceRender();
-    };
-    mgr.options.propOptions.onComponentChange = () => {
-      forceRender();
-    };
+    mgr.selected.propOptions.onComponentChange = () => {};
+    mgr.options.propOptions.onComponentChange = () => {};
 
     const unsubs: (() => void)[] = [];
 
@@ -252,12 +268,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         setOnClearCount((prev) => prev + 1);
         if (!confirm("Are you sure?")) return;
         setSelectedItems([]);
-        setOptions((prevOptions) =>
-          markSelectedByIds(
-            prevOptions,
-            [],
-          ) as CustomItem[],
-        );
+        setOptions((prevOptions) => markSelectedByIds(prevOptions, []) as CustomItem[]);
       }),
     );
 
@@ -325,11 +336,12 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     };
     const newList = [...selectedItems, newItem];
     setSelectedItems(newList);
-    setOptions((prevOptions) =>
-      markSelectedByIds(
-        prevOptions,
-        newList.map((i) => i.id),
-      ) as CustomItem[],
+    setOptions(
+      (prevOptions) =>
+        markSelectedByIds(
+          prevOptions,
+          newList.map((i) => i.id),
+        ) as CustomItem[],
     );
   };
 
@@ -500,12 +512,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
           <div className="gcp-css checkbox-wrapper">
             <div className="checkbox-row">
-              <input
-                type="checkbox"
-                id={`empty-list-${id}`}
-                checked={emptyList}
-                onChange={handleEmptyListChange}
-              />
+              <input type="checkbox" id={`empty-list-${id}`} checked={emptyList} onChange={handleEmptyListChange} />
               <div className="content-cell">
                 <label htmlFor={`empty-list-${id}`}>Empty list</label>
               </div>

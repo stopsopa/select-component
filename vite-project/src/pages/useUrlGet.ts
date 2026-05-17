@@ -40,15 +40,15 @@ export const BooleanSerializer: Serializer<boolean> = {
 export const predefinedUseUrlBoolean = createUseUrlGet(BooleanSerializer);
 
 export const StringArraySerializer: Serializer<string[]> = {
-  parse: (raw) => (raw ? raw.split(",") : []),
-  serialize: (val) => val.join(","),
+  parse: (raw) => (raw ? raw.split("~") : []),
+  serialize: (val) => val.join("~"),
 };
 
 export const predefinedUseUrlStringArray = createUseUrlGet(StringArraySerializer);
 
 export const NumberArraySerializer: Serializer<number[]> = {
-  parse: (raw) => (raw ? raw.split(",").map(Number) : []),
-  serialize: (val) => val.join(","),
+  parse: (raw) => (raw ? raw.split("~").map(Number) : []),
+  serialize: (val) => val.join("~"),
 };
 
 export const predefinedUseUrlNumberArray = createUseUrlGet(NumberArraySerializer);

@@ -161,6 +161,7 @@ export function searchNames(name: string | undefined, num: number = 10): Item[] 
       buff.push({ id: i + offset, label });
     }
 
+    // if (num !== Infinity && buff.length === num) { // this is actually not needed
     if (buff.length === num) {
       return buff;
     }
