@@ -147,8 +147,21 @@ export default function UrlSerialiser() {
     </div>
   );
 }
-
-const Single = React.memo(function Single({ i, search, navigate }: { i: number; search: string; navigate: NavigateFunction }) {
+/**
+ * Another aspect is that we have to wrap with React.memo() becaue parent will rerender
+ * on any url change so it will cascade down to children
+ * 
+ * React.memo() work like useMemo() but for components but the props are used as array of dependencies for useMemo()
+ */
+const Single = React.memo(function Single({
+  i,
+  search,
+  navigate,
+}: {
+  i: number;
+  search: string;
+  navigate: NavigateFunction;
+}) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, i);
 
   useEffect(() => {
