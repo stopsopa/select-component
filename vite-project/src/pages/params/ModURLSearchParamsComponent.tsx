@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useCallback } from "react";
 
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -58,26 +58,53 @@ const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
 );
 
 export default function UrlSerialiser() {
-  const [list, setList] = useState<number[]>(() => {
-    const params = new URLSearchParams(window.location.search);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const list = useMemo(() => {
+    const params = new URLSearchParams(location.search);
     const indexes = new Set<number>();
-    for (const key of params.keys()) {
+    params.forEach((_, key) => {
       const match = key.match(/-(\d+)$/);
       if (match) {
         indexes.add(parseInt(match[1], 10));
       }
-    }
+    });
     return Array.from(indexes).sort((a, b) => a - b);
-  });
-
-  const location = useLocation();
+  }, [location.search]);
 
   /**
-   * Important part:
-   * navigate have to be injected from parent to Single() react component (the child)
-   * else it will cause multiple re-render
+   * Process of extracting list is little bit messy but I don't want to add more complexity to modURLSearchParams hook
    */
-  const navigate = useNavigate();
+  const addComponent = useCallback(() => {
+    const nextIndex = list.length > 0 ? Math.max(...list) + 1 : 1;
+
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set(`t-${nextIndex}`, "");
+    navigate({ search: currentParams.toString() }, { replace: true });
+  }, [list, navigate]);
+
+  const deleteItem = useCallback(
+    (i: number) => {
+      // 1. Read live query params
+      const nextSearchParams = new URLSearchParams(window.location.search);
+
+      // 2. Find only keys belonging to index i
+      const childParams = separateIndexedSearchParams(nextSearchParams, i);
+      
+      let changed = false;
+      childParams.forEach((_, key) => {
+        nextSearchParams.delete(key);
+        changed = true;
+      });
+
+      // 3. Update URL if changed
+      if (changed) {
+        navigate({ search: nextSearchParams.toString() }, { replace: true });
+      }
+    },
+    [navigate],
+  );
 
   useEffect(() => {
     // create style element and put some styles
@@ -121,6 +148,19 @@ export default function UrlSerialiser() {
 .url-ser-pre {
     white-space: pre-wrap;
 }
+.url-ser-delete-btn {
+    padding: 8px 12px;
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    align-self: flex-start;
+    &:hover {
+        background-color: #ff7875;
+    }
+}
 `;
     document.head.appendChild(style);
 
@@ -131,31 +171,24 @@ export default function UrlSerialiser() {
 
   return (
     <div>
-      <h5>UrlSerialiser Demo Form</h5>
+      <span style={{ padding: "5px" }}></span>
       <a href={window.location.href.split("?")[0]} className="gcp-css">
         off
       </a>
-      |
+      <span style={{ padding: "5px" }}>|</span>
       <a href="./" className="gcp-css">
         up ..
       </a>
+      <span style={{ padding: "5px" }}>|</span>
+      <a href="?t-1=aaa&t-3=cccc" className="gcp-css">
+        1, 3 example
+      </a>
       <hr />
-      <button
-        onClick={() => {
-          /**
-           * This is quite important - generating new number
-           * Because what if in list we have [1, 3] we can't rely on list.length
-           * because for [1, 3] array in list we would endup with [1, 3, 3] which would scream on key="3"
-           */
-          setList((prev) => [...prev, prev.length > 0 ? Math.max(...prev) + 1 : 1]);
-        }}
-      >
-        Add Text Param
-      </button>
+      <button onClick={addComponent}>Add Text Param</button> {list.join(", ")}
       <div>
         {list.map((i) => {
           const search = separateIndexedSearchParams(location.search, i).toString();
-          return <Single key={i} i={i} search={search} navigate={navigate} />;
+          return <Single key={i} i={i} search={search} navigate={navigate} onDelete={() => deleteItem(i)} />;
         })}
       </div>
     </div>
@@ -171,10 +204,12 @@ const Single = React.memo(function Single({
   i,
   search,
   navigate,
+  onDelete,
 }: {
   i: number;
   search: string;
   navigate: NavigateFunction;
+  onDelete: () => void;
 }) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, navigate, i);
 
@@ -266,6 +301,10 @@ const Single = React.memo(function Single({
               Checkbox B
             </label>
           </fieldset>
+
+          <button type="button" onClick={onDelete} className="url-ser-delete-btn">
+            Delete Component #{i}
+          </button>
         </form>
 
         <div className="url-ser-dump-container">
