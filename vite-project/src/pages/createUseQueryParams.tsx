@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect, useMemo } from "react";
 
 // ---- Type Utilities ----
 
@@ -64,26 +65,28 @@ type ParamDiff<C extends ParamConfigInput> = Partial<InferParamTypes<C>>;
 //
 // Search terms: "TypeScript generic function type", "per-call generic",
 // "correlated union types", "indexed access types"
-type SetParam<C extends ParamConfigInput> = <K extends keyof C>(key: K, value?: InferParamTypes<C>[K] | null) => void;
+type SetParam<C extends ParamConfigInput> = <K extends keyof C>(key: K, value?: InferParamTypes<C>[K] | null) => URLSearchParams;
 
 // Partial mapped type for setParams — allows updating any subset of keys
 // while still enforcing that each value matches its key's type.
 // Search terms: "TypeScript Partial utility type", "mapped type modifiers"
 type SetParams<C extends ParamConfigInput> = (
   updates: Partial<{ [K in keyof C]: InferParamTypes<C>[K] | null | undefined }>,
-) => void;
+) => URLSearchParams;
 
 // The hook no longer owns URL writes — it exposes:
 // - params:    all current values (decoded from URL or defaulted)
 // - diff:      only keys that differ from their default (useful for building
 //              a URLSearchParams to push externally)
-// - setParam:  update a single key in local state
-// - setParams: update multiple keys in local state
+// - setParam:  returns a new URLSearchParams with a single key updated and triggers rerender
+// - setParams: returns a new URLSearchParams with multiple keys updated and triggers rerender
+// - updatedURLSearchParams: the internal state URLSearchParams
 type UseQueryParamsReturn<C extends ParamConfigInput> = {
   params: ParamValues<C>;
   diff: ParamDiff<C>;
   setParam: SetParam<C>;
   setParams: SetParams<C>;
+  updatedURLSearchParams: URLSearchParams;
 };
 
 // ---- extractSearchParams ----
@@ -99,7 +102,11 @@ type UseQueryParamsReturn<C extends ParamConfigInput> = {
 //
 // Search terms: "URL parsing JavaScript", "URLSearchParams constructor",
 // "robust query string parsing"
-function extractSearchParams(input: string): URLSearchParams {
+function extractSearchParams(input: string | URLSearchParams): URLSearchParams {
+  if (input instanceof URLSearchParams) {
+    return new URLSearchParams(input);
+  }
+
   // Strip fragment — everything from # onwards is irrelevant for query params
   const withoutHash = input.split("#")[0];
 
@@ -138,115 +145,76 @@ function extractSearchParams(input: string): URLSearchParams {
 // Search terms: "TypeScript factory pattern", "higher order functions TypeScript",
 // "React hook factory", "closing over generic type"
 export function createUseQueryParams<C extends ParamConfigInput>(config: C) {
-  return function useQueryParams(urlInput: string): UseQueryParamsReturn<C> {
+  return function useQueryParams(urlInput: string | URLSearchParams): UseQueryParamsReturn<C> {
     // Parse the caller-supplied URL string into URLSearchParams.
     // The hook is decoupled from any router — the caller decides what
     // to pass (location.href, location.search, a raw string, etc).
     // Search terms: "dependency injection React hooks", "decoupled hook design"
-    const searchParams = extractSearchParams(urlInput);
+    const initialSearchParams = useMemo(() => extractSearchParams(urlInput), [urlInput]);
 
-    // ---- Build initial state from URL ----
-    //
-    // We read from searchParams once to seed the initial local state.
-    // After that, local React state is the source of truth — the hook
-    // does not write back to the URL at all.
-    //
-    // Search terms: "React controlled state", "derived initial state"
-    const buildParamsFromUrl = (): ParamValues<C> => {
-      const result = {} as ParamValues<C>;
+    const [updatedURLSearchParams, setUpdatedURLSearchParams] = useState<URLSearchParams>(initialSearchParams);
 
-      // Generic helper to assign a value to result[k] in a type-safe way.
-      // Without this, `result[key] = value` in a for..in loop loses the
-      // per-key type correlation — TypeScript sees the key as `string`
-      // and can't verify the value type matches.
-      //
-      // By making the helper generic over K, TypeScript can verify that
-      // result[k] and v share the same type InferParamTypes<C>[K].
-      //
-      // Search terms: "TypeScript for-in loop type narrowing",
-      // "correlated generic assignment", "index signature assignment"
-      const assign = <K extends keyof C>(k: K, v: InferParamTypes<C>[K]) => {
-        result[k] = v;
-      };
-
-      // These two helpers cast the return of decode/default to InferParamTypes<C>[K].
-      // The cast is unavoidable because the index signature loses the per-key
-      // T at runtime — config[k] is seen as ParamValueInput<unknown>, not
-      // ParamValueInput<InferParamTypes<C>[K]>.
-      //
-      // The cast is safe by construction: the user's config guarantees decode
-      // and default agree on T (enforced at the call site of createUseQueryParams).
-      //
-      // Search terms: "TypeScript type assertion", "safe cast pattern",
-      // "TypeScript branded types alternative"
-      const getDecoded = <K extends keyof C>(k: K, raw: string): InferParamTypes<C>[K] =>
-        config[k].decode(raw) as InferParamTypes<C>[K];
-
-      const getDefault = <K extends keyof C>(k: K): InferParamTypes<C>[K] => config[k].default as InferParamTypes<C>[K];
-
-      for (const key in config) {
-        const raw = searchParams.get(key);
-        assign(key, raw !== null ? getDecoded(key, raw) : getDefault(key));
-      }
-
-      return result;
-    };
-
-    // Local React state holds the current param values.
-    // useState with an initialiser function so buildParamsFromUrl()
-    // runs only once on mount, not on every render.
-    // Search terms: "React useState lazy initializer"
-    const [state, setState] = useState<ParamValues<C>>(buildParamsFromUrl);
-
-    // ---- Build diff ----
-    //
-    // Walk all keys and include only those whose current value differs
-    // from the config default, using JSON.stringify for structural equality
-    // so arrays and objects compare by value not reference.
-    //
-    // This is useful for the caller to build a URLSearchParams externally:
-    //   const sp = new URLSearchParams();
-    //   for (const [k, v] of Object.entries(diff)) sp.set(k, encode(v));
-    //   navigate({ search: sp.toString() });
-    //
-    // Search terms: "structural equality JavaScript", "JSON.stringify comparison",
-    // "TypeScript Partial construction"
+    useEffect(() => {
+      setUpdatedURLSearchParams(extractSearchParams(urlInput));
+    }, [urlInput]);
+    
+    const params = {} as ParamValues<C>;
     const diff = {} as ParamDiff<C>;
 
+    const getDecoded = <K extends keyof C>(k: K, raw: string): InferParamTypes<C>[K] =>
+      config[k].decode(raw) as InferParamTypes<C>[K];
+
+    const getDefault = <K extends keyof C>(k: K): InferParamTypes<C>[K] => config[k].default as InferParamTypes<C>[K];
+
     for (const key in config) {
-      const current = state[key];
-      const isDefault = JSON.stringify(current) === JSON.stringify(config[key].default);
+      const raw = updatedURLSearchParams.get(key);
+      const val = raw !== null ? getDecoded(key, raw) : getDefault(key);
+      params[key] = val;
+      
+      const isDefault = JSON.stringify(val) === JSON.stringify(config[key].default);
       if (!isDefault) {
-        (diff as Record<string, unknown>)[key] = current;
+        (diff as Record<string, unknown>)[key] = val;
       }
     }
 
-    // setParam updates a single key in local state using the functional
-    // updater form to avoid stale closure bugs.
-    // Null/undefined resets the key to its default value.
-    //
-    // Search terms: "React functional state updater", "stale closure React hooks"
+    // setParam creates and returns a new URLSearchParams with the single key updated.
+    // Null/undefined resets the key to its default value (deletes from URL).
     const setParam: SetParam<C> = (key, value) => {
-      setState((prev) => ({
-        ...prev,
-        [key]: value ?? config[key as string].default,
-      }));
-    };
-
-    // setParams updates multiple keys at once in a single setState call,
-    // avoiding multiple re-renders for batched updates.
-    // Search terms: "React batched state updates", "Object.entries TypeScript"
-    const setParams: SetParams<C> = (updates) => {
-      setState((prev) => {
-        const next = { ...prev };
-        for (const key in updates) {
-          const value = updates[key];
-          (next as Record<string, unknown>)[key] = value ?? config[key].default;
+      const next = new URLSearchParams(updatedURLSearchParams);
+      if (value === null || value === undefined) {
+        next.delete(key as string);
+      } else {
+        const isDefault = JSON.stringify(value) === JSON.stringify(config[key as string].default);
+        if (isDefault) {
+          next.delete(key as string);
+        } else {
+          next.set(key as string, config[key as string].encode(value));
         }
-        return next;
-      });
+      }
+      setUpdatedURLSearchParams(next);
+      return next;
     };
 
-    return { params: state, diff, setParam, setParams };
+    // setParams creates and returns a new URLSearchParams with multiple keys updated.
+    const setParams: SetParams<C> = (updates) => {
+      const next = new URLSearchParams(updatedURLSearchParams);
+      for (const key in updates) {
+        const value = updates[key];
+        if (value === null || value === undefined) {
+          next.delete(key);
+        } else {
+          const isDefault = JSON.stringify(value) === JSON.stringify(config[key].default);
+          if (isDefault) {
+            next.delete(key);
+          } else {
+            next.set(key, config[key].encode(value));
+          }
+        }
+      }
+      setUpdatedURLSearchParams(next);
+      return next;
+    };
+
+    return { params, diff, setParam, setParams, updatedURLSearchParams };
   };
 }

@@ -24,7 +24,10 @@ pnpm-lock.yaml
 !/vite-project/src/pages/useUrlGet.ts
 !/vite-project/src/pages/UrlSerialiser.tsx
 !/vite-project/src/pages/createUseQueryParams.tsx
-
+!/vite-project/src/pages/params/
+/vite-project/src/pages/params/*
+!/vite-project/src/pages/params/ModURLSearchParamsComponent.tsx
+!/vite-project/src/pages/params/modURLSearchParams.ts
 
 
 

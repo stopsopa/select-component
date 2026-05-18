@@ -4,6 +4,7 @@ import CompositeSelectDemoAttr from './pages/CompositeSelectDemoAttr'
 import OptionsSectionDemo from './pages/OptionsSectionDemo'
 import SelectedSectionDemo from './pages/SelectedSectionDemo'
 import UrlSerialiser from './pages/UrlSerialiser'
+import ModURLSearchParamsComponent from './pages/params/ModURLSearchParamsComponent'
 import 'composite-select/floating-label-pattern.css'
 import './App.css'
 
@@ -29,6 +30,9 @@ function Home() {
           <li>
             <Link to="/url-serialiser" className="gcp-css">UrlSerialiser Demo</Link>
           </li>
+          <li>
+            <Link to="/url-serialiser-mod" className="gcp-css">UrlSerialiser Mod Demo</Link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -44,6 +48,7 @@ function App() {
       <Route path="/options-section-demo" element={<OptionsSectionDemo />} />
       <Route path="/selected-section-demo" element={<SelectedSectionDemo />} />
       <Route path="/url-serialiser" element={<UrlSerialiser />} />
+      <Route path="/url-serialiser-mod" element={<ModURLSearchParamsComponent />} />
     </Routes>
   )
 }

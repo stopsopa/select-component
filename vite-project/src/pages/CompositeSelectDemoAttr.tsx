@@ -205,14 +205,14 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     })
     .filter(Boolean) as CustomItem[];
 
-  console.log("render", {
-    allScientists,
-    selectedItems,
-  });
+  // console.log("render", {
+  //   allScientists,
+  //   selectedItems,
+  // });
 
   const setSelectedItems = (items: CustomItem[]) => {
     const list = items.map((i) => String(i.id));
-    console.log("list", list);
+    // console.log("list", list);
     setSelectedIds(list);
   };
 
@@ -274,7 +274,6 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     setOnDeleteCount((prev) => prev + 1);
     const newSelected = selectedItems.filter((i) => String(i.id) !== String(id));
     setSelectedItems(newSelected);
-    updateCheckmarks(newSelected);
   };
 
   const debouncedHandleChangeValue = (detail: {
@@ -404,44 +403,25 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   };
 
   const handleSelectedItemsChanged = (_, reason) => {
-    console.log('r'.repeat(1000), `>${reason}<`)
+    return;
+    if (reason === "setOptions" || reason === "setSelected") {
+      return;
+    }
+    console.log("r".repeat(1000), `>${reason}<`);
     setHandleSelectedItemsChangedCount((prev) => prev + 1);
     const mgr = getManager();
     if (!mgr) return;
-
-    // const disabled = mgr.selected.getDisabled();
-    // if (selectedDisabled !== disabled) setSelectedDisabled(disabled);
-
-    // const loading = mgr.selected.getLoading();
-    // if (selectedLoading !== loading) setSelectedLoading(loading);
-
-    // const error = mgr.selected.getError();
-    // if (selectedError !== error) setSelectedError(error);
-
-    // const showInput = mgr.selected.getShowInput();
-    // if (selectedShowInput !== showInput) setSelectedShowInput(showInput);
-
-    // const showDelete = mgr.selected.getShowDelete();
-    // if (showDeleteSel !== showDelete) setShowDeleteSel(showDelete);
   };
 
-  const handleOptionsChanged = (_ , reason) => {
-    console.log('r'.repeat(1000), `>${reason}<`)
+  const handleOptionsChanged = (_, reason) => {
+    return;
+    if (reason === "setOptions" || reason === "setSelected") {
+      return;
+    }
+    console.log("r".repeat(1000), `>${reason}<`);
     setHandleOptionsChangedCount((prev) => prev + 1);
     const mgr = getManager();
     if (!mgr) return;
-
-    // const showFooter = mgr.options.getShowFooter();
-    // if (optionsShowFooter !== showFooter) setOptionsShowFooter(showFooter);
-
-    // const showFilter = mgr.options.getShowFilter();
-    // if (optionsShowFilter !== showFilter) setOptionsShowFilter(showFilter);
-
-    // const disabled = mgr.options.getDisabled();
-    // if (optionsDisabled !== disabled) setOptionsDisabled(disabled);
-
-    // const loading = mgr.options.getLoading();
-    // if (optionsLoading !== loading) setOptionsLoading(loading);
   };
 
   const handleEmptyListChange = (e: React.ChangeEvent<HTMLInputElement>) => {
