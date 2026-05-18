@@ -125,31 +125,26 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`s-${id}`, []);
   const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`emp-${id}`, false);
 
-  const [selectedValue, setSelectedValue] = predefinedUseUrlString(`v-${id}`, "");
-  const [selectedLabel, setSelectedLabel] = predefinedUseUrlString(`l-${id}`, "");
-  const [selectedDisabled, setSelectedDisabledRaw] = predefinedUseUrlBoolean(`d-${id}`, false);
-  const [selectedError, setSelectedError] = predefinedUseUrlBoolean(`e-${id}`, false);
-  const [selectedLoading, setSelectedLoading] = predefinedUseUrlBoolean(`lo-${id}`, false);
-  const [selectedShowInput, setSelectedShowInput] = predefinedUseUrlBoolean(`si-${id}`, true);
+  const [selectedValue, setSelectedValue] = predefinedUseUrlString(`sv-${id}`, "default value");
+  const [selectedLabel, setSelectedLabel] = predefinedUseUrlString(`sla-${id}`, "selected label");
+  const [selectedDisabled, setSelectedDisabled] = predefinedUseUrlBoolean(`sd-${id}`, false);
+  const [selectedError, setSelectedError] = predefinedUseUrlBoolean(`se-${id}`, false);
+  const [selectedLoading, setSelectedLoading] = predefinedUseUrlBoolean(`slo-${id}`, false);
+  const [selectedShowInput, setSelectedShowInput] = predefinedUseUrlBoolean(`ssi-${id}`, true);
 
   const [optionsDisabled, setOptionsDisabled] = predefinedUseUrlBoolean(`od-${id}`, false);
   const [optionsLoading, setOptionsLoading] = predefinedUseUrlBoolean(`ol-${id}`, false);
-  const [optionsShowFilter, setOptionsShowFilter] = predefinedUseUrlBoolean(`sf-${id}`, false);
-  const [optionsShowFooter, setOptionsShowFooter] = predefinedUseUrlBoolean(`sfo-${id}`, false);
-  const [optionsPosition, setOptionsPosition] = predefinedUseUrlString(`pos-${id}`, "cover-bottom");
-  const [optionsLabel, setOptionsLabel] = predefinedUseUrlString(`olb-${id}`, "");
+  const [optionsShowFilter, setOptionsShowFilter] = predefinedUseUrlBoolean(`sf-${id}`, true);
+  const [optionsShowFooter, setOptionsShowFooter] = predefinedUseUrlBoolean(`sfo-${id}`, true);
+  const [optionsPosition, setOptionsPosition] = predefinedUseUrlString(`op-${id}`, "cover-bottom");
+  const [optionsLabel, setOptionsLabel] = predefinedUseUrlString(`ola-${id}`, "options label");
 
-  const [activeTemplates, setActiveTemplates] = predefinedUseUrlStringArray(`tpl-${id}`, []);
+  const [activeTemplates, setActiveTemplates] = predefinedUseUrlStringArray(`t-${id}`, []);
   const customRenderItem = activeTemplates.includes("item");
   const customRenderList = activeTemplates.includes("list");
 
   const [optionsRender, setOptionsRender] = predefinedUseUrlString(`or-${id}`, "default");
   const [optionsCustomEmpty, setOptionsCustomEmpty] = predefinedUseUrlBoolean(`oce-${id}`, false);
-
-  function setSelectedDisabled(value: boolean) {
-    console.log("setSelectedDisabled", value);
-    setSelectedDisabledRaw(value);
-  }
 
   // Derive selectedItems by rehydrating the selectedIds (scientists and template items)
   const selectedItems = useMemo(() => {
@@ -196,44 +191,57 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     return { search: mgr.options.getValue() || "", popupInput: true };
   }
 
-  const updateCheckmarks = (mgr: CompositeManager<CustomItem>, currentSelected: CustomItem[]) => {
+  const updateCheckmarks = (currentSelected: CustomItem[]) => {
     setOptions(
       (prevOptions) =>
         markSelectedByIds(prevOptions, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[],
     );
   };
 
-  const fetchOptions = async (
-    mgr: CompositeManager<CustomItem>,
-    search: string,
-    currentSelected: CustomItem[] = selectedItems,
-    overrideEmptyList?: boolean,
-  ) => {
-    setOptionsLoading(true);
-    setOptionsDisabled(true);
-    setSelectedLoading(true);
-    setSelectedDisabled(true);
+  const fetchOptions = useCallback(
+    async (
+      mgr: CompositeManager<CustomItem>,
+      search: string,
+      currentSelected: CustomItem[] = selectedItems,
+      overrideEmptyList?: boolean,
+    ) => {
+      setOptionsLoading(true);
+      setOptionsDisabled(true);
+      setSelectedLoading(true);
+      setSelectedDisabled(true);
 
-    await delay(500);
+      await delay(500);
 
-    const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
-    const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
-    const opts = markSelectedByIds(found, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[];
-    setOptions(sortById(opts) as CustomItem[]);
+      const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
+      const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+      const opts = markSelectedByIds(found, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[];
+      setOptions(sortById(opts) as CustomItem[]);
 
-    setOptionsDisabled(false);
-    setOptionsLoading(false);
-    setSelectedDisabled(false);
-    setSelectedLoading(false);
-  };
+      setOptionsDisabled(false);
+      setOptionsLoading(false);
+      setSelectedDisabled(false);
+      setSelectedLoading(false);
+    },
+    [
+      emptyList,
+      selectedItems,
+      setOptionsDisabled,
+      setOptionsLoading,
+      setSelectedDisabled,
+      setSelectedLoading,
+      setOptions,
+    ],
+  );
 
-  const handleEmptyListChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEmptyListChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     setEmptyList(checked);
     const mgr = getManager();
     if (mgr) {
       const { search } = localDetermineSearch(mgr);
-      await fetchOptions(mgr, search, selectedItems, checked);
+      const found = checked ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+      const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
+      setOptions(sortById(opts) as CustomItem[]);
     }
   };
 
@@ -241,14 +249,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   useEffect(() => {
     const mgr = getManager();
     if (mgr) {
-      (window as any).mgr = mgr;
+      (window as unknown as Record<string, unknown>).mgr = mgr;
 
       const { search } = localDetermineSearch(mgr);
       if (options.length === 0 && !emptyList) {
         // Initial synchronous load matching the vanilla HTML template
         const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
         const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
-        setOptions(sortById(opts) as CustomItem[]);
+        Promise.resolve().then(() => {
+          setOptions(sortById(opts) as CustomItem[]);
+        });
       }
     }
   }, []);
@@ -280,6 +290,10 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       mgr.selected.setError(selectedError);
       mgr.selected.setLoading(selectedLoading);
       mgr.selected.setShowInput(selectedShowInput);
+
+      mgr.selected.setSelected(selectedItems);
+      mgr.options.setOptions(options);
+      mgr.options.setMaxHeight("300px");
 
       mgr.options.setDisabled(optionsDisabled);
       mgr.options.setLoading(optionsLoading);
@@ -406,6 +420,8 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     selectedError,
     selectedLoading,
     selectedShowInput,
+    selectedItems,
+    options,
     optionsDisabled,
     optionsLoading,
     optionsShowFilter,
@@ -426,7 +442,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
     // Create debounced versions of the search input change handlers.
     // They will wait 500ms before calling the simulated async fetchOptions.
-    const debouncedOnInputChangeSelected = debounce(async (e: any) => {
+    const debouncedOnInputChangeSelected = debounce(async (e: Event) => {
       const val = (e.target as HTMLInputElement).value;
       setSelectedValue(val);
       setOnChangeCount((prev) => prev + 1);
@@ -443,7 +459,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           const newSelected = [...selectedItems];
           newSelected.pop();
           setSelectedItems(newSelected);
-          updateCheckmarks(mgr, newSelected);
+          updateCheckmarks(newSelected);
           return;
         }
       }
@@ -453,7 +469,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       mgr.selected.setFocus();
     }, 500);
 
-    const debouncedOnInputChangeOptions = debounce(async (e: any) => {
+    const debouncedOnInputChangeOptions = debounce(async (e: Event) => {
       setOnInputChangeCount((prev) => prev + 1);
       const search = (e.target as HTMLInputElement).value || "";
       await fetchOptions(mgr, search, selectedItems);
@@ -480,7 +496,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         setOnDeleteCount((prev) => prev + 1);
         const newSelected = selectedItems.filter((i) => String(i.id) !== String(id));
         setSelectedItems(newSelected);
-        updateCheckmarks(mgr, newSelected);
+        updateCheckmarks(newSelected);
       }),
     );
 
@@ -542,7 +558,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     );
 
     return () => unsubs.forEach((unsub) => unsub());
-  }, [selectedItems, options, emptyList]);
+  }, [selectedItems, options, emptyList, fetchOptions, setSelectedItems, setSelectedValue, setOptions]);
 
   const addTemplate = (color: string, img: string) => {
     const newItem: CustomItem = {
@@ -581,9 +597,6 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       <div style={{ padding: "20px", background: "#fafafa", border: "1px dashed #ccc", marginBottom: "20px" }}>
         <CompositeSelect<CustomItem>
           ref={csRef}
-          selected-selected={selectedItems}
-          options-options={options}
-          options-max-height="300px"
         ></CompositeSelect>
       </div>
 
@@ -632,20 +645,21 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       <div style={{ marginBottom: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button
           className="gcp-css"
-          onClick={() => setActiveTemplates((prev) => [...new Set([...prev, "item"])])}
+          onClick={() =>
+            setActiveTemplates(activeTemplates.includes("item") ? activeTemplates : [...activeTemplates, "item"])
+          }
         >
           Set Custom Render Item
         </button>
         <button
           className="gcp-css"
-          onClick={() => setActiveTemplates((prev) => [...new Set([...prev, "list"])])}
+          onClick={() =>
+            setActiveTemplates(activeTemplates.includes("list") ? activeTemplates : [...activeTemplates, "list"])
+          }
         >
           Set Custom Render List
         </button>
-        <button
-          className="gcp-css"
-          onClick={() => setActiveTemplates([])}
-        >
+        <button className="gcp-css" onClick={() => setActiveTemplates([])}>
           Reset Templates
         </button>
       </div>
@@ -681,25 +695,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           <span style={{ minWidth: "120px" }}>
             🎨 <strong>Render</strong>:
           </span>
-          <button
-            className="gcp-css"
-            onClick={() => setOptionsRender("custom")}
-          >
+          <button className="gcp-css" onClick={() => setOptionsRender("custom")}>
             Set Custom Render
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => setOptionsRender("string")}
-          >
+          <button className="gcp-css" onClick={() => setOptionsRender("string")}>
             Set String Render
           </button>
           <button className="gcp-css" onClick={() => setOptionsRender("default")}>
             Set Default Render
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => setOptionsCustomEmpty(true)}
-          >
+          <button className="gcp-css" onClick={() => setOptionsCustomEmpty(true)}>
             Set Custom Empty
           </button>
           <button className="gcp-css" onClick={() => setOptionsCustomEmpty(false)}>
