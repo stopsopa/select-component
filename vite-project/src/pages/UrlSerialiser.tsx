@@ -30,42 +30,42 @@ export default function UrlSerialiser() {
     // create style element and put some styles
     const style = document.createElement("style");
     style.innerHTML = `
-            .url-ser-container {
-                padding: 20px;
-            }
-            .url-ser-flex {
-                display: flex;
-                gap: 40px;
-            }
-            .url-ser-form {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-                flex: 1;
-                max-width: 400px;
-            }
-            .url-ser-input {
-                width: 100%;
-                padding: 5px;
-            }
-            .url-ser-select {
-                width: 100%;
-                padding: 5px;
-                height: 100px;
-            }
-            .url-ser-label-margin {
-                margin-right: 10px;
-            }
-            .url-ser-dump-container {
-                flex: 1;
-                padding: 20px;
-                background: #f5f5f5;
-                border-radius: 8px;
-            }
-            .url-ser-pre {
-                white-space: pre-wrap;
-            }
-        `;
+    .url-ser-container {
+        padding: 20px;
+    }
+    .url-ser-flex {
+        display: flex;
+        gap: 40px;
+    }
+    .url-ser-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex: 1;
+        max-width: 400px;
+    }
+    .url-ser-input {
+        width: 100%;
+        padding: 5px;
+    }
+    .url-ser-select {
+        width: 100%;
+        padding: 5px;
+        height: 100px;
+    }
+    .url-ser-label-margin {
+        margin-right: 10px;
+    }
+    .url-ser-dump-container {
+        flex: 1;
+        padding: 20px;
+        background: #f5f5f5;
+        border-radius: 8px;
+    }
+    .url-ser-pre {
+        white-space: pre-wrap;
+    }
+`;
     document.head.appendChild(style);
 
     return () => {
