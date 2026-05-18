@@ -131,12 +131,12 @@ export default function UrlSerialiser() {
   );
 }
 
-function Single({ i, location }: any) {
+function Single({ i, location }) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(location.search, i);
 
-  // setParam("text", 'nevwalue');
+  // setParam("multiSelect", []);
 
-  // setParams('radio', 'test');
+  // setParam("radio", 'test');
 
   return (
     <div className="url-ser-container">
@@ -203,7 +203,7 @@ function Single({ i, location }: any) {
                 type="checkbox"
                 checked={params.checkboxA}
                 onChange={(e) => setParam("checkboxA", e.target.checked)}
-              />{" "}
+              />
               Checkbox A
             </label>
             <label>
