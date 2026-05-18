@@ -5,6 +5,14 @@ import { useLocation, useSearchParams } from "react-router-dom";
 // import { createUseQueryParams } from "./createUseQueryParams.tsx";
 import modURLSearchParams from "./modURLSearchParams.ts";
 
+// type RadioType = "option1" | "option2" | "option3";
+
+const multiOptions = ["item1", "item2", "item3", "item4"] as const;
+
+type SingleOption = "item1" | "item2" | "item3" | "item4";
+
+type MultiSelectOptionsArray = SingleOption[];
+
 const useQueryParams = modURLSearchParams(
   {
     text: {
@@ -20,9 +28,9 @@ const useQueryParams = modURLSearchParams(
       decode: (value: string) => value,
     },
     multiSelect: {
-      default: [] as string[],
+      default: [] as MultiSelectOptionsArray,
       getParam: "m",
-      encode: (value: string[]) => JSON.stringify(value),
+      encode: (value: MultiSelectOptionsArray) => JSON.stringify(value),
       decode: (value: string) => {
         try {
           return JSON.parse(value);
@@ -134,10 +142,6 @@ export default function UrlSerialiser() {
 function Single({ i, location }) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(location.search, i);
 
-  // setParam("multiSelect", []);
-
-  // setParam("radio", 'test');
-
   return (
     <div className="url-ser-container">
       <div className="url-ser-flex">
@@ -182,15 +186,18 @@ function Single({ i, location }) {
               onChange={(e) =>
                 setParam(
                   "multiSelect",
-                  Array.from(e.target.selectedOptions, (option) => option.value),
+                  Array.from(e.target.selectedOptions, (option) => option.value as SingleOption),
                 )
               }
               className="url-ser-select"
             >
-              <option value="item1">Item 1</option>
-              <option value="item2">Item 2</option>
-              <option value="item3">Item 3</option>
-              <option value="item4">Item 4</option>
+              {multiOptions.map((l) => {
+                return (
+                  <option key={l} value={l}>
+                    {l}
+                  </option>
+                );
+              })}
             </select>
           </label>
 
