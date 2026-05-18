@@ -146,6 +146,15 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [optionsRender, setOptionsRender] = predefinedUseUrlString(`or-${id}`, "default");
   const [optionsCustomEmpty, setOptionsCustomEmpty] = predefinedUseUrlBoolean(`oce-${id}`, false);
 
+  const [optionsMaxHeight, setOptionsMaxHeight] = predefinedUseUrlString(`omh-${id}`, "300px");
+
+  const stepMaxHeight = (delta: number) => {
+    let current = parseInt(optionsMaxHeight || "") || 0;
+    current += delta;
+    if (current < 0) current = 0;
+    setOptionsMaxHeight(current + "px");
+  };
+
   // Derive selectedItems by rehydrating the selectedIds (scientists and template items)
   const selectedItems = useMemo(() => {
     const allScientists = searchNames("", Infinity);
@@ -293,7 +302,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
       mgr.selected.setSelected(selectedItems);
       mgr.options.setOptions(options);
-      mgr.options.setMaxHeight("300px");
+      mgr.options.setMaxHeight(optionsMaxHeight || "");
 
       mgr.options.setDisabled(optionsDisabled);
       mgr.options.setLoading(optionsLoading);
@@ -432,6 +441,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     customRenderList,
     optionsRender,
     optionsCustomEmpty,
+    optionsMaxHeight,
   ]);
 
   useEffect(() => {
@@ -688,6 +698,37 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
                 <label htmlFor={`empty-list-${id}`}>Empty list</label>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center", width: "100%" }}>
+          <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+            <span style={{ minWidth: "120px" }}>📏 <strong>Max Height</strong>:</span>
+            <div style={{ display: "flex", gap: "2px" }}>
+              <button className="gcp-css white" onClick={() => stepMaxHeight(-10)} style={{ padding: "0 8px", minWidth: "auto" }}>▼</button>
+              <div className="gcp-css input-wrapper" style={{ maxWidth: "150px", marginBottom: 0 }}>
+                <input
+                  type="text"
+                  id={`maxheight-input-${id}`}
+                  placeholder=" "
+                  value={optionsMaxHeight || ""}
+                  onChange={(e) => setOptionsMaxHeight(e.target.value)}
+                />
+                <label htmlFor={`maxheight-input-${id}`}>Max height</label>
+              </div>
+              <button className="gcp-css white" onClick={() => stepMaxHeight(10)} style={{ padding: "0 8px", minWidth: "auto" }}>▲</button>
+            </div>
+            <button className="gcp-css" onClick={() => setOptionsMaxHeight(optionsMaxHeight || "")}>Set</button>
+            {["200px", "300px", "400px", "600px"].map((preset) => (
+              <button
+                key={preset}
+                className="gcp-css white"
+                onClick={() => setOptionsMaxHeight(preset)}
+              >
+                {preset}
+              </button>
+            ))}
+            <button className="gcp-css white" onClick={() => setOptionsMaxHeight("")}>Reset</button>
           </div>
         </div>
 
