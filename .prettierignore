@@ -22,6 +22,8 @@ pnpm-lock.yaml
 !/vite-project/src/pages/OptionsSectionDemo.tsx
 !/vite-project/index.html
 !/vite-project/src/pages/useUrlGet.ts
+!/vite-project/src/pages/UrlSerialiser.tsx
+!/vite-project/src/pages/createUseQueryParams.tsx
 
 
 
