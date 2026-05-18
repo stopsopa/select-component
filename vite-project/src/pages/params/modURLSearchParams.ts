@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 
-import { normalizeSearchParams, sortSearchParamsByKeyThenValue } from "./toolsURLSearchParams.ts";
+import { mergeURLSearchParams, normalizeSearchParams, sortSearchParamsByKeyThenValue } from "./toolsURLSearchParams.ts";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -45,9 +45,12 @@ export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>
       [ctx],
     );
 
-    // Derive the initial URLSearchParams once from the input
+    // Derive the initial URLSearchParams once from the input, filtered by our allowed keys
     const initial = useMemo(() => {
-      return typeof search === "string" ? new URLSearchParams(search) : search;
+      const allowedKeys = Object.values(config).map((def) => applyKey((def as ParamDef<unknown>).getParam));
+      const normalized = typeof search === "string" ? new URLSearchParams(search) : search;
+      return mergeURLSearchParams(new URLSearchParams(), allowedKeys, normalized);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentionally empty — treat `search` as an initial value
 
     const [paramsState, setParamsState] = useState(initial);

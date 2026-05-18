@@ -140,6 +140,8 @@ export default function UrlSerialiser() {
 function Single({ i, location }) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(location.search, i);
 
+  console.log("render", i);
+
   return (
     <div className="url-ser-container">
       <div className="url-ser-flex">
