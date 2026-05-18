@@ -49,7 +49,7 @@ export default function modURLSearchParams<C extends ParamConfig, Opts = any>(
 
     // Compute the parsed params whenever the URLSearchParams change
     const params = useMemo(() => {
-      const result: any = {};
+      const result: Record<string, unknown> = {};
       for (const [key, def] of Object.entries(config)) {
         const d = def as unknown as ParamDef<unknown>;
         const raw = paramsState.get(applyKey(d.getParam));
