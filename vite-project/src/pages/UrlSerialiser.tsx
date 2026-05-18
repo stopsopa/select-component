@@ -18,6 +18,14 @@ export default function UrlSerialiser() {
   const [checkboxA, setCheckboxA] = predefinedUseUrlBoolean("ca", false);
   const [checkboxB, setCheckboxB] = predefinedUseUrlBoolean("cb", true);
 
+  console.log('render', {
+    text,
+    radio,
+    multiSelect,
+    checkboxA,
+    checkboxB,
+  })
+
   useEffect(() => {
     // create style element and put some styles
     const style = document.createElement("style");

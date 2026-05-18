@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { CompositeSelect } from "composite-select/composite-select/react";
 import type { CompositeManager } from "composite-select";
-import { predefinedUseUrlStringArray, predefinedUseUrlBoolean } from "./useUrlGet";
+import { predefinedUseUrlString, predefinedUseUrlStringArray, predefinedUseUrlBoolean } from "./useUrlGet";
 
 import { CompositeSelect as CompositeSelectElement } from "composite-select/composite-select/composite-select";
 
@@ -32,6 +32,7 @@ import {
   togglePresenceOnTheList,
   markSelectedByIds,
 } from "composite-select/composite-select/helpers";
+import debounce from "composite-select/composite-select/debounce";
 
 import { searchNames as searchNamesOriginal } from "./namesSource";
 
@@ -52,8 +53,6 @@ const imgDataJson: Record<string, string[]> = {
   "#0f9d58": ["chatgpt.png", "claude.png", "gemini.png", "perplexity.png"],
   "#ff9800": ["tools.png", "timeanddate.png", "t3chat.png", "ai.png"],
 };
-
-let globalIdCounter = 1;
 
 export default function CompositeSelectDemo() {
   const [instances, setInstances] = useState<number[]>([]);
@@ -110,9 +109,6 @@ export default function CompositeSelectDemo() {
 function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const csRef = useRef<CompositeSelectElement<CustomItem>>(null);
 
-  const [, setRenderCount] = useState(0);
-  const forceRender = () => setRenderCount((x) => x + 1);
-
   const [onChangeCount, setOnChangeCount] = useState(0);
   const [onFocusCount, setOnFocusCount] = useState(0);
   const [onDeleteCount, setOnDeleteCount] = useState(0);
@@ -123,10 +119,30 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [onItemPickCount, setOnItemPickCount] = useState(0);
   const [onCloseCount, setOnCloseCount] = useState(0);
 
+  const [options, setOptions] = useState<CustomItem[]>([]);
+
   // Local arrays and selections managed via URL (storing only selected ids)
   const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`s-${id}`, []);
-  const [options, setOptions] = useState<CustomItem[]>([]);
-  const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`empty-${id}`, false);
+  const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`emp-${id}`, false);
+
+  const [selectedValue, setSelectedValue] = predefinedUseUrlString(`v-${id}`, "");
+  const [selectedLabel, setSelectedLabel] = predefinedUseUrlString(`l-${id}`, "");
+  const [selectedDisabled, setSelectedDisabledRaw] = predefinedUseUrlBoolean(`d-${id}`, false);
+  const [selectedError, setSelectedError] = predefinedUseUrlBoolean(`e-${id}`, false);
+  const [selectedLoading, setSelectedLoading] = predefinedUseUrlBoolean(`lo-${id}`, false);
+  const [selectedShowInput, setSelectedShowInput] = predefinedUseUrlBoolean(`si-${id}`, true);
+
+  const [optionsDisabled, setOptionsDisabled] = predefinedUseUrlBoolean(`od-${id}`, false);
+  const [optionsLoading, setOptionsLoading] = predefinedUseUrlBoolean(`ol-${id}`, false);
+  const [optionsShowFilter, setOptionsShowFilter] = predefinedUseUrlBoolean(`sf-${id}`, false);
+  const [optionsShowFooter, setOptionsShowFooter] = predefinedUseUrlBoolean(`sfo-${id}`, false);
+  const [optionsPosition, setOptionsPosition] = predefinedUseUrlString(`pos-${id}`, "cover-bottom");
+  const [optionsLabel, setOptionsLabel] = predefinedUseUrlString(`olb-${id}`, "");
+
+  function setSelectedDisabled(value: boolean) {
+    console.log("setSelectedDisabled", value);
+    setSelectedDisabledRaw(value);
+  }
 
   // Derive selectedItems by rehydrating the selectedIds (scientists and template items)
   const selectedItems = useMemo(() => {
@@ -155,9 +171,12 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       .filter(Boolean) as CustomItem[];
   }, [selectedIds]);
 
-  const setSelectedItems = useCallback((items: CustomItem[]) => {
-    setSelectedIds(items.map((i) => String(i.id)));
-  }, [setSelectedIds]);
+  const setSelectedItems = useCallback(
+    (items: CustomItem[]) => {
+      setSelectedIds(items.map((i) => String(i.id)));
+    },
+    [setSelectedIds],
+  );
 
   const getManager = () => csRef.current?.getManager();
 
@@ -173,10 +192,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const updateCheckmarks = (mgr: CompositeManager<CustomItem>, currentSelected: CustomItem[]) => {
     setOptions(
       (prevOptions) =>
-        markSelectedByIds(
-          prevOptions,
-          currentSelected.map((i) => i.id) as unknown as number[],
-        ) as CustomItem[],
+        markSelectedByIds(prevOptions, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[],
     );
   };
 
@@ -186,25 +202,22 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     currentSelected: CustomItem[] = selectedItems,
     overrideEmptyList?: boolean,
   ) => {
-    mgr.options.setLoading(true);
-    mgr.options.setDisabled(true);
-    mgr.selected.setLoading(true);
-    mgr.selected.setDisabled(true);
+    setOptionsLoading(true);
+    setOptionsDisabled(true);
+    setSelectedLoading(true);
+    setSelectedDisabled(true);
 
     await delay(500);
 
     const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
     const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
-    const opts = markSelectedByIds(
-      found,
-      currentSelected.map((i) => i.id) as unknown as number[],
-    ) as CustomItem[];
+    const opts = markSelectedByIds(found, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[];
     setOptions(sortById(opts) as CustomItem[]);
 
-    mgr.options.setDisabled(false);
-    mgr.options.setLoading(false);
-    mgr.selected.setDisabled(false);
-    mgr.selected.setLoading(false);
+    setOptionsDisabled(false);
+    setOptionsLoading(false);
+    setSelectedDisabled(false);
+    setSelectedLoading(false);
   };
 
   const handleEmptyListChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -217,49 +230,110 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     }
   };
 
+  // This useEffect runs once on component mount to trigger the initial search/fetch of options if needed.
   useEffect(() => {
     const mgr = getManager();
     if (mgr) {
+      (window as any).mgr = mgr;
+
       const { search } = localDetermineSearch(mgr);
       if (options.length === 0 && !emptyList) {
-        fetchOptions(mgr, search, selectedItems);
+        // Initial synchronous load matching the vanilla HTML template
+        const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+        const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
+        setOptions(sortById(opts) as CustomItem[]);
       }
     }
   }, []);
 
   useEffect(() => {
     const mgr = getManager();
-    if (!mgr) return;
+    if (mgr) {
+      console.log("useEffect", {
+        selectedValue,
+        selectedLabel,
+        selectedDisabled,
+        selectedError,
+        selectedLoading,
+        selectedShowInput,
+        optionsDisabled,
+        optionsLoading,
+        optionsShowFilter,
+        optionsShowFooter,
+        optionsPosition,
+        optionsLabel,
+      });
+      mgr.selected.setValue(selectedValue, false);
+      mgr.selected.setLabel(selectedLabel);
+      mgr.selected.setDisabled(selectedDisabled);
+      mgr.selected.setError(selectedError);
+      mgr.selected.setLoading(selectedLoading);
+      mgr.selected.setShowInput(selectedShowInput);
 
-    mgr.selected.propOptions.onComponentChange = () => {};
-    mgr.options.propOptions.onComponentChange = () => {};
+      mgr.options.setDisabled(optionsDisabled);
+      mgr.options.setLoading(optionsLoading);
+      mgr.options.setShowFilter(optionsShowFilter);
+      mgr.options.setShowFooter(optionsShowFooter);
+      mgr.container.setPosition(optionsPosition as PositionType);
+      mgr.options.setLabel(optionsLabel);
+    }
+  }, [
+    selectedValue,
+    selectedLabel,
+    selectedDisabled,
+    selectedError,
+    selectedLoading,
+    selectedShowInput,
+    optionsDisabled,
+    optionsLoading,
+    optionsShowFilter,
+    optionsShowFooter,
+    optionsPosition,
+    optionsLabel,
+  ]);
+
+  useEffect(() => {
+    const mgr = getManager();
+    if (!mgr) return;
 
     const unsubs: (() => void)[] = [];
 
-    unsubs.push(
-      mgr.selected.getSubscriber().bind("onInputChange", async (e) => {
-        const val = (e.target as HTMLInputElement).value;
-        setOnChangeCount((prev) => prev + 1);
+    // Create debounced versions of the search input change handlers.
+    // They will wait 500ms before calling the simulated async fetchOptions.
+    const debouncedOnInputChangeSelected = debounce(async (e: any) => {
+      const val = (e.target as HTMLInputElement).value;
+      setSelectedValue(val);
+      setOnChangeCount((prev) => prev + 1);
 
-        const { search, popupInput } = localDetermineSearch(mgr);
+      const { search, popupInput } = localDetermineSearch(mgr);
 
-        if (!popupInput && (e as KeyboardEvent).type === "keydown") {
-          const key = (e as KeyboardEvent).key;
-          if (key === "Backspace" && val === "" && selectedItems.length > 0) {
-            const newSelected = [...selectedItems];
-            newSelected.pop();
-            setSelectedItems(newSelected);
-            updateCheckmarks(mgr, newSelected);
-            return;
-          }
+      if (popupInput === true) {
+        return;
+      }
+
+      if ((e as KeyboardEvent).type === "keydown") {
+        const key = (e as KeyboardEvent).key;
+        if (key === "Backspace" && val === "" && selectedItems.length > 0) {
+          const newSelected = [...selectedItems];
+          newSelected.pop();
+          setSelectedItems(newSelected);
+          updateCheckmarks(mgr, newSelected);
+          return;
         }
+      }
 
-        if (!popupInput) mgr.options.setValue(search);
-        await fetchOptions(mgr, search, selectedItems);
+      mgr.options.setValue(search);
+      await fetchOptions(mgr, search, selectedItems);
+      mgr.selected.setFocus();
+    }, 500);
 
-        if (!popupInput) mgr.selected.setFocus();
-      }),
-    );
+    const debouncedOnInputChangeOptions = debounce(async (e: any) => {
+      setOnInputChangeCount((prev) => prev + 1);
+      const search = (e.target as HTMLInputElement).value || "";
+      await fetchOptions(mgr, search, selectedItems);
+    }, 500);
+
+    unsubs.push(mgr.selected.getSubscriber().bind("onInputChange", debouncedOnInputChangeSelected));
 
     unsubs.push(
       mgr.selected.getSubscriber().bind("onFocus", () => {
@@ -289,17 +363,13 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         setOnClearCount((prev) => prev + 1);
         if (!confirm("Are you sure?")) return;
         setSelectedItems([]);
+        setSelectedValue("");
+        getManager()?.selected.setValue("");
         setOptions((prevOptions) => markSelectedByIds(prevOptions, []) as CustomItem[]);
       }),
     );
 
-    unsubs.push(
-      mgr.options.getSubscriber().bind("onInputChange", async (e) => {
-        setOnInputChangeCount((prev) => prev + 1);
-        const search = (e.target as HTMLInputElement).value || "";
-        await fetchOptions(mgr, search, selectedItems);
-      }),
-    );
+    unsubs.push(mgr.options.getSubscriber().bind("onInputChange", debouncedOnInputChangeOptions));
 
     unsubs.push(
       mgr.options.getSubscriber().bind("onOk", () => {
@@ -392,7 +462,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       </div>
 
       <div style={{ marginBottom: "15px", fontSize: "14px" }}>
-        <strong>Input Value:</strong>{" "}
+        <strong>Input Value:</strong>
         <pre
           style={{
             display: "inline",
@@ -403,16 +473,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
             maxHeight: "none",
           }}
         >
-          {getManager()?.selected.getValue() || "-"}
+          {selectedValue || "-"}
         </pre>
-        (onChange: <span style={{ fontWeight: "bold" }}>{onChangeCount}</span>, onFocus:{" "}
-        <span style={{ fontWeight: "bold" }}>{onFocusCount}</span>, onDelete:{" "}
-        <span style={{ fontWeight: "bold" }}>{onDeleteCount}</span>, onClear:{" "}
-        <span style={{ fontWeight: "bold" }}>{onClearCount}</span>, onInputChange:{" "}
-        <span style={{ fontWeight: "bold" }}>{onInputChangeCount}</span>, onOk:{" "}
-        <span style={{ fontWeight: "bold" }}>{onOkCount}</span>, onCancel:{" "}
-        <span style={{ fontWeight: "bold" }}>{onCancelCount}</span>, onItemPick:{" "}
-        <span style={{ fontWeight: "bold" }}>{onItemPickCount}</span>, onClose:{" "}
+        (onChange: <span style={{ fontWeight: "bold" }}>{onChangeCount}</span>, onFocus:
+        <span style={{ fontWeight: "bold" }}>{onFocusCount}</span>, onDelete:
+        <span style={{ fontWeight: "bold" }}>{onDeleteCount}</span>, onClear:
+        <span style={{ fontWeight: "bold" }}>{onClearCount}</span>, onInputChange:
+        <span style={{ fontWeight: "bold" }}>{onInputChangeCount}</span>, onOk:
+        <span style={{ fontWeight: "bold" }}>{onOkCount}</span>, onCancel:
+        <span style={{ fontWeight: "bold" }}>{onCancelCount}</span>, onItemPick:
+        <span style={{ fontWeight: "bold" }}>{onItemPickCount}</span>, onClose:
         <span style={{ fontWeight: "bold" }}>{onCloseCount}</span>)
       </div>
 
@@ -476,7 +546,10 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <button
           className="gcp-css"
           onClick={() => {
-            getManager()?.selected.setRenderList(function (selected: CustomItem[], defaultRenderList: (list: CustomItem[]) => HTMLElement[]) {
+            getManager()?.selected.setRenderList(function (
+              selected: CustomItem[],
+              defaultRenderList: (list: CustomItem[]) => HTMLElement[],
+            ) {
               const elements = defaultRenderList(selected);
               const groups: HTMLElement[] = [];
               for (let i = 0; i < elements.length; i += 3) {
@@ -620,123 +693,65 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <div style={{ flex: 1, minWidth: "300px", borderRight: "1px solid #eee", paddingRight: "20px" }}>
           <h4 style={{ marginTop: 0 }}>SelectedSection (Top)</h4>
           <label>
-            <input
-              type="checkbox"
-              checked={getManager()?.selected.getDisabled() || false}
-              onChange={(e) => {
-                getManager()?.selected.setDisabled(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+            <input type="checkbox" checked={selectedDisabled} onChange={(e) => setSelectedDisabled(e.target.checked)} />
             Disabled
           </label>
           <br />
           <label>
-            <input
-              type="checkbox"
-              checked={getManager()?.selected.getLoading() || false}
-              onChange={(e) => {
-                getManager()?.selected.setLoading(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+            <input type="checkbox" checked={selectedLoading} onChange={(e) => setSelectedLoading(e.target.checked)} />
             Loading
           </label>
           <br />
           <label>
-            <input
-              type="checkbox"
-              checked={getManager()?.selected.getError() || false}
-              onChange={(e) => {
-                getManager()?.selected.setError(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
-            Error
+            <input type="checkbox" checked={selectedError} onChange={(e) => setSelectedError(e.target.checked)} /> Error
           </label>
           <br />
           <label>
             <input
               type="checkbox"
-              checked={getManager()?.selected.getShowInput() !== false}
-              onChange={(e) => {
-                getManager()?.selected.setShowInput(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+              checked={selectedShowInput}
+              onChange={(e) => setSelectedShowInput(e.target.checked)}
+            />
             Show Input
           </label>
           <br />
           <label>
-            Label:{" "}
-            <input
-              value={getManager()?.selected.getLabel() || ""}
-              onChange={(e) => {
-                getManager()?.selected.setLabel(e.target.value);
-                forceRender();
-              }}
-            />
+            Label: <input value={selectedLabel} onChange={(e) => setSelectedLabel(e.target.value)} />
           </label>
         </div>
         <div style={{ flex: 1, minWidth: "300px" }}>
           <h4 style={{ marginTop: 0 }}>OptionsSection (Dropdown)</h4>
           <label>
-            <input
-              type="checkbox"
-              checked={getManager()?.options.getDisabled() || false}
-              onChange={(e) => {
-                getManager()?.options.setDisabled(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+            <input type="checkbox" checked={optionsDisabled} onChange={(e) => setOptionsDisabled(e.target.checked)} />
             Disabled
           </label>
           <br />
           <label>
-            <input
-              type="checkbox"
-              checked={getManager()?.options.getLoading() || false}
-              onChange={(e) => {
-                getManager()?.options.setLoading(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+            <input type="checkbox" checked={optionsLoading} onChange={(e) => setOptionsLoading(e.target.checked)} />
             Loading
           </label>
           <br />
           <label>
             <input
               type="checkbox"
-              checked={getManager()?.options.getShowFilter() || false}
-              onChange={(e) => {
-                getManager()?.options.setShowFilter(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+              checked={optionsShowFilter}
+              onChange={(e) => setOptionsShowFilter(e.target.checked)}
+            />
             Show Filter
           </label>
           <br />
           <label>
             <input
               type="checkbox"
-              checked={getManager()?.options.getShowFooter() || false}
-              onChange={(e) => {
-                getManager()?.options.setShowFooter(e.target.checked);
-                forceRender();
-              }}
-            />{" "}
+              checked={optionsShowFooter}
+              onChange={(e) => setOptionsShowFooter(e.target.checked)}
+            />
             Show Footer
           </label>
           <br />
           <label>
             Position:
-            <select
-              value={getManager()?.container.getPosition() || "cover-bottom"}
-              onChange={(e) => {
-                getManager()?.container.setPosition(e.target.value as PositionType);
-                forceRender();
-              }}
-            >
+            <select value={optionsPosition} onChange={(e) => setOptionsPosition(e.target.value)}>
               <option value="cover-bottom">cover-bottom</option>
               <option value="bottom">bottom</option>
               <option value="top">top</option>
@@ -746,14 +761,8 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           </label>
           <br />
           <label>
-            Label:{" "}
-            <input
-              value={getManager()?.options.getLabel() || ""}
-              onChange={(e) => {
-                getManager()?.options.setLabel(e.target.value);
-                forceRender();
-              }}
-            />
+            Label:
+            <input value={optionsLabel} onChange={(e) => setOptionsLabel(e.target.value)} />
           </label>
         </div>
       </div>
