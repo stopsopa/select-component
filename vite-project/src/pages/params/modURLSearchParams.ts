@@ -33,14 +33,14 @@ type ParamValues<C extends ParamConfig> = {
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 
-export default function modURLSearchParams<C extends ParamConfig, Opts = any>(
+export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>(
   config: C,
-  options?: { key?: (key: string, ctx?: Opts) => string },
+  keyFn?: (key: string, ctx?: Ctx) => string,
 ) {
-  return function useQueryParams(search: string | URLSearchParams, ctx?: Opts) {
+  return function useQueryParams(search: string | URLSearchParams, ctx?: Ctx) {
     const applyKey = useCallback(
       (baseKey: string) => {
-        return options?.key ? options.key(baseKey, ctx) : baseKey;
+        return keyFn ? keyFn(baseKey, ctx) : baseKey;
       },
       [ctx],
     );

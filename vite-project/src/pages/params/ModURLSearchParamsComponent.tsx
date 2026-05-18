@@ -52,9 +52,7 @@ const useQueryParams = modURLSearchParams(
       decode: (value: string) => value === "1",
     },
   },
-  {
-    key: (key, i) => (i !== undefined ? `${key}-${i}` : key),
-  },
+  (key, i: number | undefined) => (i !== undefined ? `${key}-${i}` : key),
 );
 
 export default function UrlSerialiser() {
