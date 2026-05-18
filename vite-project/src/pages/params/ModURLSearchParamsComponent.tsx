@@ -160,19 +160,26 @@ export default function ParentComponent() {
 .url-ser-pre {
     white-space: pre-wrap;
 }
+.buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
 .url-ser-delete-btn {
     padding: 8px 12px;
-    background-color: #ff4d4f;
+    background-color: #4d6effff;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
-    align-self: flex-start;
+    &.red {
+    background-color: #ff4d4f;
+    }
     &:hover {
         background-color: #ff7875;
     }
 }
+    }
 `;
     document.head.appendChild(style);
 
@@ -200,7 +207,21 @@ export default function ParentComponent() {
       <div>
         {list.map((i) => {
           const search = separateIndexedSearchParams(location.search, i).toString();
-          return <ChildComponent key={i} i={i} search={search} navigate={navigate} onDelete={() => deleteItem(i)} />;
+          /**
+           * passing onDelete={deleteItem} like so is important because we are passing the same instance
+           * that will not trigger rerender of children
+           *
+           * when you do
+           *
+           * onDelete={() => deleteItem(i)}
+           *
+           * you will trigger rerender of children
+           *
+           * But then that means we have to pass i={i} to ChildComponent so that it knows which
+           *
+           * for it to be able to call deleteItem(i) - by passing it's index i
+           */
+          return <ChildComponent key={i} i={i} search={search} navigate={navigate} onDelete={deleteItem} />;
         })}
       </div>
     </div>
@@ -221,12 +242,13 @@ const ChildComponent = React.memo(function ChildComponent({
   i: number;
   search: string;
   navigate: NavigateFunction;
-  onDelete: () => void;
+  onDelete: (i: number) => void;
 }) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, navigate, i);
 
-  console.log(`render ${i} >${search}<`);
+  console.log(`render child ${i} >${search}<`);
 
+  // you can interact with parameters using these two methods
   // setParam("radio", "option2");
   // setParams({
   //   multiSelect: ["item3", "item4"],
@@ -244,7 +266,7 @@ const ChildComponent = React.memo(function ChildComponent({
               type="text"
               value={params.text}
               onChange={(e) => {
-                console.log(`text ${i} >${e.target.value}<`);
+                console.log(`set text input ${i} setParam(  ${e.target.value}  )`);
                 setParam("text", e.target.value);
               }}
               className="url-ser-input"
@@ -314,9 +336,32 @@ const ChildComponent = React.memo(function ChildComponent({
             </label>
           </fieldset>
 
-          <button type="button" onClick={onDelete} className="url-ser-delete-btn">
-            Delete Component #{i}
-          </button>
+          <div className="buttons">
+            <button type="button" onClick={() => onDelete(i)} className="url-ser-delete-btn red">
+              Delete Component #{i}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                /**
+                 * That will trigger all of these changes in one go
+                 *
+                 * see console.log in chrome developer tools - only one render
+                 */
+                setParams({
+                  text: `text-${i}`,
+                  radio: "radio2",
+                  multiSelect: [selectOptions[0], selectOptions[selectOptions.length - 1]],
+                  checkboxA: false,
+                  checkboxB: true,
+                });
+              }}
+              className="url-ser-delete-btn"
+            >
+              Reconfigure #{i}
+            </button>
+          </div>
         </form>
 
         <div className="url-ser-dump-container">
