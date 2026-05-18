@@ -58,7 +58,17 @@ const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
 );
 
 export default function UrlSerialiser() {
-  const [list, setList] = useState<number[]>([]);
+  const [list, setList] = useState<number[]>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const indexes = new Set<number>();
+    for (const key of params.keys()) {
+      const match = key.match(/-(\d+)$/);
+      if (match) {
+        indexes.add(parseInt(match[1], 10));
+      }
+    }
+    return Array.from(indexes).sort((a, b) => a - b);
+  });
 
   const location = useLocation();
 
@@ -132,7 +142,12 @@ export default function UrlSerialiser() {
       <hr />
       <button
         onClick={() => {
-          setList((prev) => [...prev, prev.length + 1]);
+          /**
+           * This is quite important - generating new number
+           * Because what if in list we have [1, 3] we can't rely on list.length
+           * because for [1, 3] array in list we would endup with [1, 3, 3] which would scream on key="3"
+           */
+          setList((prev) => [...prev, prev.length > 0 ? Math.max(...prev) + 1 : 1]);
         }}
       >
         Add Text Param
