@@ -79,6 +79,8 @@ export default function ParentComponent() {
 
   /**
    * Process of extracting list is little bit messy but I don't want to add more complexity to modURLSearchParams hook
+   * We would need to find a way to correlate the way how we add prefix with the process of extracting the list for given index in prefix
+   * So let's keep it custom
    */
   const addComponent = useCallback(() => {
     const nextIndex = list.length > 0 ? Math.max(...list) + 1 : 1;
@@ -91,6 +93,10 @@ export default function ParentComponent() {
     navigate({ search: currentParams.toString() }, { replace: true });
   }, [list, navigate]);
 
+  /**
+   * We have to wrap deleteItem with useCallback otherwise we will trigger rerender of children
+   * We have to wrap to make sure we will pass exactly the same instance according to === compare which React.memo uses
+   */
   const deleteItem = useCallback(
     (i: number) => {
       // 1. Read live query params
@@ -119,70 +125,10 @@ export default function ParentComponent() {
   );
 
   useEffect(() => {
-    // create style element and put some styles
+    // sprinkle some css styles in simples way
     const style = document.createElement("style");
-    style.innerHTML = `
-.url-ser-container {
-    padding: 20px;
-    &:not(:last-child){
-        border-bottom: 1px solid gray;
-    }
-}
-.url-ser-flex {
-    display: flex;
-    gap: 40px;
-}
-.url-ser-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    flex: 1;
-    max-width: 400px;
-}
-.url-ser-input {
-    width: 100%;
-    padding: 5px;
-}
-.url-ser-select {
-    width: 100%;
-    padding: 5px;
-    height: 100px;
-}
-.url-ser-label-margin {
-    margin-right: 10px;
-}
-.url-ser-dump-container {
-    flex: 1;
-    padding: 20px;
-    background: #f5f5f5;
-    border-radius: 8px;
-}
-.url-ser-pre {
-    white-space: pre-wrap;
-}
-.buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-.url-ser-delete-btn {
-    padding: 8px 12px;
-    background-color: #4d6effff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    &.red {
-    background-color: #ff4d4f;
-    }
-    &:hover {
-        background-color: #ff7875;
-    }
-}
-    }
-`;
+    style.innerHTML = getCss();
     document.head.appendChild(style);
-
     return () => {
       document.head.removeChild(style);
     };
@@ -208,14 +154,15 @@ export default function ParentComponent() {
         {list.map((i) => {
           const search = separateIndexedSearchParams(location.search, i).toString();
           /**
-           * passing onDelete={deleteItem} like so is important because we are passing the same instance
+           * passing onDelete={deleteItem} like so is important because we are passing the same instance of function
            * that will not trigger rerender of children
            *
            * when you do
            *
            * onDelete={() => deleteItem(i)}
            *
-           * you will trigger rerender of children
+           * you will trigger rerender of children because you are passing new instance of function
+           * in each parent render bo basically on every url change
            *
            * But then that means we have to pass i={i} to ChildComponent so that it knows which
            *
@@ -231,7 +178,8 @@ export default function ParentComponent() {
  * Another aspect is that we have to wrap with React.memo() becaue parent will rerender
  * on any url change so it will cascade down to children
  *
- * React.memo() work like useMemo() but for components but the props are used as array of dependencies for useMemo()
+ * React.memo() work like useMemo() but for components where props are used as array of dependencies for useMemo()
+ * So be careful to pass the same propos (the same values according to === operator) to the children components.
  */
 const ChildComponent = React.memo(function ChildComponent({
   i,
@@ -384,3 +332,66 @@ const ChildComponent = React.memo(function ChildComponent({
     </div>
   );
 });
+
+function getCss() {
+  return `
+.url-ser-container {
+    padding: 20px;
+    &:not(:last-child){
+        border-bottom: 1px solid gray;
+    }
+}
+.url-ser-flex {
+    display: flex;
+    gap: 40px;
+}
+.url-ser-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+    max-width: 400px;
+}
+.url-ser-input {
+    width: 100%;
+    padding: 5px;
+}
+.url-ser-select {
+    width: 100%;
+    padding: 5px;
+    height: 100px;
+}
+.url-ser-label-margin {
+    margin-right: 10px;
+}
+.url-ser-dump-container {
+    flex: 1;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+.url-ser-pre {
+    white-space: pre-wrap;
+}
+.buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+.url-ser-delete-btn {
+    padding: 8px 12px;
+    background-color: #4d6effff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    &.red {
+    background-color: #ff4d4f;
+    }
+    &:hover {
+        background-color: #ff7875;
+    }
+}
+    }
+`;
+}
