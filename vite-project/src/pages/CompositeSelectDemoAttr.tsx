@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { CompositeSelect } from "composite-select/composite-select/react";
-
+import type { CompositeManager } from "composite-select";
+import { predefinedUseUrlString, predefinedUseUrlStringArray, predefinedUseUrlBoolean } from "./useUrlGet";
 
 import { CompositeSelect as CompositeSelectElement } from "composite-select/composite-select/composite-select";
 
@@ -52,8 +53,6 @@ const imgDataJson: Record<string, string[]> = {
   "#ff9800": ["tools.png", "timeanddate.png", "t3chat.png", "ai.png"],
 };
 
-let globalIdCounter = 1;
-
 export default function CompositeSelectDemo() {
   const [instances, setInstances] = useState<number[]>([]);
 
@@ -80,14 +79,20 @@ export default function CompositeSelectDemo() {
       <button onClick={addInstance} className="gcp-css">
         Initialize New Instance
       </button>
-
+      <span style={{ padding: "0 10px" }}>|</span>
+      <a href={window.location.href.split("?")[0]} className="gcp-css">
+        off
+      </a>
+      <span style={{ padding: "0 10px" }}>|</span>
+      <a href="./" className="gcp-css">
+        up ..
+      </a>
       <div style={{ display: "flex", flexDirection: "column", gap: "30px", marginTop: "20px" }}>
         {instances.map((id) => (
           <DemoInstance key={id} id={id} onRemove={() => removeInstance(id)} />
         ))}
       </div>
       <hr />
-
       {/* <Card title="">
         <p>This is a card component from the example package.</p>
         <Button onClick={() => alert("Hello!")}>Click me!</Button>
@@ -103,21 +108,6 @@ export default function CompositeSelectDemo() {
 function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const csRef = useRef<CompositeSelectElement<CustomItem>>(null);
 
-  // Simple state flags handled via props
-  const [disabledSel, setDisabledSel] = useState(false);
-  const [loadingSel, setLoadingSel] = useState(false);
-  const [errorSel, setErrorSel] = useState(false);
-  const [showInputSel, setShowInputSel] = useState(true);
-  const [showDeleteSel, setShowDeleteSel] = useState(true);
-  const [labelSel, setLabelSel] = useState("Select Fruit");
-
-  const [disabledOpt, setDisabledOpt] = useState(false);
-  const [loadingOpt, setLoadingOpt] = useState(false);
-  const [showFilter, setShowFilter] = useState(true);
-  const [showFooter, setShowFooter] = useState(true);
-  const [labelOpt, setLabelOpt] = useState("Search fruits...");
-  const [position, setPosition] = useState<PositionType>("cover-bottom");
-  const [selectedValue, setSelectedValue] = useState("");
   const [onChangeCount, setOnChangeCount] = useState(0);
   const [onFocusCount, setOnFocusCount] = useState(0);
   const [onDeleteCount, setOnDeleteCount] = useState(0);
@@ -127,126 +117,279 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [onCancelCount, setOnCancelCount] = useState(0);
   const [onItemPickCount, setOnItemPickCount] = useState(0);
   const [onCloseCount, setOnCloseCount] = useState(0);
+  const [handleSelectedItemsChangedCount, setHandleSelectedItemsChangedCount] = useState(0);
+  const [handleOptionsChangedCount, setHandleOptionsChangedCount] = useState(0);
 
-  // Local arrays and values
-  const [selectedItems, setSelectedItems] = useState<CustomItem[]>([]);
   const [options, setOptions] = useState<CustomItem[]>([]);
-  const [optionsValue, setOptionsValue] = useState("");
-  const [buffItems, setBuffItems] = useState<CustomItem[]>([]);
+  const [showDeleteSel, setShowDeleteSel] = useState(true);
 
-  const getManager = () => csRef.current?.getManager();
+  // Local arrays and selections managed via URL (storing only selected ids)
+  const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`s-${id}`, []);
+  const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`emp-${id}`, false);
 
-  const fetchOptions = async (search: string, currentBuff: CustomItem[] = buffItems) => {
-    setLoadingOpt(true);
-    setDisabledOpt(true);
-    setLoadingSel(true);
-    setDisabledSel(true);
+  const [selectedValue, setSelectedValue] = predefinedUseUrlString(`sv-${id}`, "");
+  const [selectedLabel, setSelectedLabel] = predefinedUseUrlString(`sla-${id}`, "selected label");
+  const [selectedDisabled, setSelectedDisabled] = predefinedUseUrlBoolean(`sd-${id}`, false);
+  const [selectedError, setSelectedError] = predefinedUseUrlBoolean(`se-${id}`, false);
+  const [selectedLoading, setSelectedLoading] = predefinedUseUrlBoolean(`slo-${id}`, false);
+  const [selectedShowInput, setSelectedShowInput] = predefinedUseUrlBoolean(`ssi-${id}`, true);
 
-    await delay(500);
+  const [optionsDisabled, setOptionsDisabled] = predefinedUseUrlBoolean(`od-${id}`, false);
+  const [optionsLoading, setOptionsLoading] = predefinedUseUrlBoolean(`ol-${id}`, false);
+  const [optionsShowFilter, setOptionsShowFilter] = predefinedUseUrlBoolean(`sf-${id}`, true);
+  const [optionsShowFooter, setOptionsShowFooter] = predefinedUseUrlBoolean(`sfo-${id}`, true);
+  const [optionsPosition, setOptionsPosition] = predefinedUseUrlString(`op-${id}`, "cover-bottom");
+  const [optionsLabel, setOptionsLabel] = predefinedUseUrlString(`ola-${id}`, "options label");
 
-    const found = deduplicateArrayById<CustomItem>(searchNames(search));
-    const opts = markSelectedByIds(found, currentBuff.map(i => i.id)) as CustomItem[];
-    setOptions(sortById(opts) as CustomItem[]);
+  const [activeTemplates, setActiveTemplates] = predefinedUseUrlStringArray(`t-${id}`, []);
+  const customRenderItem = activeTemplates.includes("item");
+  const customRenderList = activeTemplates.includes("list");
 
-    setDisabledOpt(false);
-    setLoadingOpt(false);
-    setDisabledSel(false);
-    setLoadingSel(false);
+  const [optionsRender, setOptionsRender] = predefinedUseUrlString(`or-${id}`, "default");
+  const [optionsCustomEmpty, setOptionsCustomEmpty] = predefinedUseUrlBoolean(`oce-${id}`, false);
+
+  const [optionsMaxHeight, setOptionsMaxHeight] = predefinedUseUrlString(`omh-${id}`, "300px");
+
+  const stepMaxHeight = (delta: number) => {
+    let current = parseInt(optionsMaxHeight || "") || 0;
+    current += delta;
+    if (current < 0) current = 0;
+    setOptionsMaxHeight(current + "px");
   };
 
   useEffect(() => {
-    fetchOptions("", buffItems);
+    console.log("initial", {
+      selectedIds,
+      selectedDisabled,
+      selectedError,
+      selectedLoading,
+      selectedShowInput,
+      selectedLabel,
+      optionsPosition,
+      optionsMaxHeight,
+      optionsCustomEmpty,
+      optionsDisabled,
+      optionsLoading,
+      optionsShowFilter,
+      optionsShowFooter,
+      optionsLabel,
+      activeTemplates,
+      customRenderItem,
+      customRenderList,
+      optionsRender,
+    });
   }, []);
 
-  const updateCheckmarks = (currentSelected: CustomItem[]) => {
-    setOptions((prevOptions) => markSelectedByIds(prevOptions, currentSelected.map(i => i.id)) as CustomItem[]);
+  // Derive selectedItems by rehydrating the selectedIds (scientists and template items)
+  const allScientists = searchNames("", Infinity);
+  const selectedItems = selectedIds
+    .map((idStr) => {
+      // If it contains a dot, it's a template item (e.g. "gmail.png")
+      if (idStr.includes(".")) {
+        let itemColor = "#999";
+        for (const [color, imgs] of Object.entries(imgDataJson)) {
+          if (imgs.includes(idStr)) {
+            itemColor = color;
+            break;
+          }
+        }
+        return {
+          id: idStr,
+          label: idStr.split(".")[0],
+          color: itemColor,
+          img: idStr,
+        } as unknown as CustomItem;
+      }
+      // Otherwise, it is a scientist
+      return allScientists.find((s) => String(s.id) === idStr);
+    })
+    .filter(Boolean) as CustomItem[];
+
+  console.log("render", {
+    allScientists,
+    selectedItems,
+  });
+
+  const setSelectedItems = (items: CustomItem[]) => {
+    const list = items.map((i) => String(i.id));
+    console.log("list", list);
+    setSelectedIds(list);
   };
 
-  function localDetermineSearch(): { search: string; popupInput: boolean } {
-    if (!showFilter && position === "bottom") {
-      return { search: "", popupInput: false }; 
+  const getManager = () => csRef.current?.getManager();
+
+  function localDetermineSearch(mgr: CompositeManager<CustomItem>): { search: string; popupInput: boolean } {
+    const setShowFilter = mgr.options.getShowFilter();
+    const position = mgr.container.getPosition();
+    if (!setShowFilter && position === "bottom") {
+      return { search: mgr.selected.getValue() || "", popupInput: false };
     }
-    return { search: optionsValue, popupInput: true };
+    return { search: mgr.options.getValue() || "", popupInput: true };
   }
 
-  // Event handlers as props
-  const handleSelectedItemsChanged = (opts: any) => {
-    if (opts.disabled !== undefined) setDisabledSel(!!opts.disabled);
-    if (opts.loading !== undefined) setLoadingSel(!!opts.loading);
-    if (opts.error !== undefined) setErrorSel(!!opts.error);
-    if (opts.showInput !== undefined) setShowInputSel(opts.showInput !== false);
-    if (opts.label !== undefined) setLabelSel(opts.label || "");
+  const updateCheckmarks = (currentSelected: CustomItem[]) => {
+    setOptions(
+      (prevOptions) =>
+        markSelectedByIds(prevOptions, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[],
+    );
   };
 
-  const handleOptionsChanged = (opts: any) => {
-    if (opts.showFilter !== undefined) setShowFilter(!!opts.showFilter);
-    if (opts.showFooter !== undefined) setShowFooter(!!opts.showFooter);
-    if (opts.disabled !== undefined) setDisabledOpt(!!opts.disabled);
-    if (opts.loading !== undefined) setLoadingOpt(!!opts.loading);
-    if (opts.label !== undefined) setLabelOpt(opts.label || "");
-  };
+  const fetchOptions = async (
+    search: string,
+    currentSelected: CustomItem[] = selectedItems,
+    overrideEmptyList?: boolean,
+  ) => {
+    setOptionsLoading(true);
+    setOptionsDisabled(true);
+    setSelectedLoading(true);
+    setSelectedDisabled(true);
 
-  const handleChangeValue = async (detail: { originalEvent: Event; value: string; key: string; previousValue?: string }) => {
-    const val = detail.value;
-    setSelectedValue(val || "");
-    setOnChangeCount((prev) => prev + 1);
+    await delay(500);
 
-    const { popupInput } = localDetermineSearch();
-    const search = popupInput ? optionsValue : val;
+    const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
+    const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+    const opts = markSelectedByIds(found, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[];
+    setOptions(sortById(opts) as CustomItem[]);
 
-    if (!popupInput && detail.originalEvent.type === "keydown") {
-      if (detail.key === "Backspace" && val === "" && selectedItems.length > 0) {
-        const newBuff = [...selectedItems];
-        newBuff.pop();
-        setBuffItems(newBuff);
-        setSelectedItems(newBuff);
-        updateCheckmarks(newBuff);
-        return;
-      }
-    }
-
-    if (!popupInput) setOptionsValue(search);
-    await fetchOptions(search, buffItems);
-
-    if (!popupInput) getManager()?.selected.setFocus();
+    setOptionsDisabled(false);
+    setOptionsLoading(false);
+    setSelectedDisabled(false);
+    setSelectedLoading(false);
   };
 
   const handleFocus = () => {
     setOnFocusCount((prev) => prev + 1);
-    setBuffItems([...selectedItems]);
-
-    updateCheckmarks(selectedItems);
-    
-    setShowDeleteSel(false);
-    getManager()?.options.setFocus();
+    const mgr = getManager();
+    if (mgr) {
+      const { search } = localDetermineSearch(mgr);
+      const selIds = selectedItems.map((i) => i.id);
+      const combined = emptyList ? [] : searchNames(search);
+      const opts = markSelectedByIds(combined, selIds) as CustomItem[];
+      setOptions(sortById(opts) as CustomItem[]);
+      setShowDeleteSel(false);
+    }
   };
 
   const handleDelete = (id: string) => {
     setOnDeleteCount((prev) => prev + 1);
     const newSelected = selectedItems.filter((i) => String(i.id) !== String(id));
-    setBuffItems(newSelected);
     setSelectedItems(newSelected);
     updateCheckmarks(newSelected);
+  };
+
+  const debouncedHandleChangeValue = (detail: {
+    originalEvent: Event;
+    value: string;
+    key: string;
+    previousValue?: string;
+  }) => {
+    const mgr = getManager();
+    if (!mgr) return;
+
+    if ((mgr as any)._changeTimer) {
+      clearTimeout((mgr as any)._changeTimer);
+    }
+
+    (mgr as any)._changeTimer = setTimeout(async () => {
+      const { search, popupInput } = localDetermineSearch(mgr);
+
+      if (popupInput === true) {
+        setOnChangeCount((prev) => prev + 1);
+        setSelectedValue(search);
+      }
+
+      if (popupInput === true) {
+        return;
+      }
+
+      const val = detail.value;
+
+      if (!popupInput && detail.originalEvent.type === "keydown") {
+        const key = detail.key;
+        if (key === "Backspace" && val === "" && selectedItems.length > 0) {
+          const newSelected = [...selectedItems];
+          newSelected.pop();
+          setSelectedItems(newSelected);
+          updateCheckmarks(newSelected);
+          return;
+        }
+      }
+
+      if (search === detail.previousValue) return;
+
+      setSelectedValue(search);
+      setOnChangeCount((prev) => prev + 1);
+
+      await fetchOptions(search, selectedItems);
+    }, 500);
   };
 
   const handleClear = () => {
     setOnClearCount((prev) => prev + 1);
     if (!confirm("Are you sure?")) return;
-    setBuffItems([]);
+
     setSelectedItems([]);
-    updateCheckmarks([]);
+    setSelectedValue("");
   };
 
-  const handleInputChange = async (detail: { originalEvent: Event; value: string; previousValue?: string }) => {
-    setOnInputChangeCount((prev) => prev + 1);
-    const search = detail.value || "";
-    setOptionsValue(search);
-    await fetchOptions(search, buffItems);
+  const handlePick = (item: CustomItem) => {
+    setOnItemPickCount((prev) => prev + 1);
+    const mgr = getManager();
+    if (!mgr) return;
+
+    console.log("footer", {
+      state: optionsShowFooter,
+      mgr: mgr.options.getShowFooter(),
+    });
+    if (mgr.options.getShowFooter()) {
+      // if (optionsShowFooter) {
+      const newOptions = options.map((opt) => {
+        if (opt.id === item.id) {
+          return { ...opt, selected: !opt.selected };
+        }
+        return opt;
+      });
+      setOptions(newOptions);
+    } else {
+      const selectedToggled = togglePresenceOnTheList(selectedItems, item as CustomItem) as CustomItem[];
+      setSelectedItems(selectedToggled);
+      mgr.container.hide();
+      setShowDeleteSel(true);
+    }
+  };
+
+  const debouncedHandleInputChange = (detail: {
+    originalEvent: Event;
+    value: string;
+    key: string;
+    previousValue?: string;
+  }) => {
+    const mgr = getManager();
+    if (!mgr) return;
+
+    if ((mgr as any)._inputTimer) {
+      clearTimeout((mgr as any)._inputTimer);
+    }
+
+    (mgr as any)._inputTimer = setTimeout(async () => {
+      const { search, popupInput } = localDetermineSearch(mgr);
+
+      if (popupInput === false) {
+        return;
+      }
+
+      if (search === detail.previousValue) return;
+
+      setOnInputChangeCount((prev) => prev + 1);
+      await fetchOptions(search, selectedItems);
+    }, 500);
   };
 
   const handleOk = () => {
     setOnOkCount((prev) => prev + 1);
-    setSelectedItems(buffItems);
+    const combined = deduplicateArrayById([...options, ...selectedItems]);
+    const optionsSelected = combined.filter((i) => i.selected);
+    setSelectedItems(optionsSelected);
     getManager()?.container.hide();
   };
 
@@ -260,29 +403,227 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     setShowDeleteSel(true);
   };
 
-  const handlePick = (item: CustomItem) => {
-    setOnItemPickCount((prev) => prev + 1);
-    const newBuff = togglePresenceOnTheList(buffItems, item) as CustomItem[];
-    setBuffItems(newBuff);
+  const handleSelectedItemsChanged = (_, reason) => {
+    console.log('r'.repeat(1000), `>${reason}<`)
+    setHandleSelectedItemsChangedCount((prev) => prev + 1);
+    const mgr = getManager();
+    if (!mgr) return;
 
-    if (showFooter) {
-      updateCheckmarks(newBuff);
-    } else {
-      setSelectedItems(newBuff);
-      getManager()?.container.hide();
-      setShowDeleteSel(true);
-    }
+    // const disabled = mgr.selected.getDisabled();
+    // if (selectedDisabled !== disabled) setSelectedDisabled(disabled);
+
+    // const loading = mgr.selected.getLoading();
+    // if (selectedLoading !== loading) setSelectedLoading(loading);
+
+    // const error = mgr.selected.getError();
+    // if (selectedError !== error) setSelectedError(error);
+
+    // const showInput = mgr.selected.getShowInput();
+    // if (selectedShowInput !== showInput) setSelectedShowInput(showInput);
+
+    // const showDelete = mgr.selected.getShowDelete();
+    // if (showDeleteSel !== showDelete) setShowDeleteSel(showDelete);
   };
+
+  const handleOptionsChanged = (_ , reason) => {
+    console.log('r'.repeat(1000), `>${reason}<`)
+    setHandleOptionsChangedCount((prev) => prev + 1);
+    const mgr = getManager();
+    if (!mgr) return;
+
+    // const showFooter = mgr.options.getShowFooter();
+    // if (optionsShowFooter !== showFooter) setOptionsShowFooter(showFooter);
+
+    // const showFilter = mgr.options.getShowFilter();
+    // if (optionsShowFilter !== showFilter) setOptionsShowFilter(showFilter);
+
+    // const disabled = mgr.options.getDisabled();
+    // if (optionsDisabled !== disabled) setOptionsDisabled(disabled);
+
+    // const loading = mgr.options.getLoading();
+    // if (optionsLoading !== loading) setOptionsLoading(loading);
+  };
+
+  const handleEmptyListChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setEmptyList(checked);
+  };
+
+  // Sync options whenever emptyList changes or on initial mount
+  useEffect(() => {
+    const mgr = getManager();
+    if (mgr) {
+      const { search } = localDetermineSearch(mgr);
+      const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+      const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
+      setOptions(sortById(opts) as CustomItem[]);
+    }
+  }, [emptyList]);
+
+  // Sync React URL states DOWN to the manager on mount
+  useEffect(() => {
+    const mgr = getManager();
+    if (mgr) {
+      mgr.options.setShowFooter(optionsShowFooter);
+      mgr.options.setShowFilter(optionsShowFilter);
+      mgr.options.setDisabled(optionsDisabled);
+      mgr.options.setLoading(optionsLoading);
+
+      mgr.selected.setDisabled(selectedDisabled);
+      mgr.selected.setLoading(selectedLoading);
+      mgr.selected.setError(selectedError);
+      mgr.selected.setShowInput(selectedShowInput);
+      mgr.selected.setShowDelete(showDeleteSel);
+    }
+  }, []);
+
+  // Set the global window.mgr reference for debugging
+  useEffect(() => {
+    const mgr = getManager();
+    if (mgr) {
+      (window as unknown as Record<string, unknown>).mgr = mgr;
+    }
+  }, []);
+
+  useEffect(() => {
+    const mgr = getManager();
+    if (mgr) {
+      console.log("useEffect templates", {
+        customRenderItem,
+        customRenderList,
+        optionsRender,
+        optionsCustomEmpty,
+      });
+
+      // Selected Custom Render Item
+      if (customRenderItem) {
+        mgr.selected.setRenderItem(function (item: CustomItem) {
+          const el = document.createElement("div");
+          el.className = "element";
+          el.dataset.id = String(item.id);
+          el.style.border = `2px solid ${item.color || "black"}`;
+          el.style.display = "flex";
+          el.style.alignItems = "center";
+          el.style.gap = "5px";
+          el.style.padding = "5px";
+          el.style.background = "#fff";
+
+          if (item.img) {
+            const img = document.createElement("img");
+            img.src = `/img/${item.img}`;
+            img.style.width = "20px";
+            img.style.height = "20px";
+            img.style.objectFit = "contain";
+            el.appendChild(img);
+          }
+
+          const label = document.createElement("label");
+          label.textContent = item.label;
+
+          const del = document.createElement("div");
+          del.dataset.remove = String(item.id);
+
+          el.appendChild(label);
+          el.appendChild(del);
+
+          return el;
+        });
+      } else {
+        mgr.selected.setRenderItem();
+      }
+
+      // Selected Custom Render List
+      if (customRenderList) {
+        mgr.selected.setRenderList(function (
+          selected: CustomItem[],
+          defaultRenderList: (list: CustomItem[]) => HTMLElement[],
+        ) {
+          const elements = defaultRenderList(selected);
+          const groups: HTMLElement[] = [];
+          for (let i = 0; i < elements.length; i += 3) {
+            const groupDiv = document.createElement("div");
+            groupDiv.style.border = "1px solid #1a73e8";
+            groupDiv.style.borderRadius = "8px";
+            groupDiv.style.padding = "8px";
+            groupDiv.style.margin = "4px";
+            groupDiv.style.display = "flex";
+            groupDiv.style.gap = "8px";
+            groupDiv.style.flexWrap = "wrap";
+            groupDiv.style.background = "#e8f0fe";
+            groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+            const chunk = elements.slice(i, i + 3);
+            chunk.forEach((el: HTMLElement) => groupDiv.appendChild(el));
+            groups.push(groupDiv);
+          }
+          return groups;
+        });
+      } else {
+        mgr.selected.setRenderList();
+      }
+
+      // Options Custom Render Item
+      if (optionsRender === "custom") {
+        mgr.options.setRenderItem((item: Item) => {
+          const el = document.createElement("div");
+          el.className = "element";
+          el.style.padding = "12px";
+          el.style.background = item.selected ? "#fff3e0" : "transparent";
+          el.style.color = item.selected ? "#e65100" : "inherit";
+          el.dataset.id = String(item.id);
+
+          const icon = document.createElement("span");
+          icon.textContent = item.selected ? "🔥 " : "❄️ ";
+          icon.style.marginRight = "10px";
+
+          const label = document.createElement("label");
+          label.textContent = item.label || "";
+
+          el.appendChild(icon);
+          el.appendChild(label);
+          return el;
+        });
+      } else if (optionsRender === "string") {
+        mgr.options.setRenderItem(
+          (item: Item) => `
+          <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? "#e8f5e9" : "white"}; color: ${item.selected ? "#2e7d32" : "#333"};">
+            <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? "✅" : "⬜"}</span>
+            <strong style="margin-left: 10px;">${item.label}</strong>
+            <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
+          </div>
+        `,
+        );
+      } else {
+        mgr.options.setRenderItem();
+      }
+
+      // Options Custom Render Empty State
+      if (optionsCustomEmpty) {
+        mgr.options.setRenderEmpty(
+          () =>
+            `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`,
+        );
+      } else {
+        mgr.options.setRenderEmpty();
+      }
+    }
+  }, [customRenderItem, customRenderList, optionsRender, optionsCustomEmpty]);
 
   const addTemplate = (color: string, img: string) => {
     const newItem: CustomItem = {
-      id: globalIdCounter++,
+      id: img,
       label: img.split(".")[0],
       color,
       img,
-    };
-    setSelectedItems([...selectedItems, newItem]);
-    updateCheckmarks([...selectedItems, newItem]);
+    } as unknown as CustomItem;
+    const newList = [...selectedItems, newItem];
+    setSelectedItems(newList);
+    setOptions(
+      (prevOptions) =>
+        markSelectedByIds(
+          prevOptions,
+          newList.map((i) => i.id),
+        ) as CustomItem[],
+    );
   };
 
   return (
@@ -304,42 +645,44 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       <div style={{ padding: "20px", background: "#fafafa", border: "1px dashed #ccc", marginBottom: "20px" }}>
         <CompositeSelect<CustomItem>
           ref={csRef}
-          selected-selected={selectedItems}
+          selected-selected={(function (selectedItems) {
+            console.log("selectedItems::", selectedItems);
+
+            return selectedItems;
+          })(selectedItems)}
           selected-value={selectedValue}
-          selected-label={labelSel}
-          selected-disabled={disabledSel}
-          selected-loading={loadingSel}
-          selected-error={errorSel}
-          selected-show-input={showInputSel}
+          selected-label={selectedLabel}
+          selected-disabled={selectedDisabled}
+          selected-loading={selectedLoading}
+          selected-error={selectedError}
+          selected-show-input={selectedShowInput}
           selected-show-delete={showDeleteSel}
           selected-onFocus={handleFocus}
           selected-onDelete={handleDelete}
-          selected-onInputChange={handleChangeValue}
+          selected-onInputChange={debouncedHandleChangeValue}
           selected-onClear={handleClear}
           selected-onChange={(selected) => console.log("onChange: ", selected)}
           selected-onComponentChange={handleSelectedItemsChanged}
-          
           options-options={options}
-          options-value={optionsValue}
-          options-label={labelOpt}
-          options-max-height="300px"
-          options-show-footer={showFooter}
-          options-show-filter={showFilter}
-          options-disabled={disabledOpt}
-          options-loading={loadingOpt}
+          options-value={selectedValue}
+          options-label={optionsLabel}
+          options-max-height={optionsMaxHeight}
+          options-show-footer={optionsShowFooter}
+          options-show-filter={optionsShowFilter}
+          options-disabled={optionsDisabled}
+          options-loading={optionsLoading}
           options-onItemPick={handlePick}
-          options-onInputChange={handleInputChange}
+          options-onInputChange={debouncedHandleInputChange}
           options-onOk={handleOk}
           options-onCancel={handleCancel}
           options-onComponentChange={handleOptionsChanged}
-          
+          container-position={optionsPosition}
           container-onClose={handleClose}
-          container-position={position}
         ></CompositeSelect>
       </div>
 
       <div style={{ marginBottom: "15px", fontSize: "14px" }}>
-        <strong>Input Value:</strong>{" "}
+        <strong>Input Value:</strong>
         <pre
           style={{
             display: "inline",
@@ -352,15 +695,17 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         >
           {selectedValue || "-"}
         </pre>
-        (onChange: <span style={{ fontWeight: "bold" }}>{onChangeCount}</span>, onFocus:{" "}
-        <span style={{ fontWeight: "bold" }}>{onFocusCount}</span>, onDelete:{" "}
-        <span style={{ fontWeight: "bold" }}>{onDeleteCount}</span>, onClear:{" "}
-        <span style={{ fontWeight: "bold" }}>{onClearCount}</span>, onInputChange:{" "}
-        <span style={{ fontWeight: "bold" }}>{onInputChangeCount}</span>, onOk:{" "}
-        <span style={{ fontWeight: "bold" }}>{onOkCount}</span>, onCancel:{" "}
-        <span style={{ fontWeight: "bold" }}>{onCancelCount}</span>, onItemPick:{" "}
-        <span style={{ fontWeight: "bold" }}>{onItemPickCount}</span>, onClose:{" "}
-        <span style={{ fontWeight: "bold" }}>{onCloseCount}</span>)
+        (onChange: <span style={{ fontWeight: "bold" }}>{onChangeCount}</span>, onFocus:
+        <span style={{ fontWeight: "bold" }}>{onFocusCount}</span>, onDelete:
+        <span style={{ fontWeight: "bold" }}>{onDeleteCount}</span>, onClear:
+        <span style={{ fontWeight: "bold" }}>{onClearCount}</span>, onInputChange:
+        <span style={{ fontWeight: "bold" }}>{onInputChangeCount}</span>, onOk:
+        <span style={{ fontWeight: "bold" }}>{onOkCount}</span>, onCancel:
+        <span style={{ fontWeight: "bold" }}>{onCancelCount}</span>, onItemPick:
+        <span style={{ fontWeight: "bold" }}>{onItemPickCount}</span>, onClose:
+        <span style={{ fontWeight: "bold" }}>{onCloseCount}</span>, handleSelectedItemsChanged:
+        <span style={{ fontWeight: "bold" }}>{handleSelectedItemsChangedCount}</span>, handleOptionsChanged:
+        <span style={{ fontWeight: "bold" }}>{handleOptionsChangedCount}</span>)
       </div>
 
       <div style={{ marginBottom: "20px" }}>
@@ -383,76 +728,21 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       <div style={{ marginBottom: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button
           className="gcp-css"
-          onClick={() => {
-            getManager()?.selected.setRenderItem(function (item: CustomItem) {
-              const el = document.createElement("div");
-              el.className = "element";
-              el.dataset.id = String(item.id);
-              el.style.border = `2px solid ${item.color || "black"}`;
-              el.style.display = "flex";
-              el.style.alignItems = "center";
-              el.style.gap = "5px";
-              el.style.padding = "5px";
-              el.style.background = "#fff";
-
-              if (item.img) {
-                const img = document.createElement("img");
-                img.src = `/img/${item.img}`;
-                img.style.width = "20px";
-                img.style.height = "20px";
-                img.style.objectFit = "contain";
-                el.appendChild(img);
-              }
-
-              const label = document.createElement("label");
-              label.textContent = item.label;
-
-              const del = document.createElement("div");
-              del.dataset.remove = String(item.id);
-
-              el.appendChild(label);
-              el.appendChild(del);
-
-              return el;
-            });
-          }}
+          onClick={() =>
+            setActiveTemplates(activeTemplates.includes("item") ? activeTemplates : [...activeTemplates, "item"])
+          }
         >
           Set Custom Render Item
         </button>
         <button
           className="gcp-css"
-          onClick={() => {
-            getManager()?.selected.setRenderList(function (selected: CustomItem[], defaultRenderList: any) {
-              const elements = defaultRenderList(selected);
-              const groups: HTMLElement[] = [];
-              for (let i = 0; i < elements.length; i += 3) {
-                const groupDiv = document.createElement("div");
-                groupDiv.style.border = "1px solid #1a73e8";
-                groupDiv.style.borderRadius = "8px";
-                groupDiv.style.padding = "8px";
-                groupDiv.style.margin = "4px";
-                groupDiv.style.display = "flex";
-                groupDiv.style.gap = "8px";
-                groupDiv.style.flexWrap = "wrap";
-                groupDiv.style.background = "#e8f0fe";
-                groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
-                const chunk = elements.slice(i, i + 3);
-                chunk.forEach((el: any) => groupDiv.appendChild(el));
-                groups.push(groupDiv);
-              }
-              return groups;
-            });
-          }}
+          onClick={() =>
+            setActiveTemplates(activeTemplates.includes("list") ? activeTemplates : [...activeTemplates, "list"])
+          }
         >
           Set Custom Render List
         </button>
-        <button
-          className="gcp-css"
-          onClick={() => {
-            getManager()?.selected.setRenderItem();
-            getManager()?.selected.setRenderList();
-          }}
-        >
+        <button className="gcp-css" onClick={() => setActiveTemplates([])}>
           Reset Templates
         </button>
       </div>
@@ -464,85 +754,88 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           <button
             className="gcp-css"
             onClick={() => {
-              getManager()?.container.show();
-              getManager()?.options.setFocus();
+              const mgr = getManager();
+              if (mgr) {
+                mgr.container.show();
+                mgr.options.setFocus();
+              }
             }}
           >
             Focus Input
           </button>
 
-          <button
-            className="gcp-css"
-            onClick={() => {
-              setOptions([]);
-              setBuffItems([]);
-            }}
-          >
-            Clear Options
-          </button>
+          <div className="gcp-css checkbox-wrapper">
+            <div className="checkbox-row">
+              <input type="checkbox" id={`empty-list-${id}`} checked={emptyList} onChange={handleEmptyListChange} />
+              <div className="content-cell">
+                <label htmlFor={`empty-list-${id}`}>Empty list</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center", width: "100%" }}>
+          <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
+            <span style={{ minWidth: "120px" }}>
+              📏 <strong>Max Height</strong>:
+            </span>
+            <div style={{ display: "flex", gap: "2px" }}>
+              <button
+                className="gcp-css white"
+                onClick={() => stepMaxHeight(-10)}
+                style={{ padding: "0 8px", minWidth: "auto" }}
+              >
+                ▼
+              </button>
+              <div className="gcp-css input-wrapper" style={{ maxWidth: "150px", marginBottom: 0 }}>
+                <input
+                  type="text"
+                  id={`maxheight-input-${id}`}
+                  placeholder=" "
+                  value={optionsMaxHeight || ""}
+                  onChange={(e) => setOptionsMaxHeight(e.target.value)}
+                />
+                <label htmlFor={`maxheight-input-${id}`}>Max height</label>
+              </div>
+              <button
+                className="gcp-css white"
+                onClick={() => stepMaxHeight(10)}
+                style={{ padding: "0 8px", minWidth: "auto" }}
+              >
+                ▲
+              </button>
+            </div>
+            <button className="gcp-css" onClick={() => setOptionsMaxHeight(optionsMaxHeight || "")}>
+              Set
+            </button>
+            {["200px", "300px", "400px", "600px"].map((preset) => (
+              <button key={preset} className="gcp-css white" onClick={() => setOptionsMaxHeight(preset)}>
+                {preset}
+              </button>
+            ))}
+            <button className="gcp-css white" onClick={() => setOptionsMaxHeight("")}>
+              Reset
+            </button>
+          </div>
         </div>
 
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
           <span style={{ minWidth: "120px" }}>
             🎨 <strong>Render</strong>:
           </span>
-          <button
-            className="gcp-css"
-            onClick={() => {
-              getManager()?.options.setRenderItem((item: Item) => {
-                const el = document.createElement("div");
-                el.className = "element";
-                el.style.padding = "12px";
-                el.style.background = item.selected ? "#fff3e0" : "transparent";
-                el.style.color = item.selected ? "#e65100" : "inherit";
-                el.dataset.id = String(item.id);
-
-                const icon = document.createElement("span");
-                icon.textContent = item.selected ? "🔥 " : "❄️ ";
-                icon.style.marginRight = "10px";
-
-                const label = document.createElement("label");
-                label.textContent = item.label || "";
-
-                el.appendChild(icon);
-                el.appendChild(label);
-                return el;
-              });
-            }}
-          >
+          <button className="gcp-css" onClick={() => setOptionsRender("custom")}>
             Set Custom Render
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => {
-              getManager()?.options.setRenderItem(
-                (item: Item) => `
-                <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? "#e8f5e9" : "white"}; color: ${item.selected ? "#2e7d32" : "#333"};">
-                  <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? "✅" : "⬜"}</span>
-                  <strong style="margin-left: 10px;">${item.label}</strong>
-                  <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
-                </div>
-              `,
-              );
-            }}
-          >
+          <button className="gcp-css" onClick={() => setOptionsRender("string")}>
             Set String Render
           </button>
-          <button className="gcp-css" onClick={() => getManager()?.options.setRenderItem()}>
+          <button className="gcp-css" onClick={() => setOptionsRender("default")}>
             Set Default Render
           </button>
-          <button
-            className="gcp-css"
-            onClick={() => {
-              getManager()?.options.setRenderEmpty(
-                () =>
-                  `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`,
-              );
-            }}
-          >
+          <button className="gcp-css" onClick={() => setOptionsCustomEmpty(true)}>
             Set Custom Empty
           </button>
-          <button className="gcp-css" onClick={() => getManager()?.options.setRenderEmpty()}>
+          <button className="gcp-css" onClick={() => setOptionsCustomEmpty(false)}>
             Set Default Empty
           </button>
         </div>
@@ -561,47 +854,65 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <div style={{ flex: 1, minWidth: "300px", borderRight: "1px solid #eee", paddingRight: "20px" }}>
           <h4 style={{ marginTop: 0 }}>SelectedSection (Top)</h4>
           <label>
-            <input type="checkbox" checked={disabledSel} onChange={(e) => setDisabledSel(e.target.checked)} /> Disabled
+            <input type="checkbox" checked={selectedDisabled} onChange={(e) => setSelectedDisabled(e.target.checked)} />
+            Disabled
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={loadingSel} onChange={(e) => setLoadingSel(e.target.checked)} /> Loading
+            <input type="checkbox" checked={selectedLoading} onChange={(e) => setSelectedLoading(e.target.checked)} />
+            Loading
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={errorSel} onChange={(e) => setErrorSel(e.target.checked)} /> Error
+            <input type="checkbox" checked={selectedError} onChange={(e) => setSelectedError(e.target.checked)} /> Error
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={showInputSel} onChange={(e) => setShowInputSel(e.target.checked)} /> Show
-            Input
+            <input
+              type="checkbox"
+              checked={selectedShowInput}
+              onChange={(e) => setSelectedShowInput(e.target.checked)}
+            />
+            Show Input
           </label>
           <br />
           <label>
-            Label: <input value={labelSel} onChange={(e) => setLabelSel(e.target.value)} />
+            Label: <input value={selectedLabel} onChange={(e) => setSelectedLabel(e.target.value)} />
           </label>
         </div>
         <div style={{ flex: 1, minWidth: "300px" }}>
           <h4 style={{ marginTop: 0 }}>OptionsSection (Dropdown)</h4>
           <label>
-            <input type="checkbox" checked={disabledOpt} onChange={(e) => setDisabledOpt(e.target.checked)} /> Disabled
+            <input type="checkbox" checked={optionsDisabled} onChange={(e) => setOptionsDisabled(e.target.checked)} />
+            Disabled
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={loadingOpt} onChange={(e) => setLoadingOpt(e.target.checked)} /> Loading
+            <input type="checkbox" checked={optionsLoading} onChange={(e) => setOptionsLoading(e.target.checked)} />
+            Loading
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={showFilter} onChange={(e) => setShowFilter(e.target.checked)} /> Show Filter
+            <input
+              type="checkbox"
+              checked={optionsShowFilter}
+              onChange={(e) => setOptionsShowFilter(e.target.checked)}
+            />
+            Show Filter
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={showFooter} onChange={(e) => setShowFooter(e.target.checked)} /> Show Footer
+            <input
+              type="checkbox"
+              checked={optionsShowFooter}
+              onChange={(e) => setOptionsShowFooter(e.target.checked)}
+            />
+            Show Footer
           </label>
           <br />
           <label>
             Position:
-            <select value={position} onChange={(e) => setPosition(e.target.value as PositionType)}>
+            <select value={optionsPosition} onChange={(e) => setOptionsPosition(e.target.value)}>
               <option value="cover-bottom">cover-bottom</option>
               <option value="bottom">bottom</option>
               <option value="top">top</option>
@@ -611,7 +922,8 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           </label>
           <br />
           <label>
-            Label: <input value={labelOpt} onChange={(e) => setLabelOpt(e.target.value)} />
+            Label:
+            <input value={optionsLabel} onChange={(e) => setOptionsLabel(e.target.value)} />
           </label>
         </div>
       </div>

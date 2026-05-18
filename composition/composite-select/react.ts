@@ -2,6 +2,9 @@
 import React from "react";
 import "./composite-select.js";
 import type { Item, InputChangeEvent } from "../types.js";
+import type { OptionsSectionManagerOptions } from "../options-section/OptionsSectionManager.js";
+import type { SelectedSectionManager, SelectedSectionManagerOptions } from "../selected-section/SelectedSectionManager.js";
+import type { CompositeManager } from "./CompositeManager.js";
 
 type BaseCompositeSelectProps<T extends Item = Item> = {
   className?: string;
@@ -31,7 +34,7 @@ type BaseCompositeSelectProps<T extends Item = Item> = {
   }) => void;
   "selected-onFocus"?: (detail: { originalEvent: FocusEvent }) => void;
   "selected-onChange"?: (selected: T[]) => void;
-  "selected-onComponentChange"?: (options: any) => void;
+  "selected-onComponentChange"?: (options: SelectedSectionManagerOptions<T>, reason: string) => void;
 
   // options-* properties
   "options-options"?: T[] | string;
@@ -49,7 +52,7 @@ type BaseCompositeSelectProps<T extends Item = Item> = {
   "options-onOk"?: () => void;
   "options-onHighlightChange"?: (id: string | number | null) => void;
   "options-onClear"?: () => void;
-  "options-onComponentChange"?: (options: any) => void;
+  "options-onComponentChange"?: (options: OptionsSectionManagerOptions<T>, reason: string) => void;
   "container-onClose"?: () => void;
 
   // container-* properties
@@ -128,21 +131,21 @@ export const CompositeSelect = React.forwardRef(
     React.useLayoutEffect(() => {
       const el = internalRef.current as any;
       if (el && el.getManager && el.getManager()) {
-        const mgr = el.getManager();
+        const mgr = el.getManager() as CompositeManager<T>;
         const unbinds: (() => void)[] = [];
 
         // SelectedSection events
         const selSub = mgr.selected.getSubscriber();
         if (selSub) {
           if (selectedOnDelete) {
-            unbinds.push(selSub.bind("onDelete", (id: string) => selectedOnDelete(id)));
+            unbinds.push(selSub.bind("onDelete", (id) => selectedOnDelete(id)));
           }
           if (selectedOnClear) {
             unbinds.push(selSub.bind("onClear", () => selectedOnClear()));
           }
           if (selectedOnChangeValue) {
             unbinds.push(
-              selSub.bind("onInputChange", (e: InputChangeEvent, previousValue?: string) =>
+              selSub.bind("onInputChange", (e, previousValue) =>
                 selectedOnChangeValue({
                   originalEvent: e,
                   value: e.target.value,
@@ -153,13 +156,13 @@ export const CompositeSelect = React.forwardRef(
             );
           }
           if (selectedOnFocus) {
-            unbinds.push(selSub.bind("onFocus", (e: FocusEvent) => selectedOnFocus({ originalEvent: e })));
+            unbinds.push(selSub.bind("onFocus", (e) => selectedOnFocus({ originalEvent: e })));
           }
           if (selectedOnChange) {
-            unbinds.push(selSub.bind("onChange", (selected: T[]) => selectedOnChange(selected)));
+            unbinds.push(selSub.bind("onChange", (selected) => selectedOnChange(selected)));
           }
           if (selectedOnSelectedItemsChanged) {
-            unbinds.push(selSub.bind("onComponentChange", (options: any) => selectedOnSelectedItemsChanged(options)));
+            unbinds.push(selSub.bind("onComponentChange", (options, reason) => selectedOnSelectedItemsChanged(options, reason)));
           }
         }
 
@@ -167,11 +170,11 @@ export const CompositeSelect = React.forwardRef(
         const optSub = mgr.options.getSubscriber();
         if (optSub) {
           if (optionsOnItemPick) {
-            unbinds.push(optSub.bind("onItemPick", (item: T) => optionsOnItemPick(item)));
+            unbinds.push(optSub.bind("onItemPick", (item) => optionsOnItemPick(item)));
           }
           if (optionsOnInputChange) {
             unbinds.push(
-              optSub.bind("onInputChange", (e: InputChangeEvent, previousValue?: string) =>
+              optSub.bind("onInputChange", (e, previousValue) =>
                 optionsOnInputChange({
                   originalEvent: e,
                   value: e.target.value,
@@ -188,14 +191,14 @@ export const CompositeSelect = React.forwardRef(
           }
           if (optionsOnHighlightChange) {
             unbinds.push(
-              optSub.bind("onHighlightChange", (id: string | number | null) => optionsOnHighlightChange(id)),
+              optSub.bind("onHighlightChange", (id) => optionsOnHighlightChange(id)),
             );
           }
           if (optionsOnClear) {
             unbinds.push(optSub.bind("onClear", () => optionsOnClear()));
           }
           if (optionsOnOptionsChanged) {
-            unbinds.push(optSub.bind("onComponentChange", (options: any) => optionsOnOptionsChanged(options)));
+            unbinds.push(optSub.bind("onComponentChange", (options, reason) => optionsOnOptionsChanged(options, reason)));
           }
         }
 

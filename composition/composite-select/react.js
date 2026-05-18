@@ -83,7 +83,9 @@ export const CompositeSelect = React.forwardRef((props, ref) => {
           unbinds.push(selSub.bind("onChange", (selected) => selectedOnChange(selected)));
         }
         if (selectedOnSelectedItemsChanged) {
-          unbinds.push(selSub.bind("onComponentChange", (options) => selectedOnSelectedItemsChanged(options)));
+          unbinds.push(
+            selSub.bind("onComponentChange", (options, reason) => selectedOnSelectedItemsChanged(options, reason)),
+          );
         }
       }
       // OptionsSection events
@@ -116,7 +118,7 @@ export const CompositeSelect = React.forwardRef((props, ref) => {
           unbinds.push(optSub.bind("onClear", () => optionsOnClear()));
         }
         if (optionsOnOptionsChanged) {
-          unbinds.push(optSub.bind("onComponentChange", (options) => optionsOnOptionsChanged(options)));
+          unbinds.push(optSub.bind("onComponentChange", (options, reason) => optionsOnOptionsChanged(options, reason)));
         }
       }
       // Container events

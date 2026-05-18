@@ -61,7 +61,8 @@ export const JsonSerializer = <T>(): Serializer<T> => ({
 
 export const predefinedUseUrlJson = <T>() => createUseUrlGet(JsonSerializer<T>());
 
-// ─── Hook ─────────────────────────────────────────────────────────────────────
+let pendingSearchParams: URLSearchParams | null = null;
+let batchTimeout: any = null;
 
 export default function useUrlGet<T = string>(opt: UseUrlGetProps<T>): [T, SetUrlValue<T>] {
   const {
@@ -89,28 +90,34 @@ export default function useUrlGet<T = string>(opt: UseUrlGetProps<T>): [T, SetUr
   // ── Write ─────────────────────────────────────────────────────────────────
   const setValue: SetUrlValue<T> = useCallback(
     (next) => {
-      setSearchParams(
-        (prev) => {
-          const updated = new URLSearchParams(prev);
+      if (!pendingSearchParams) {
+        pendingSearchParams = new URLSearchParams(window.location.search);
+      }
 
-          const isDefault =
-            next === null ||
-            next === undefined ||
-            next === defaultValue ||
-            (defaultValue !== null &&
-              defaultValue !== undefined &&
-              serializer.serialize(next) === serializer.serialize(defaultValue));
+      const isDefault =
+        next === null ||
+        next === undefined ||
+        next === defaultValue ||
+        (defaultValue !== null &&
+          defaultValue !== undefined &&
+          serializer.serialize(next) === serializer.serialize(defaultValue));
 
-          if (isDefault) {
-            updated.delete(key);
-          } else {
-            updated.set(key, serializer.serialize(next!));
-          }
+      if (isDefault) {
+        pendingSearchParams.delete(key);
+      } else {
+        pendingSearchParams.set(key, serializer.serialize(next!));
+      }
 
-          return updated;
-        },
-        { replace: true }, // don't pollute browser history on every keystroke
-      );
+      if (batchTimeout) {
+        clearTimeout(batchTimeout);
+      }
+
+      batchTimeout = setTimeout(() => {
+        if (pendingSearchParams) {
+          setSearchParams(pendingSearchParams, { replace: true });
+          pendingSearchParams = null;
+        }
+      }, 0);
     },
     [key, defaultValue, serializer, setSearchParams],
   );

@@ -18,6 +18,7 @@ pnpm-lock.yaml
 /vite-project/src/pages/*
 !/vite-project/src/pages/SelectedSectionDemo.tsx
 !/vite-project/src/pages/CompositeSelectDemo.tsx
+!/vite-project/src/pages/CompositeSelectDemoAttr.tsx
 !/vite-project/src/pages/OptionsSectionDemo.tsx
 !/vite-project/index.html
 !/vite-project/src/pages/useUrlGet.ts

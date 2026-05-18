@@ -208,12 +208,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   };
 
   const fetchOptions = useCallback(
-    async (
-      mgr: CompositeManager<CustomItem>,
-      search: string,
-      currentSelected: CustomItem[] = selectedItems,
-      overrideEmptyList?: boolean,
-    ) => {
+    async (search: string, currentSelected: CustomItem[] = selectedItems, overrideEmptyList?: boolean) => {
       setOptionsLoading(true);
       setOptionsDisabled(true);
       setSelectedLoading(true);
@@ -245,30 +240,24 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const handleEmptyListChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     setEmptyList(checked);
+  };
+
+  // Sync options whenever emptyList changes or on initial mount
+  useEffect(() => {
     const mgr = getManager();
     if (mgr) {
       const { search } = localDetermineSearch(mgr);
-      const found = checked ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+      const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
       const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
       setOptions(sortById(opts) as CustomItem[]);
     }
-  };
+  }, [emptyList]);
 
-  // This useEffect runs once on component mount to trigger the initial search/fetch of options if needed.
+  // Set the global window.mgr reference for debugging
   useEffect(() => {
     const mgr = getManager();
     if (mgr) {
       (window as unknown as Record<string, unknown>).mgr = mgr;
-
-      const { search } = localDetermineSearch(mgr);
-      if (options.length === 0 && !emptyList) {
-        // Initial synchronous load matching the vanilla HTML template
-        const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
-        const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
-        Promise.resolve().then(() => {
-          setOptions(sortById(opts) as CustomItem[]);
-        });
-      }
     }
   }, []);
 
@@ -475,14 +464,14 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       }
 
       mgr.options.setValue(search);
-      await fetchOptions(mgr, search, selectedItems);
+      await fetchOptions(search, selectedItems);
       mgr.selected.setFocus();
     }, 500);
 
     const debouncedOnInputChangeOptions = debounce(async (e: Event) => {
       setOnInputChangeCount((prev) => prev + 1);
       const search = (e.target as HTMLInputElement).value || "";
-      await fetchOptions(mgr, search, selectedItems);
+      await fetchOptions(search, selectedItems);
     }, 500);
 
     unsubs.push(mgr.selected.getSubscriber().bind("onInputChange", debouncedOnInputChangeSelected));
@@ -605,9 +594,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       </button>
 
       <div style={{ padding: "20px", background: "#fafafa", border: "1px dashed #ccc", marginBottom: "20px" }}>
-        <CompositeSelect<CustomItem>
-          ref={csRef}
-        ></CompositeSelect>
+        <CompositeSelect<CustomItem> ref={csRef}></CompositeSelect>
       </div>
 
       <div style={{ marginBottom: "15px", fontSize: "14px" }}>
@@ -703,9 +690,17 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center", width: "100%" }}>
           <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-            <span style={{ minWidth: "120px" }}>📏 <strong>Max Height</strong>:</span>
+            <span style={{ minWidth: "120px" }}>
+              📏 <strong>Max Height</strong>:
+            </span>
             <div style={{ display: "flex", gap: "2px" }}>
-              <button className="gcp-css white" onClick={() => stepMaxHeight(-10)} style={{ padding: "0 8px", minWidth: "auto" }}>▼</button>
+              <button
+                className="gcp-css white"
+                onClick={() => stepMaxHeight(-10)}
+                style={{ padding: "0 8px", minWidth: "auto" }}
+              >
+                ▼
+              </button>
               <div className="gcp-css input-wrapper" style={{ maxWidth: "150px", marginBottom: 0 }}>
                 <input
                   type="text"
@@ -716,19 +711,25 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
                 />
                 <label htmlFor={`maxheight-input-${id}`}>Max height</label>
               </div>
-              <button className="gcp-css white" onClick={() => stepMaxHeight(10)} style={{ padding: "0 8px", minWidth: "auto" }}>▲</button>
-            </div>
-            <button className="gcp-css" onClick={() => setOptionsMaxHeight(optionsMaxHeight || "")}>Set</button>
-            {["200px", "300px", "400px", "600px"].map((preset) => (
               <button
-                key={preset}
                 className="gcp-css white"
-                onClick={() => setOptionsMaxHeight(preset)}
+                onClick={() => stepMaxHeight(10)}
+                style={{ padding: "0 8px", minWidth: "auto" }}
               >
+                ▲
+              </button>
+            </div>
+            <button className="gcp-css" onClick={() => setOptionsMaxHeight(optionsMaxHeight || "")}>
+              Set
+            </button>
+            {["200px", "300px", "400px", "600px"].map((preset) => (
+              <button key={preset} className="gcp-css white" onClick={() => setOptionsMaxHeight(preset)}>
                 {preset}
               </button>
             ))}
-            <button className="gcp-css white" onClick={() => setOptionsMaxHeight("")}>Reset</button>
+            <button className="gcp-css white" onClick={() => setOptionsMaxHeight("")}>
+              Reset
+            </button>
           </div>
         </div>
 
