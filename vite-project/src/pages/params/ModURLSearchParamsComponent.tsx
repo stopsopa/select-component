@@ -6,12 +6,12 @@ import type { NavigateFunction } from "react-router-dom";
 
 import modURLSearchParams from "./modURLSearchParams.ts";
 
-const options = ["option1", "option2", "option3"] as const;
-type RadioOptionType = (typeof options)[number];
-const defaultRadioOption: RadioOptionType = options[0];
+const radioOptions = ["radio1", "radio2", "radio3"] as const;
+type RadioOptionType = (typeof radioOptions)[number];
+const defaultRadioOption: RadioOptionType = radioOptions[0];
 
-const multiOptions = ["item1", "item2", "item3", "item4"] as const;
-type SingleOptionType = (typeof multiOptions)[number];
+const selectOptions = ["item1", "item2", "item3", "item4"] as const;
+type SingleOptionType = (typeof selectOptions)[number];
 
 type MultiSelectOptionsArray = SingleOptionType[];
 
@@ -165,7 +165,11 @@ const Single = React.memo(function Single({
 
   console.log(`render ${i} >${search}<`);
 
-  setParam("radio", "fdsaf");
+  // setParam("radio", "option2");
+  // setParams({
+  //   multiSelect: ["item3", "item4"],
+  //   radio: "option2",
+  // });
 
   return (
     <div className="url-ser-container">
@@ -189,13 +193,13 @@ const Single = React.memo(function Single({
             <legend>
               <strong>Radio Group:</strong>
             </legend>
-            {["option1", "option2", "option3"].map((opt) => (
+            {radioOptions.map((opt) => (
               <label key={opt} className="url-ser-label-margin">
                 <input
                   type="radio"
                   value={opt}
                   checked={params.radio === opt}
-                  onChange={(e) => setParam("radio", e.target.value)}
+                  onChange={(e) => setParam("radio", e.target.value as RadioOptionType)}
                 />
                 {opt}
               </label>
@@ -216,7 +220,7 @@ const Single = React.memo(function Single({
               }
               className="url-ser-select"
             >
-              {multiOptions.map((l) => {
+              {selectOptions.map((l) => {
                 return (
                   <option key={l} value={l}>
                     {l}
