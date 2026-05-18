@@ -5,6 +5,8 @@ import { useLocation, useSearchParams } from "react-router-dom";
 // import { createUseQueryParams } from "./createUseQueryParams.tsx";
 import modURLSearchParams from "./modURLSearchParams.ts";
 
+import { mergeURLSearchParams } from "./toolsURLSearchParams.ts";
+
 // type RadioType = "option1" | "option2" | "option3";
 
 const multiOptions = ["item1", "item2", "item3", "item4"] as const;
@@ -139,6 +141,17 @@ export default function UrlSerialiser() {
 
 function Single({ i, location }) {
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(location.search, i);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const nextParams = mergeURLSearchParams(searchParams, updatedURLSearchParams);
+
+    if (nextParams.toString() !== searchParams.toString()) {
+      console.log(`setSearchParams(  ${nextParams.toString()}  )`);
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [updatedURLSearchParams, searchParams, setSearchParams]);
 
   console.log("render", i);
 
