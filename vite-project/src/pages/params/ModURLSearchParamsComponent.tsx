@@ -15,6 +15,10 @@ type SingleOptionType = (typeof selectOptions)[number];
 
 type MultiSelectOptionsArray = SingleOptionType[];
 
+/**
+ * Let's define parameters names and their keys to represent them in URL
+ * And also default values, encoding and decoding functions
+ */
 const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
   {
     text: {
@@ -54,10 +58,10 @@ const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
       decode: (value) => value === "1",
     },
   },
-  (key, i: number | undefined) => (i !== undefined ? `${key}-${i}` : key),
+  (key, i: number) => `${key}-${i}`,
 );
 
-export default function UrlSerialiser() {
+export default function ParentComponent() {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -79,6 +83,9 @@ export default function UrlSerialiser() {
   const addComponent = useCallback(() => {
     const nextIndex = list.length > 0 ? Math.max(...list) + 1 : 1;
 
+    // We read from window.location.search directly instead of location.search to avoid
+    // having location.search in the dependency array, which would recreate this callback
+    // on every keystroke.
     const currentParams = new URLSearchParams(window.location.search);
     currentParams.set(`t-${nextIndex}`, "");
     navigate({ search: currentParams.toString() }, { replace: true });
@@ -87,11 +94,16 @@ export default function UrlSerialiser() {
   const deleteItem = useCallback(
     (i: number) => {
       // 1. Read live query params
+      // Reading from window.location.search directly instead of location.search.
+      // If we used location.search, we would have to add it to the dependency array.
+      // This would recreate deleteItem on every keystroke, which would break
+      // React.memo(ChildComponent) and trigger expensive re-renders for all sibling components.
+      // Conversely, omitting it from the dependency array would cause stale closures.
       const nextSearchParams = new URLSearchParams(window.location.search);
 
       // 2. Find only keys belonging to index i
       const childParams = separateIndexedSearchParams(nextSearchParams, i);
-      
+
       let changed = false;
       childParams.forEach((_, key) => {
         nextSearchParams.delete(key);
@@ -188,7 +200,7 @@ export default function UrlSerialiser() {
       <div>
         {list.map((i) => {
           const search = separateIndexedSearchParams(location.search, i).toString();
-          return <Single key={i} i={i} search={search} navigate={navigate} onDelete={() => deleteItem(i)} />;
+          return <ChildComponent key={i} i={i} search={search} navigate={navigate} onDelete={() => deleteItem(i)} />;
         })}
       </div>
     </div>
@@ -200,7 +212,7 @@ export default function UrlSerialiser() {
  *
  * React.memo() work like useMemo() but for components but the props are used as array of dependencies for useMemo()
  */
-const Single = React.memo(function Single({
+const ChildComponent = React.memo(function ChildComponent({
   i,
   search,
   navigate,
