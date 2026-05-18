@@ -37,7 +37,16 @@ export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>
   config: C,
   keyFn?: (key: string, ctx?: Ctx) => string,
 ) {
-  return function useQueryParams(search: string | URLSearchParams, ctx?: Ctx) {
+  function separateIndexedSearchParams(search: string | URLSearchParams, ctx?: Ctx): URLSearchParams {
+    const allowedKeys = Object.values(config).map((def) => {
+      const getParam = (def as ParamDef<unknown>).getParam;
+      return keyFn ? keyFn(getParam, ctx) : getParam;
+    });
+    const normalized = typeof search === "string" ? new URLSearchParams(search) : search;
+    return mergeURLSearchParams(new URLSearchParams(), allowedKeys, normalized);
+  }
+
+  function useQueryParams(search: string | URLSearchParams, ctx?: Ctx) {
     const applyKey = useCallback(
       (baseKey: string) => {
         return keyFn ? keyFn(baseKey, ctx) : baseKey;
@@ -47,9 +56,7 @@ export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>
 
     // Derive the initial URLSearchParams once from the input, filtered by our allowed keys
     const initial = useMemo(() => {
-      const allowedKeys = Object.values(config).map((def) => applyKey((def as ParamDef<unknown>).getParam));
-      const normalized = typeof search === "string" ? new URLSearchParams(search) : search;
-      return mergeURLSearchParams(new URLSearchParams(), allowedKeys, normalized);
+      return separateIndexedSearchParams(search, ctx);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // intentionally empty — treat `search` as an initial value
 
@@ -112,5 +119,10 @@ export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>
       setParam,
       setParams,
     };
+  }
+
+  return {
+    useQueryParams,
+    separateIndexedSearchParams,
   };
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
+import type { NavigateFunction } from "react-router-dom";
 
 // import { createUseQueryParams } from "./createUseQueryParams.tsx";
 import modURLSearchParams from "./modURLSearchParams.ts";
@@ -15,7 +16,7 @@ type SingleOption = "item1" | "item2" | "item3" | "item4";
 
 type MultiSelectOptionsArray = SingleOption[];
 
-const useQueryParams = modURLSearchParams(
+const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
   {
     text: {
       default: "",
@@ -61,6 +62,13 @@ export default function UrlSerialiser() {
   const [list, setList] = useState<number[]>([]);
 
   const location = useLocation();
+
+  /**
+   * Important part:
+   * navigate have to be injected from parent to Single() react component (the child)
+   * else it will cause multiple re-render
+   */
+  const navigate = useNavigate();
 
   useEffect(() => {
     // create style element and put some styles
@@ -131,29 +139,29 @@ export default function UrlSerialiser() {
         Add Text Param
       </button>
       <div>
-        {list.map((i) => (
-          <Single key={i} i={i} location={location} />
-        ))}
+        {list.map((i) => {
+          const search = separateIndexedSearchParams(location.search, i).toString();
+          return <Single key={i} i={i} search={search} navigate={navigate} />;
+        })}
       </div>
     </div>
   );
 }
 
-function Single({ i, location }) {
-  const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(location.search, i);
-
-  const [searchParams, setSearchParams] = useSearchParams();
+const Single = React.memo(function Single({ i, search, navigate }: { i: number; search: string; navigate: NavigateFunction }) {
+  const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, i);
 
   useEffect(() => {
-    const nextParams = mergeURLSearchParams(searchParams, updatedURLSearchParams);
+    const currentSearchParams = new URLSearchParams(window.location.search);
+    const nextParams = mergeURLSearchParams(currentSearchParams, updatedURLSearchParams);
 
-    if (nextParams.toString() !== searchParams.toString()) {
-      console.log(`setSearchParams(  ${nextParams.toString()}  )`);
-      setSearchParams(nextParams, { replace: true });
+    if (nextParams.toString() !== currentSearchParams.toString()) {
+      console.log(`setSearchParams(  ${nextParams.toString()}  ) ${i}`);
+      navigate({ search: nextParams.toString() }, { replace: true });
     }
-  }, [updatedURLSearchParams, searchParams, setSearchParams]);
+  }, [updatedURLSearchParams, navigate]);
 
-  console.log("render", i);
+  console.log(`render ${i} >${search}<`);
 
   return (
     <div className="url-ser-container">
@@ -166,7 +174,7 @@ function Single({ i, location }) {
               type="text"
               value={params.text}
               onChange={(e) => {
-                console.log(`setParam("text", "${e.target.value}")`);
+                console.log(`text ${i} >${e.target.value}<`);
                 setParam("text", e.target.value);
               }}
               className="url-ser-input"
@@ -246,4 +254,4 @@ function Single({ i, location }) {
       </div>
     </div>
   );
-}
+});
