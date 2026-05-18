@@ -349,6 +349,17 @@ const ChildComponent = React.memo(function ChildComponent({
                  *
                  * see console.log in chrome developer tools - only one render
                  */
+                if (params.radio === "radio2") {
+                  setParams({
+                    text: `text-${i} second state`,
+                    radio: "radio3",
+                    multiSelect: [selectOptions[1], selectOptions[selectOptions.length - 2]],
+                    checkboxA: true,
+                    checkboxB: false,
+                  });
+
+                  return;
+                }
                 setParams({
                   text: `text-${i}`,
                   radio: "radio2",
