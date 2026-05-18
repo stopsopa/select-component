@@ -139,6 +139,13 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [optionsPosition, setOptionsPosition] = predefinedUseUrlString(`pos-${id}`, "cover-bottom");
   const [optionsLabel, setOptionsLabel] = predefinedUseUrlString(`olb-${id}`, "");
 
+  const [activeTemplates, setActiveTemplates] = predefinedUseUrlStringArray(`tpl-${id}`, []);
+  const customRenderItem = activeTemplates.includes("item");
+  const customRenderList = activeTemplates.includes("list");
+
+  const [optionsRender, setOptionsRender] = predefinedUseUrlString(`or-${id}`, "default");
+  const [optionsCustomEmpty, setOptionsCustomEmpty] = predefinedUseUrlBoolean(`oce-${id}`, false);
+
   function setSelectedDisabled(value: boolean) {
     console.log("setSelectedDisabled", value);
     setSelectedDisabledRaw(value);
@@ -262,6 +269,10 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         optionsShowFooter,
         optionsPosition,
         optionsLabel,
+        customRenderItem,
+        customRenderList,
+        optionsRender,
+        optionsCustomEmpty,
       });
       mgr.selected.setValue(selectedValue, false);
       mgr.selected.setLabel(selectedLabel);
@@ -276,6 +287,117 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       mgr.options.setShowFooter(optionsShowFooter);
       mgr.container.setPosition(optionsPosition as PositionType);
       mgr.options.setLabel(optionsLabel);
+
+      // Selected Custom Render Item
+      if (customRenderItem) {
+        mgr.selected.setRenderItem(function (item: CustomItem) {
+          const el = document.createElement("div");
+          el.className = "element";
+          el.dataset.id = String(item.id);
+          el.style.border = `2px solid ${item.color || "black"}`;
+          el.style.display = "flex";
+          el.style.alignItems = "center";
+          el.style.gap = "5px";
+          el.style.padding = "5px";
+          el.style.background = "#fff";
+
+          if (item.img) {
+            const img = document.createElement("img");
+            img.src = `/img/${item.img}`;
+            img.style.width = "20px";
+            img.style.height = "20px";
+            img.style.objectFit = "contain";
+            el.appendChild(img);
+          }
+
+          const label = document.createElement("label");
+          label.textContent = item.label;
+
+          const del = document.createElement("div");
+          del.dataset.remove = String(item.id);
+
+          el.appendChild(label);
+          el.appendChild(del);
+
+          return el;
+        });
+      } else {
+        mgr.selected.setRenderItem();
+      }
+
+      // Selected Custom Render List
+      if (customRenderList) {
+        mgr.selected.setRenderList(function (
+          selected: CustomItem[],
+          defaultRenderList: (list: CustomItem[]) => HTMLElement[],
+        ) {
+          const elements = defaultRenderList(selected);
+          const groups: HTMLElement[] = [];
+          for (let i = 0; i < elements.length; i += 3) {
+            const groupDiv = document.createElement("div");
+            groupDiv.style.border = "1px solid #1a73e8";
+            groupDiv.style.borderRadius = "8px";
+            groupDiv.style.padding = "8px";
+            groupDiv.style.margin = "4px";
+            groupDiv.style.display = "flex";
+            groupDiv.style.gap = "8px";
+            groupDiv.style.flexWrap = "wrap";
+            groupDiv.style.background = "#e8f0fe";
+            groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
+            const chunk = elements.slice(i, i + 3);
+            chunk.forEach((el: HTMLElement) => groupDiv.appendChild(el));
+            groups.push(groupDiv);
+          }
+          return groups;
+        });
+      } else {
+        mgr.selected.setRenderList();
+      }
+
+      // Options Custom Render Item
+      if (optionsRender === "custom") {
+        mgr.options.setRenderItem((item: Item) => {
+          const el = document.createElement("div");
+          el.className = "element";
+          el.style.padding = "12px";
+          el.style.background = item.selected ? "#fff3e0" : "transparent";
+          el.style.color = item.selected ? "#e65100" : "inherit";
+          el.dataset.id = String(item.id);
+
+          const icon = document.createElement("span");
+          icon.textContent = item.selected ? "🔥 " : "❄️ ";
+          icon.style.marginRight = "10px";
+
+          const label = document.createElement("label");
+          label.textContent = item.label || "";
+
+          el.appendChild(icon);
+          el.appendChild(label);
+          return el;
+        });
+      } else if (optionsRender === "string") {
+        mgr.options.setRenderItem(
+          (item: Item) => `
+          <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? "#e8f5e9" : "white"}; color: ${item.selected ? "#2e7d32" : "#333"};">
+            <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? "✅" : "⬜"}</span>
+            <strong style="margin-left: 10px;">${item.label}</strong>
+            <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
+          </div>
+        `,
+        );
+      } else {
+        mgr.options.setRenderItem();
+      }
+
+      // Options Custom Render Empty State
+      if (optionsCustomEmpty) {
+        mgr.options.setRenderEmpty(
+          () =>
+            `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`,
+        );
+      } else {
+        mgr.options.setRenderEmpty();
+      }
     }
   }, [
     selectedValue,
@@ -290,6 +412,10 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     optionsShowFooter,
     optionsPosition,
     optionsLabel,
+    customRenderItem,
+    customRenderList,
+    optionsRender,
+    optionsCustomEmpty,
   ]);
 
   useEffect(() => {
@@ -506,82 +632,19 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       <div style={{ marginBottom: "20px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button
           className="gcp-css"
-          onClick={() => {
-            getManager()?.selected.setRenderItem(function (item: CustomItem) {
-              const el = document.createElement("div");
-              el.className = "element";
-              el.dataset.id = String(item.id);
-              el.style.border = `2px solid ${item.color || "black"}`;
-              el.style.display = "flex";
-              el.style.alignItems = "center";
-              el.style.gap = "5px";
-              el.style.padding = "5px";
-              el.style.background = "#fff";
-
-              if (item.img) {
-                const img = document.createElement("img");
-                // Note: images are served from the public directory in Vite
-                img.src = `/img/${item.img}`;
-                img.style.width = "20px";
-                img.style.height = "20px";
-                img.style.objectFit = "contain";
-                el.appendChild(img);
-              }
-
-              const label = document.createElement("label");
-              label.textContent = item.label;
-
-              const del = document.createElement("div");
-              del.dataset.remove = String(item.id);
-
-              el.appendChild(label);
-              el.appendChild(del);
-
-              return el;
-            });
-          }}
+          onClick={() => setActiveTemplates((prev) => [...new Set([...prev, "item"])])}
         >
           Set Custom Render Item
         </button>
         <button
           className="gcp-css"
-          onClick={() => {
-            getManager()?.selected.setRenderList(function (
-              selected: CustomItem[],
-              defaultRenderList: (list: CustomItem[]) => HTMLElement[],
-            ) {
-              const elements = defaultRenderList(selected);
-              const groups: HTMLElement[] = [];
-              for (let i = 0; i < elements.length; i += 3) {
-                const groupDiv = document.createElement("div");
-                groupDiv.style.border = "1px solid #1a73e8";
-                groupDiv.style.borderRadius = "8px";
-                groupDiv.style.padding = "8px";
-                groupDiv.style.margin = "4px";
-                groupDiv.style.display = "flex";
-                groupDiv.style.gap = "8px";
-                groupDiv.style.flexWrap = "wrap";
-                groupDiv.style.background = "#e8f0fe";
-                groupDiv.style.boxShadow = "0 2px 5px rgba(0,0,0,0.05)";
-                const chunk = elements.slice(i, i + 3);
-                chunk.forEach((el: HTMLElement) => groupDiv.appendChild(el));
-                groups.push(groupDiv);
-              }
-              return groups;
-            });
-          }}
+          onClick={() => setActiveTemplates((prev) => [...new Set([...prev, "list"])])}
         >
           Set Custom Render List
         </button>
         <button
           className="gcp-css"
-          onClick={() => {
-            const mgr = getManager();
-            if (mgr) {
-              mgr.selected.setRenderItem();
-              mgr.selected.setRenderList();
-            }
-          }}
+          onClick={() => setActiveTemplates([])}
         >
           Reset Templates
         </button>
@@ -620,61 +683,26 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           </span>
           <button
             className="gcp-css"
-            onClick={() => {
-              getManager()?.options.setRenderItem((item: Item) => {
-                const el = document.createElement("div");
-                el.className = "element";
-                el.style.padding = "12px";
-                el.style.background = item.selected ? "#fff3e0" : "transparent";
-                el.style.color = item.selected ? "#e65100" : "inherit";
-                el.dataset.id = String(item.id);
-
-                const icon = document.createElement("span");
-                icon.textContent = item.selected ? "🔥 " : "❄️ ";
-                icon.style.marginRight = "10px";
-
-                const label = document.createElement("label");
-                label.textContent = item.label || "";
-
-                el.appendChild(icon);
-                el.appendChild(label);
-                return el;
-              });
-            }}
+            onClick={() => setOptionsRender("custom")}
           >
             Set Custom Render
           </button>
           <button
             className="gcp-css"
-            onClick={() => {
-              getManager()?.options.setRenderItem(
-                (item: Item) => `
-                <div class="element" data-id="${item.id}" style="border: 1px solid #ccc; margin: 2px; border-radius: 20px; padding: 5px 15px; background: ${item.selected ? "#e8f5e9" : "white"}; color: ${item.selected ? "#2e7d32" : "#333"};">
-                  <span style="font-size: 1.2em; vertical-align: middle;">${item.selected ? "✅" : "⬜"}</span>
-                  <strong style="margin-left: 10px;">${item.label}</strong>
-                  <small style="margin-left: auto; opacity: 0.5;">#${item.id}</small>
-                </div>
-              `,
-              );
-            }}
+            onClick={() => setOptionsRender("string")}
           >
             Set String Render
           </button>
-          <button className="gcp-css" onClick={() => getManager()?.options.setRenderItem()}>
+          <button className="gcp-css" onClick={() => setOptionsRender("default")}>
             Set Default Render
           </button>
           <button
             className="gcp-css"
-            onClick={() => {
-              getManager()?.options.setRenderEmpty(
-                () =>
-                  `<div style="padding: 40px; text-align: center; color: #ff5252; font-weight: bold; border: 2px dashed #ff5252; border-radius: 8px;">⚠️ Custom Empty State!</div>`,
-              );
-            }}
+            onClick={() => setOptionsCustomEmpty(true)}
           >
             Set Custom Empty
           </button>
-          <button className="gcp-css" onClick={() => getManager()?.options.setRenderEmpty()}>
+          <button className="gcp-css" onClick={() => setOptionsCustomEmpty(false)}>
             Set Default Empty
           </button>
         </div>
