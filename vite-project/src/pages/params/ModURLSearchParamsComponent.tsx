@@ -1,40 +1,39 @@
 import React, { useEffect, useState } from "react";
 
-import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import type { NavigateFunction } from "react-router-dom";
 
-// import { createUseQueryParams } from "./createUseQueryParams.tsx";
 import modURLSearchParams from "./modURLSearchParams.ts";
 
-import { mergeURLSearchParams } from "./toolsURLSearchParams.ts";
-
-// type RadioType = "option1" | "option2" | "option3";
+const options = ["option1", "option2", "option3"] as const;
+type RadioOptionType = (typeof options)[number];
+const defaultRadioOption: RadioOptionType = options[0];
 
 const multiOptions = ["item1", "item2", "item3", "item4"] as const;
+type SingleOptionType = (typeof multiOptions)[number];
 
-type SingleOption = "item1" | "item2" | "item3" | "item4";
-
-type MultiSelectOptionsArray = SingleOption[];
+type MultiSelectOptionsArray = SingleOptionType[];
 
 const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
   {
     text: {
       default: "",
       getParam: "t",
-      encode: (value: string) => value,
-      decode: (value: string) => value,
+      encode: (value) => value,
+      decode: (value) => value,
     },
     radio: {
-      default: "option1",
+      default: defaultRadioOption as RadioOptionType,
       getParam: "r",
-      encode: (value: string) => value,
-      decode: (value: string) => value,
+      encode: (value) => value,
+      decode: (value) => value as RadioOptionType,
     },
     multiSelect: {
       default: [] as MultiSelectOptionsArray,
       getParam: "m",
-      encode: (value: MultiSelectOptionsArray) => JSON.stringify(value),
-      decode: (value: string) => {
+      encode: (value) => JSON.stringify(value),
+      decode: (value) => {
         try {
           return JSON.parse(value);
         } catch {
@@ -45,14 +44,14 @@ const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
     checkboxA: {
       default: false,
       getParam: "c1",
-      encode: (value: boolean) => (value ? "1" : "0"),
-      decode: (value: string) => value === "1",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
     },
     checkboxB: {
       default: true,
       getParam: "c2",
-      encode: (value: boolean) => (value ? "1" : "0"),
-      decode: (value: string) => value === "1",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
     },
   },
   (key, i: number | undefined) => (i !== undefined ? `${key}-${i}` : key),
@@ -150,7 +149,7 @@ export default function UrlSerialiser() {
 /**
  * Another aspect is that we have to wrap with React.memo() becaue parent will rerender
  * on any url change so it will cascade down to children
- * 
+ *
  * React.memo() work like useMemo() but for components but the props are used as array of dependencies for useMemo()
  */
 const Single = React.memo(function Single({
@@ -162,19 +161,11 @@ const Single = React.memo(function Single({
   search: string;
   navigate: NavigateFunction;
 }) {
-  const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, i);
-
-  useEffect(() => {
-    const currentSearchParams = new URLSearchParams(window.location.search);
-    const nextParams = mergeURLSearchParams(currentSearchParams, updatedURLSearchParams);
-
-    if (nextParams.toString() !== currentSearchParams.toString()) {
-      console.log(`setSearchParams(  ${nextParams.toString()}  ) ${i}`);
-      navigate({ search: nextParams.toString() }, { replace: true });
-    }
-  }, [updatedURLSearchParams, navigate]);
+  const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, navigate, i);
 
   console.log(`render ${i} >${search}<`);
+
+  setParam("radio", "fdsaf");
 
   return (
     <div className="url-ser-container">
@@ -220,7 +211,7 @@ const Single = React.memo(function Single({
               onChange={(e) =>
                 setParam(
                   "multiSelect",
-                  Array.from(e.target.selectedOptions, (option) => option.value as SingleOption),
+                  Array.from(e.target.selectedOptions, (option) => option.value as SingleOptionType),
                 )
               }
               className="url-ser-select"
@@ -259,7 +250,6 @@ const Single = React.memo(function Single({
         </form>
 
         <div className="url-ser-dump-container">
-          <strong>State Dump:</strong>
           <pre className="url-ser-pre">
             {JSON.stringify({ params, path: updatedURLSearchParams.toString() }, null, 2)}
           </pre>

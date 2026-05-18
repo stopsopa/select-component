@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 
-import { mergeURLSearchParams, normalizeSearchParams, sortSearchParamsByKeyThenValue } from "./toolsURLSearchParams.ts";
+import { mergeURLSearchParams } from "./toolsURLSearchParams.ts";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -11,30 +11,13 @@ type ParamDef<T> = {
   decode: (value: string) => T;
 };
 
-// Use a loose base type for the config constraint to avoid 'any'
-// `encode: (value: never) => string` allows any function of 1 argument to be assigned.
-type ParamConfig = Record<
-  string,
-  {
-    default: unknown;
-    getParam: string;
-    encode: (value: never) => string;
-    decode: (value: string) => unknown;
-  }
->;
-
-// Extracts the value type from a config entry by looking at its 'default' property
-type InferValue<P> = P extends { default: infer T } ? T : never;
-
 // Maps config keys to their value types
-type ParamValues<C extends ParamConfig> = {
-  [K in keyof C]: InferValue<C[K]>;
-};
+type ParamValues<C> = C;
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 
-export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>(
-  config: C,
+export default function modURLSearchParams<C extends Record<string, unknown>, Ctx = unknown>(
+  config: { [K in keyof C]: ParamDef<C[K]> },
   keyFn?: (key: string, ctx?: Ctx) => string,
 ) {
   function separateIndexedSearchParams(search: string | URLSearchParams, ctx?: Ctx): URLSearchParams {
@@ -46,7 +29,11 @@ export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>
     return mergeURLSearchParams(new URLSearchParams(), allowedKeys, normalized);
   }
 
-  function useQueryParams(search: string | URLSearchParams, ctx?: Ctx) {
+  function useQueryParams(
+    search: string | URLSearchParams,
+    navigate?: (to: { search: string }, options?: { replace?: boolean }) => void,
+    ctx?: Ctx,
+  ) {
     const applyKey = useCallback(
       (baseKey: string) => {
         return keyFn ? keyFn(baseKey, ctx) : baseKey;
@@ -73,13 +60,23 @@ export default function modURLSearchParams<C extends ParamConfig, Ctx = unknown>
       return result as ParamValues<C>;
     }, [paramsState, applyKey]);
 
+    useEffect(() => {
+      if (!navigate) return;
+      const currentSearchParams = new URLSearchParams(window.location.search);
+      const nextParams = mergeURLSearchParams(currentSearchParams, paramsState);
+
+      if (nextParams.toString() !== currentSearchParams.toString()) {
+        navigate({ search: nextParams.toString() }, { replace: true });
+      }
+    }, [paramsState, navigate]);
+
     // ── setParam: update a single key ────────────────────────────────────────
     // If the new value equals the default, the key is removed from the URL
     // instead of being set — keeping the URL clean. The value will still
     // appear in `params` as the default.
 
-    const setParam = useCallback(<K extends keyof C>(key: K, value: InferValue<C[K]>) => {
-      const def = config[key] as unknown as ParamDef<InferValue<C[K]>>;
+    const setParam = useCallback(<K extends keyof C>(key: K, value: C[K]) => {
+      const def = config[key] as unknown as ParamDef<C[K]>;
       setParamsState((prev) => {
         const next = new URLSearchParams(prev);
         const finalKey = applyKey(def.getParam);
