@@ -28,8 +28,19 @@ console.log(
 );
 console.log("💡 Run enableStrictMode() or disableStrictMode() in this console to toggle.");
 
+const getBasename = () => {
+  let path = window.location.pathname;
+  if (path.endsWith('/index.html')) {
+    path = path.slice(0, -11);
+  }
+  if (path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
+  return path;
+};
+
 const AppTree = (
-  <BrowserRouter>
+  <BrowserRouter basename={getBasename()}>
     <App />
   </BrowserRouter>
 );
