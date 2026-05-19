@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 
-import { mergeURLSearchParams } from "./toolsURLSearchParams.ts";
+import { mergeURLSearchParams, syncURLSearchParams } from "./toolsURLSearchParams.ts";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -63,12 +63,16 @@ export default function modURLSearchParams<C extends Record<string, unknown>, Ct
     useEffect(() => {
       if (!navigate) return;
       const currentSearchParams = new URLSearchParams(window.location.search);
-      const nextParams = mergeURLSearchParams(currentSearchParams, paramsState);
 
-      if (nextParams.toString() !== currentSearchParams.toString()) {
+      // Find all parameter keys governed by this specific hook instance
+      const governedKeys = Object.values(config).map((def) => applyKey((def as ParamDef<unknown>).getParam));
+
+      const nextParams = syncURLSearchParams(currentSearchParams, governedKeys, paramsState);
+
+      if (nextParams.toString() !== new URLSearchParams(window.location.search).toString()) {
         navigate({ search: nextParams.toString() }, { replace: true });
       }
-    }, [paramsState, navigate]);
+    }, [paramsState, navigate, applyKey]);
 
     // ── setParam: update a single key ────────────────────────────────────────
     // If the new value equals the default, the key is removed from the URL

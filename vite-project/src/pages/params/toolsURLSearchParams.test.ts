@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 
-import { mergeURLSearchParams, cloneSearchParams, normalizeSearchParams, compareNormalizedSearchParams, sortSearchParamsByKeyThenValue } from "./toolsURLSearchParams.ts";
+import { mergeURLSearchParams, cloneSearchParams, normalizeSearchParams, compareNormalizedSearchParams, sortSearchParamsByKeyThenValue, syncURLSearchParams } from "./toolsURLSearchParams.ts";
 
 /**
  * node --test vite-project/src/pages/params/toolsURLSearchParams.test.ts
@@ -204,5 +204,53 @@ describe("sortSearchParamsByKeyThenValue", () => {
     const sorted = sortSearchParamsByKeyThenValue(original);
 
     assert.strictEqual(sorted.toString(), "");
+  });
+});
+
+describe("syncURLSearchParams", () => {
+  it("should sync governed keys and delete elided defaults", () => {
+    const base = new URLSearchParams("a=1&b=2&c=3");
+    const source = new URLSearchParams("a=10");
+    const governed = ["a", "b"]; // 'a' present, 'b' absent (should be deleted), 'c' not governed (should be kept untouched)
+
+    const result = syncURLSearchParams(base, governed, source);
+    // 'a' updated to 10
+    // 'b' deleted because absent in source
+    // 'c' kept untouched at 3
+    assert.strictEqual(result.toString(), "a=10&c=3");
+  });
+
+  it("should support multiple consecutive sources with overwriting and consecutive deletions", () => {
+    const base = new URLSearchParams("a=1&b=2&c=3&d=4");
+    const governed = ["a", "b", "c"];
+
+    // Source 1 has 'a' and 'b' but not 'c'
+    const s1 = new URLSearchParams("a=10&b=20");
+    // Source 2 has 'c' but not 'a' or 'b'
+    const s2 = new URLSearchParams("c=30");
+
+    // base: a=1, b=2, c=3, d=4
+    // after s1: a=10, b=20, c deleted (absent in s1), d=4 (not governed) -> result: a=10, b=20, d=4
+    // after s2: a deleted (absent in s2), b deleted (absent in s2), c=30, d=4 (not governed) -> result: c=30, d=4
+    const result = syncURLSearchParams(base, governed, s1, s2);
+    assert.strictEqual(result.toString(), "c=30&d=4");
+  });
+
+  it("should handle presence and later absence correctly on consecutive URLSearchParams", () => {
+    const base = new URLSearchParams("a=1&b=2");
+    const governed = ["a", "b"];
+
+    const s1 = new URLSearchParams("a=10&b=20"); // both present
+    const s2 = new URLSearchParams("a=100");     // 'b' absent (deleted)
+    const s3 = new URLSearchParams("b=200");     // 'a' absent (deleted), 'b' present
+
+    const r1 = syncURLSearchParams(base, governed, s1);
+    assert.strictEqual(r1.toString(), "a=10&b=20");
+
+    const r2 = syncURLSearchParams(base, governed, s1, s2);
+    assert.strictEqual(r2.toString(), "a=100");
+
+    const r3 = syncURLSearchParams(base, governed, s1, s2, s3);
+    assert.strictEqual(r3.toString(), "b=200");
   });
 });
