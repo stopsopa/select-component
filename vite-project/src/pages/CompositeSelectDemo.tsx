@@ -185,8 +185,8 @@ export default function CompositeSelectDemo() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [instances, setInstances] = useState<number[]>(() => {
-    const params = new URLSearchParams(window.location.search);
+  const instances = useMemo(() => {
+    const params = new URLSearchParams(location.search);
     const indexes = new Set<number>();
     params.forEach((_, key) => {
       const match = key.match(/-(\d+)$/);
@@ -196,25 +196,6 @@ export default function CompositeSelectDemo() {
     });
     const parsed = Array.from(indexes).sort((a, b) => a - b);
     return parsed.length > 0 ? parsed : [1];
-  });
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const indexes = new Set<number>();
-    params.forEach((_, key) => {
-      const match = key.match(/-(\d+)$/);
-      if (match) {
-        indexes.add(parseInt(match[1], 10));
-      }
-    });
-    const nextList = Array.from(indexes).sort((a, b) => a - b);
-    setInstances((current) => {
-      const target = nextList.length > 0 ? nextList : [1];
-      if (current.length === target.length && current.every((val, index) => val === target[index])) {
-        return current;
-      }
-      return target;
-    });
   }, [location.search]);
 
   const addInstance = useCallback(() => {
@@ -433,9 +414,11 @@ const DemoInstance = memo(function DemoInstance({
       const { search } = localDetermineSearch(mgr);
       const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
       const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
-      setOptions(sortById(opts) as CustomItem[]);
+      Promise.resolve().then(() => {
+        setOptions(sortById(opts) as CustomItem[]);
+      });
     }
-  }, [emptyList]);
+  }, [emptyList, selectedItems]);
 
   // Set the global window.mgr reference for debugging
   useEffect(() => {
@@ -448,24 +431,24 @@ const DemoInstance = memo(function DemoInstance({
   useEffect(() => {
     const mgr = getManager();
     if (mgr) {
-      console.log("useEffect", {
-        selectedValue,
-        selectedLabel,
-        selectedDisabled,
-        selectedError,
-        selectedLoading,
-        selectedShowInput,
-        optionsDisabled,
-        optionsLoading,
-        optionsShowFilter,
-        optionsShowFooter,
-        optionsPosition,
-        optionsLabel,
-        customRenderItem,
-        customRenderList,
-        optionsRender,
-        optionsCustomEmpty,
-      });
+      // console.log("useEffect", {
+      //   selectedValue,
+      //   selectedLabel,
+      //   selectedDisabled,
+      //   selectedError,
+      //   selectedLoading,
+      //   selectedShowInput,
+      //   optionsDisabled,
+      //   optionsLoading,
+      //   optionsShowFilter,
+      //   optionsShowFooter,
+      //   optionsPosition,
+      //   optionsLabel,
+      //   customRenderItem,
+      //   customRenderList,
+      //   optionsRender,
+      //   optionsCustomEmpty,
+      // });
       mgr.selected.setValue(selectedValue, false);
       mgr.selected.setLabel(selectedLabel);
       mgr.selected.setDisabled(selectedDisabled);
@@ -773,7 +756,7 @@ const DemoInstance = memo(function DemoInstance({
       }}
     >
       <h2 style={{ marginTop: 0 }}>Instance #{id}</h2>
-      <button onClick={onRemove} className="gcp-css" style={{ position: "absolute", top: "20px", right: "20px" }}>
+      <button onClick={() => onRemove(id)} className="gcp-css" style={{ position: "absolute", top: "20px", right: "20px" }}>
         Destroy
       </button>
 

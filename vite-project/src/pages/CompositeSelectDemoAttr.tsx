@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback, memo } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback, memo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import type { NavigateFunction } from "react-router-dom";
 import { CompositeSelect } from "composite-select/composite-select/react";
@@ -26,6 +26,7 @@ import {
   togglePresenceOnTheList,
   markSelectedByIds,
 } from "composite-select/composite-select/helpers";
+import debounce from "composite-select/composite-select/debounce";
 
 import { searchNames as searchNamesOriginal } from "./namesSource";
 
@@ -179,8 +180,8 @@ export default function CompositeSelectDemo() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [instances, setInstances] = useState<number[]>(() => {
-    const params = new URLSearchParams(window.location.search);
+  const instances = useMemo(() => {
+    const params = new URLSearchParams(location.search);
     const indexes = new Set<number>();
     params.forEach((_, key) => {
       const match = key.match(/-(\d+)$/);
@@ -190,25 +191,6 @@ export default function CompositeSelectDemo() {
     });
     const parsed = Array.from(indexes).sort((a, b) => a - b);
     return parsed.length > 0 ? parsed : [1];
-  });
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const indexes = new Set<number>();
-    params.forEach((_, key) => {
-      const match = key.match(/-(\d+)$/);
-      if (match) {
-        indexes.add(parseInt(match[1], 10));
-      }
-    });
-    const nextList = Array.from(indexes).sort((a, b) => a - b);
-    setInstances((current) => {
-      const target = nextList.length > 0 ? nextList : [1];
-      if (current.length === target.length && current.every((val, index) => val === target[index])) {
-        return current;
-      }
-      return target;
-    });
   }, [location.search]);
 
   const addInstance = useCallback(() => {
@@ -291,7 +273,9 @@ const DemoInstance = memo(function DemoInstance({
   const [showDeleteSel, setShowDeleteSel] = useState(true);
 
   // Hook managing all URL states under this specific instance id suffix
-  const { params, setParam, setParams } = useQueryParams(search, navigate, id);
+  const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, navigate, id);
+
+  console.log(`DemoInstance render ${id} >${updatedURLSearchParams}<`);
 
   const {
     selectedIds,
@@ -421,52 +405,102 @@ const DemoInstance = memo(function DemoInstance({
     setSelectedItems(newSelected);
   };
 
-  const debouncedHandleChangeValue = (detail: {
-    originalEvent: Event;
-    value: string;
-    key: string;
-    previousValue?: string;
-  }) => {
-    const mgr = getManager();
-    if (!mgr) return;
+  // Keep everything in a latest ref to avoid stale closures in the debounced functions
+  const latestRef = useRef({
+    selectedItems,
+    fetchOptions,
+    setParam,
+    options,
+    setOptions,
+    updateCheckmarks,
+    setSelectedItems,
+  });
 
-    if ((mgr as any)._changeTimer) {
-      clearTimeout((mgr as any)._changeTimer);
-    }
+  useLayoutEffect(() => {
+    latestRef.current = {
+      selectedItems,
+      fetchOptions,
+      setParam,
+      options,
+      setOptions,
+      updateCheckmarks,
+      setSelectedItems,
+    };
+  }, [selectedItems, fetchOptions, setParam, options, setOptions, updateCheckmarks, setSelectedItems]);
 
-    (mgr as any)._changeTimer = setTimeout(async () => {
-      const { search, popupInput } = localDetermineSearch(mgr);
+  const debouncedHandleChangeValueRef = useRef<
+    ((detail: { originalEvent: Event; value: string; key: string; previousValue?: string }) => void) | null
+  >(null);
+  const debouncedHandleInputChangeRef = useRef<
+    ((detail: { originalEvent: Event; value: string; previousValue?: string }) => void) | null
+  >(null);
 
-      if (popupInput === true) {
-        setOnChangeCount((prev) => prev + 1);
-        setParam("selectedValue", search);
-      }
+  useEffect(() => {
+    debouncedHandleChangeValueRef.current = debounce(
+      async (detail: { originalEvent: Event; value: string; key: string; previousValue?: string }) => {
+        const mgr = getManager();
+        if (!mgr) return;
 
-      if (popupInput === true) {
-        return;
-      }
+        const { search, popupInput } = localDetermineSearch(mgr);
 
-      const val = detail.value;
+        if (popupInput === true) {
+          setOnChangeCount((prev) => prev + 1);
+          latestRef.current.setParam("selectedValue", search);
+        }
 
-      if (!popupInput && detail.originalEvent.type === "keydown") {
-        const key = detail.key;
-        if (key === "Backspace" && val === "" && selectedItems.length > 0) {
-          const newSelected = [...selectedItems];
-          newSelected.pop();
-          setSelectedItems(newSelected);
-          updateCheckmarks(newSelected);
+        if (popupInput === true) {
           return;
         }
-      }
 
-      if (search === detail.previousValue) return;
+        const val = detail.value;
 
-      setParam("selectedValue", search);
-      setOnChangeCount((prev) => prev + 1);
+        if (!popupInput && detail.originalEvent.type === "keydown") {
+          const key = detail.key;
+          if (key === "Backspace" && val === "" && latestRef.current.selectedItems.length > 0) {
+            const newSelected = [...latestRef.current.selectedItems];
+            newSelected.pop();
+            latestRef.current.setSelectedItems(newSelected);
+            latestRef.current.updateCheckmarks(newSelected);
+            return;
+          }
+        }
 
-      await fetchOptions(search, selectedItems);
-    }, 500);
-  };
+        if (search === detail.previousValue) return;
+
+        latestRef.current.setParam("selectedValue", search);
+        setOnChangeCount((prev) => prev + 1);
+
+        await latestRef.current.fetchOptions(search, latestRef.current.selectedItems);
+      },
+      500,
+    );
+
+    debouncedHandleInputChangeRef.current = debounce(
+      async (detail: { originalEvent: Event; value: string; key: string; previousValue?: string }) => {
+        const mgr = getManager();
+        if (!mgr) return;
+
+        const { search, popupInput } = localDetermineSearch(mgr);
+
+        if (popupInput === false) {
+          return;
+        }
+
+        if (search === detail.previousValue) return;
+
+        setOnInputChangeCount((prev) => prev + 1);
+        await latestRef.current.fetchOptions(search, latestRef.current.selectedItems);
+      },
+      500,
+    );
+  }, []);
+
+  const debouncedHandleChangeValue = useCallback(
+    (detail: { originalEvent: Event; value: string; key: string; previousValue?: string }) => {
+      debouncedHandleChangeValueRef.current?.(detail);
+    },
+    [],
+  );
 
   const handleClear = () => {
     setOnClearCount((prev) => prev + 1);
@@ -501,32 +535,12 @@ const DemoInstance = memo(function DemoInstance({
     }
   };
 
-  const debouncedHandleInputChange = (detail: {
-    originalEvent: Event;
-    value: string;
-    key: string;
-    previousValue?: string;
-  }) => {
-    const mgr = getManager();
-    if (!mgr) return;
-
-    if ((mgr as any)._inputTimer) {
-      clearTimeout((mgr as any)._inputTimer);
-    }
-
-    (mgr as any)._inputTimer = setTimeout(async () => {
-      const { search, popupInput } = localDetermineSearch(mgr);
-
-      if (popupInput === false) {
-        return;
-      }
-
-      if (search === detail.previousValue) return;
-
-      setOnInputChangeCount((prev) => prev + 1);
-      await fetchOptions(search, selectedItems);
-    }, 500);
-  };
+  const debouncedHandleInputChange = useCallback(
+    (detail: { originalEvent: Event; value: string; previousValue?: string }) => {
+      debouncedHandleInputChangeRef.current?.(detail);
+    },
+    [],
+  );
 
   const handleOk = () => {
     setOnOkCount((prev) => prev + 1);
@@ -618,9 +632,11 @@ const DemoInstance = memo(function DemoInstance({
       const { search } = localDetermineSearch(mgr);
       const found = emptyList ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
       const opts = markSelectedByIds(found, selectedItems.map((i) => i.id) as unknown as number[]) as CustomItem[];
-      setOptions(sortById(opts) as CustomItem[]);
+      Promise.resolve().then(() => {
+        setOptions(sortById(opts) as CustomItem[]);
+      });
     }
-  }, [emptyList]);
+  }, [emptyList, selectedItems]);
 
   // Sync React URL states DOWN to the manager on mount
   useEffect(() => {
@@ -800,17 +816,18 @@ const DemoInstance = memo(function DemoInstance({
       }}
     >
       <h2 style={{ marginTop: 0 }}>Instance #{id}</h2>
-      <button onClick={() => onRemove(id)} className="gcp-css" style={{ position: "absolute", top: "20px", right: "20px" }}>
+      <button
+        onClick={() => onRemove(id)}
+        className="gcp-css"
+        style={{ position: "absolute", top: "20px", right: "20px" }}
+      >
         Destroy
       </button>
 
       <div style={{ padding: "20px", background: "#fafafa", border: "1px dashed #ccc", marginBottom: "20px" }}>
         <CompositeSelect<CustomItem>
           ref={csRef}
-          selected-selected={(function (selectedItems) {
-            console.log("selectedItems::", selectedItems);
-            return selectedItems;
-          })(selectedItems)}
+          selected-selected={selectedItems}
           selected-value={selectedValue}
           selected-label={selectedLabel}
           selected-disabled={selectedDisabled}
@@ -890,7 +907,10 @@ const DemoInstance = memo(function DemoInstance({
         <button
           className="gcp-css"
           onClick={() =>
-            setParam("activeTemplates", activeTemplates.includes("item") ? activeTemplates : [...activeTemplates, "item"])
+            setParam(
+              "activeTemplates",
+              activeTemplates.includes("item") ? activeTemplates : [...activeTemplates, "item"],
+            )
           }
         >
           Set Custom Render Item
@@ -898,7 +918,10 @@ const DemoInstance = memo(function DemoInstance({
         <button
           className="gcp-css"
           onClick={() =>
-            setParam("activeTemplates", activeTemplates.includes("list") ? activeTemplates : [...activeTemplates, "list"])
+            setParam(
+              "activeTemplates",
+              activeTemplates.includes("list") ? activeTemplates : [...activeTemplates, "list"],
+            )
           }
         >
           Set Custom Render List
@@ -1007,17 +1030,30 @@ const DemoInstance = memo(function DemoInstance({
         <div style={{ flex: 1, minWidth: "300px", borderRight: "1px solid #eee", paddingRight: "20px" }}>
           <h4 style={{ marginTop: 0 }}>SelectedSection (Top)</h4>
           <label>
-            <input type="checkbox" checked={selectedDisabled} onChange={(e) => setParam("selectedDisabled", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={selectedDisabled}
+              onChange={(e) => setParam("selectedDisabled", e.target.checked)}
+            />
             Disabled
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={selectedLoading} onChange={(e) => setParam("selectedLoading", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={selectedLoading}
+              onChange={(e) => setParam("selectedLoading", e.target.checked)}
+            />
             Loading
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={selectedError} onChange={(e) => setParam("selectedError", e.target.checked)} /> Error
+            <input
+              type="checkbox"
+              checked={selectedError}
+              onChange={(e) => setParam("selectedError", e.target.checked)}
+            />{" "}
+            Error
           </label>
           <br />
           <label>
@@ -1036,12 +1072,20 @@ const DemoInstance = memo(function DemoInstance({
         <div style={{ flex: 1, minWidth: "300px" }}>
           <h4 style={{ marginTop: 0 }}>OptionsSection (Dropdown)</h4>
           <label>
-            <input type="checkbox" checked={optionsDisabled} onChange={(e) => setParam("optionsDisabled", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={optionsDisabled}
+              onChange={(e) => setParam("optionsDisabled", e.target.checked)}
+            />
             Disabled
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={optionsLoading} onChange={(e) => setParam("optionsLoading", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={optionsLoading}
+              onChange={(e) => setParam("optionsLoading", e.target.checked)}
+            />
             Loading
           </label>
           <br />
@@ -1065,7 +1109,10 @@ const DemoInstance = memo(function DemoInstance({
           <br />
           <label>
             Position:
-            <select value={optionsPosition} onChange={(e) => setParam("optionsPosition", e.target.value as PositionType)}>
+            <select
+              value={optionsPosition}
+              onChange={(e) => setParam("optionsPosition", e.target.value as PositionType)}
+            >
               <option value="cover-bottom">cover-bottom</option>
               <option value="bottom">bottom</option>
               <option value="top">top</option>
