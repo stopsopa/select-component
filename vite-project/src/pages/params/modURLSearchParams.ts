@@ -1,6 +1,6 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo } from "react";
 
-import { mergeURLSearchParams, syncURLSearchParams } from "./toolsURLSearchParams.ts";
+import { mergeURLSearchParams } from "./toolsURLSearchParams.ts";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -41,64 +41,58 @@ export default function modURLSearchParams<C extends Record<string, unknown>, Ct
       [ctx],
     );
 
-    // Derive the initial URLSearchParams once from the input, filtered by our allowed keys
-    const initial = useMemo(() => {
+    // Derive the current URLSearchParams from the search prop, filtered by allowed keys
+    const currentParams = useMemo(() => {
       return separateIndexedSearchParams(search, ctx);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // intentionally empty — treat `search` as an initial value
-
-    const [paramsState, setParamsState] = useState(initial);
+    }, [search, ctx]);
 
     // Compute the parsed params whenever the URLSearchParams change
     const params = useMemo(() => {
       const result: Record<string, unknown> = {};
       for (const [key, def] of Object.entries(config)) {
         const d = def as unknown as ParamDef<unknown>;
-        const raw = paramsState.get(applyKey(d.getParam));
+        const raw = currentParams.get(applyKey(d.getParam));
         result[key] = raw !== null ? d.decode(raw) : d.default;
       }
       return result as ParamValues<C>;
-    }, [paramsState, applyKey]);
-
-    useEffect(() => {
-      if (!navigate) return;
-      const currentSearchParams = new URLSearchParams(window.location.search);
-
-      // Find all parameter keys governed by this specific hook instance
-      const governedKeys = Object.values(config).map((def) => applyKey((def as ParamDef<unknown>).getParam));
-
-      const nextParams = syncURLSearchParams(currentSearchParams, governedKeys, paramsState);
-
-      if (nextParams.toString() !== new URLSearchParams(window.location.search).toString()) {
-        navigate({ search: nextParams.toString() }, { replace: true });
-      }
-    }, [paramsState, navigate, applyKey]);
+    }, [currentParams, applyKey]);
 
     // ── setParam: update a single key ────────────────────────────────────────
     // If the new value equals the default, the key is removed from the URL
     // instead of being set — keeping the URL clean. The value will still
     // appear in `params` as the default.
 
-    const setParam = useCallback(<K extends keyof C>(key: K, value: C[K]) => {
-      const def = config[key] as unknown as ParamDef<C[K]>;
-      setParamsState((prev) => {
-        const next = new URLSearchParams(prev);
+    const setParam = useCallback(
+      <K extends keyof C>(key: K, value: C[K]) => {
+        if (!navigate) return;
+        const def = config[key] as unknown as ParamDef<C[K]>;
         const finalKey = applyKey(def.getParam);
+
+        const currentSearchParams = new URLSearchParams(window.location.search);
+        const next = new URLSearchParams(currentSearchParams);
+
         if (JSON.stringify(value) === JSON.stringify(def.default)) {
           next.delete(finalKey);
         } else {
           next.set(finalKey, def.encode(value));
         }
-        return next;
-      });
-    }, []);
+
+        if (next.toString() !== currentSearchParams.toString()) {
+          navigate({ search: next.toString() }, { replace: true });
+        }
+      },
+      [navigate, applyKey],
+    );
 
     // ── setParams: update multiple keys at once ──────────────────────────────
     // Same default-elision logic applied per key.
 
-    const setParams = useCallback((updates: Partial<ParamValues<C>>) => {
-      setParamsState((prev) => {
-        const next = new URLSearchParams(prev);
+    const setParams = useCallback(
+      (updates: Partial<ParamValues<C>>) => {
+        if (!navigate) return;
+        const currentSearchParams = new URLSearchParams(window.location.search);
+        const next = new URLSearchParams(currentSearchParams);
+
         for (const [key, value] of Object.entries(updates)) {
           const def = config[key] as unknown as ParamDef<unknown>;
           if (def && value !== undefined) {
@@ -110,13 +104,17 @@ export default function modURLSearchParams<C extends Record<string, unknown>, Ct
             }
           }
         }
-        return next;
-      });
-    }, []);
+
+        if (next.toString() !== currentSearchParams.toString()) {
+          navigate({ search: next.toString() }, { replace: true });
+        }
+      },
+      [navigate, applyKey],
+    );
 
     return {
       params, // decoded + typed values, defaults filled in
-      updatedURLSearchParams: paramsState, // the live URLSearchParams object
+      updatedURLSearchParams: currentParams, // the live URLSearchParams object
       setParam,
       setParams,
     };
