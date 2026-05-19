@@ -58,7 +58,7 @@ const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
       decode: (value) => value === "1",
     },
   },
-  (key, i: number) => `${key}-${i}`,
+  (key, i?: number) => `${key}-${i}`,
 );
 
 export default function ParentComponent() {

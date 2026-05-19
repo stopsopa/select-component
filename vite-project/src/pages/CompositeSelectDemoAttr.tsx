@@ -173,7 +173,7 @@ const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
       decode: (value) => value,
     },
   },
-  (key, i: number) => `${key}-${i}`,
+  (key, i?: number) => `${key}-${i}`,
 );
 
 export default function CompositeSelectDemo() {
