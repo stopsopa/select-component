@@ -476,7 +476,7 @@ const DemoInstance = memo(function DemoInstance({
     );
 
     debouncedHandleInputChangeRef.current = debounce(
-      async (detail: { originalEvent: Event; value: string; key: string; previousValue?: string }) => {
+      async (detail: { originalEvent: Event; value: string; previousValue?: string }) => {
         const mgr = getManager();
         if (!mgr) return;
 
@@ -560,7 +560,7 @@ const DemoInstance = memo(function DemoInstance({
     setShowDeleteSel(true);
   };
 
-  const handleSelectedItemsChanged = useCallback((_, reason: string) => {
+  const handleSelectedItemsChanged = useCallback((_: any, reason: string) => {
     const programmaticReasons = [
       "setSelected",
       "setOptions",
@@ -590,7 +590,7 @@ const DemoInstance = memo(function DemoInstance({
     setHandleSelectedItemsChangedCount((prev) => prev + 1);
   }, []);
 
-  const handleOptionsChanged = useCallback((_, reason: string) => {
+  const handleOptionsChanged = useCallback((_: any, reason: string) => {
     const programmaticReasons = [
       "setSelected",
       "setOptions",

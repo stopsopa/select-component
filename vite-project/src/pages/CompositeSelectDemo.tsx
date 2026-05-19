@@ -285,8 +285,8 @@ const DemoInstance = memo(function DemoInstance({
 
   // Hook managing all URL states under this specific instance id suffix
   const { params, updatedURLSearchParams, setParam, setParams } = useQueryParams(search, navigate, id);
-  window.setParam = setParam;
-  window.setParams = setParams;
+  (window as any).setParam = setParam;
+  (window as any).setParams = setParams;
 
   console.log(`DemoInstance render ${id} >${updatedURLSearchParams}<`);
 
