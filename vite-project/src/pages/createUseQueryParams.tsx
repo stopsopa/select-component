@@ -28,7 +28,7 @@ type ParamValueInput<T> = {
 // Using `any` here instead would disable type checking downstream.
 // Search terms: "TypeScript index signature", "unknown vs any upper bound"
 type ParamConfigInput = {
-  [key: string]: ParamValueInput<unknown>;
+  [key: string]: ParamValueInput<any>;
 };
 
 // Mapped type that walks over the config C and extracts the T

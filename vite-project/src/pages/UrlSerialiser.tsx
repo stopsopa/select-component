@@ -45,7 +45,7 @@ export default function UrlSerialiser() {
   const page = searchParams.get("page");
   const filter = searchParams.get("filter");
 
-  const { params, diff, setParam, setParams, updatedURLSearchParams } = useQueryParams(location.search);
+  const { params, diff, setParam } = useQueryParams(location.search);
 
   useEffect(() => {
     // create style element and put some styles
