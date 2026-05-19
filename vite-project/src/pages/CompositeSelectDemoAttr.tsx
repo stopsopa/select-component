@@ -1,17 +1,11 @@
-import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useRef, useMemo, useCallback, memo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import type { NavigateFunction } from "react-router-dom";
 import { CompositeSelect } from "composite-select/composite-select/react";
 import type { CompositeManager } from "composite-select";
-import { predefinedUseUrlString, predefinedUseUrlStringArray, predefinedUseUrlBoolean } from "./useUrlGet";
+import modURLSearchParams from "./params/modURLSearchParams.ts";
 
 import { CompositeSelect as CompositeSelectElement } from "composite-select/composite-select/composite-select";
-
-// import { Card, Button } from "@madooei/react-example-package";
-// this will work too thanks to how
-// vite-project/node_modules/@madooei/react-example-package/package.json
-// is configured
-// import { Card } from "@madooei/react-example-package/card";
-// import { Button } from "@madooei/react-example-package/button";
 
 import type { PositionType } from "composite-select/container/ContainerManager";
 
@@ -44,6 +38,8 @@ function searchNames(name: string | undefined, num: number = 10): CustomItem[] {
   })) as CustomItem[];
 }
 
+const allScientists = searchNames("", Infinity);
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const imgDataJson: Record<string, string[]> = {
@@ -53,23 +49,191 @@ const imgDataJson: Record<string, string[]> = {
   "#ff9800": ["tools.png", "timeanddate.png", "t3chat.png", "ai.png"],
 };
 
+const { useQueryParams, separateIndexedSearchParams } = modURLSearchParams(
+  {
+    selectedIds: {
+      default: [] as string[],
+      getParam: "s",
+      encode: (value) => JSON.stringify(value),
+      decode: (value) => {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [];
+        }
+      },
+    },
+    emptyList: {
+      default: false,
+      getParam: "emp",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    selectedValue: {
+      default: "",
+      getParam: "sv",
+      encode: (value) => value,
+      decode: (value) => value,
+    },
+    selectedLabel: {
+      default: "selected label",
+      getParam: "sla",
+      encode: (value) => value,
+      decode: (value) => value,
+    },
+    selectedDisabled: {
+      default: false,
+      getParam: "sd",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    selectedError: {
+      default: false,
+      getParam: "se",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    selectedLoading: {
+      default: false,
+      getParam: "slo",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    selectedShowInput: {
+      default: true,
+      getParam: "ssi",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    optionsDisabled: {
+      default: false,
+      getParam: "od",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    optionsLoading: {
+      default: false,
+      getParam: "ol",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    optionsShowFilter: {
+      default: true,
+      getParam: "sf",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    optionsShowFooter: {
+      default: true,
+      getParam: "sfo",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    optionsPosition: {
+      default: "cover-bottom" as PositionType,
+      getParam: "op",
+      encode: (value) => value,
+      decode: (value) => value as PositionType,
+    },
+    optionsLabel: {
+      default: "options label",
+      getParam: "ola",
+      encode: (value) => value,
+      decode: (value) => value,
+    },
+    activeTemplates: {
+      default: [] as string[],
+      getParam: "t",
+      encode: (value) => JSON.stringify(value),
+      decode: (value) => {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [];
+        }
+      },
+    },
+    optionsRender: {
+      default: "default" as "default" | "custom" | "string",
+      getParam: "or",
+      encode: (value) => value,
+      decode: (value) => value as "default" | "custom" | "string",
+    },
+    optionsCustomEmpty: {
+      default: false,
+      getParam: "oce",
+      encode: (value) => (value ? "1" : "0"),
+      decode: (value) => value === "1",
+    },
+    optionsMaxHeight: {
+      default: "300px",
+      getParam: "omh",
+      encode: (value) => value,
+      decode: (value) => value,
+    },
+  },
+  (key, i: number) => `${key}-${i}`,
+);
+
 export default function CompositeSelectDemo() {
-  const [instances, setInstances] = useState<number[]>([]);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const [instances, setInstances] = useState<number[]>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const indexes = new Set<number>();
+    params.forEach((_, key) => {
+      const match = key.match(/-(\d+)$/);
+      if (match) {
+        indexes.add(parseInt(match[1], 10));
+      }
+    });
+    const parsed = Array.from(indexes).sort((a, b) => a - b);
+    return parsed.length > 0 ? parsed : [1];
+  });
 
   useEffect(() => {
-    // Initial instance
-    if (instances.length === 0) {
-      setInstances([1]);
-    }
-  }, []);
+    const params = new URLSearchParams(location.search);
+    const indexes = new Set<number>();
+    params.forEach((_, key) => {
+      const match = key.match(/-(\d+)$/);
+      if (match) {
+        indexes.add(parseInt(match[1], 10));
+      }
+    });
+    const nextList = Array.from(indexes).sort((a, b) => a - b);
+    setInstances((current) => {
+      const target = nextList.length > 0 ? nextList : [1];
+      if (current.length === target.length && current.every((val, index) => val === target[index])) {
+        return current;
+      }
+      return target;
+    });
+  }, [location.search]);
 
-  const addInstance = () => {
-    setInstances((prev) => [...prev, (prev[prev.length - 1] || 0) + 1]);
-  };
+  const addInstance = useCallback(() => {
+    const nextIndex = instances.length > 0 ? Math.max(...instances) + 1 : 1;
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.set(`sv-${nextIndex}`, "default value");
+    navigate({ search: currentParams.toString() }, { replace: true });
+  }, [instances, navigate]);
 
-  const removeInstance = (id: number) => {
-    setInstances((prev) => prev.filter((i) => i !== id));
-  };
+  const removeInstance = useCallback(
+    (id: number) => {
+      const nextSearchParams = new URLSearchParams(window.location.search);
+      const childParams = separateIndexedSearchParams(nextSearchParams, id);
+      let changed = false;
+      childParams.forEach((_, key) => {
+        nextSearchParams.delete(key);
+        changed = true;
+      });
+
+      if (changed) {
+        navigate({ search: nextSearchParams.toString() }, { replace: true });
+      }
+    },
+    [navigate],
+  );
 
   return (
     <div style={{ padding: "20px", fontFamily: "sans-serif" }}>
@@ -88,24 +252,27 @@ export default function CompositeSelectDemo() {
         up ..
       </a>
       <div style={{ display: "flex", flexDirection: "column", gap: "30px", marginTop: "20px" }}>
-        {instances.map((id) => (
-          <DemoInstance key={id} id={id} onRemove={() => removeInstance(id)} />
-        ))}
+        {instances.map((id) => {
+          const search = separateIndexedSearchParams(location.search, id).toString();
+          return <DemoInstance key={id} id={id} search={search} navigate={navigate} onRemove={removeInstance} />;
+        })}
       </div>
       <hr />
-      {/* <Card title="">
-        <p>This is a card component from the example package.</p>
-        <Button onClick={() => alert("Hello!")}>Click me!</Button>
-      </Card>
-      <Card title="Card with close button">
-        <button>Close</button>
-      </Card>
-      <Card title="fsdfds">test</Card> */}
     </div>
   );
 }
 
-function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
+const DemoInstance = memo(function DemoInstance({
+  id,
+  search,
+  navigate,
+  onRemove,
+}: {
+  id: number;
+  search: string;
+  navigate: NavigateFunction;
+  onRemove: (id: number) => void;
+}) {
   const csRef = useRef<CompositeSelectElement<CustomItem>>(null);
 
   const [onChangeCount, setOnChangeCount] = useState(0);
@@ -123,98 +290,73 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
   const [options, setOptions] = useState<CustomItem[]>([]);
   const [showDeleteSel, setShowDeleteSel] = useState(true);
 
-  // Local arrays and selections managed via URL (storing only selected ids)
-  const [selectedIds, setSelectedIds] = predefinedUseUrlStringArray(`s-${id}`, []);
-  const [emptyList, setEmptyList] = predefinedUseUrlBoolean(`emp-${id}`, false);
+  // Hook managing all URL states under this specific instance id suffix
+  const { params, setParam, setParams } = useQueryParams(search, navigate, id);
 
-  const [selectedValue, setSelectedValue] = predefinedUseUrlString(`sv-${id}`, "");
-  const [selectedLabel, setSelectedLabel] = predefinedUseUrlString(`sla-${id}`, "selected label");
-  const [selectedDisabled, setSelectedDisabled] = predefinedUseUrlBoolean(`sd-${id}`, false);
-  const [selectedError, setSelectedError] = predefinedUseUrlBoolean(`se-${id}`, false);
-  const [selectedLoading, setSelectedLoading] = predefinedUseUrlBoolean(`slo-${id}`, false);
-  const [selectedShowInput, setSelectedShowInput] = predefinedUseUrlBoolean(`ssi-${id}`, true);
+  const {
+    selectedIds,
+    emptyList,
+    selectedValue,
+    selectedLabel,
+    selectedDisabled,
+    selectedError,
+    selectedLoading,
+    selectedShowInput,
+    optionsDisabled,
+    optionsLoading,
+    optionsShowFilter,
+    optionsShowFooter,
+    optionsPosition,
+    optionsLabel,
+    activeTemplates,
+    optionsRender,
+    optionsCustomEmpty,
+    optionsMaxHeight,
+  } = params;
 
-  const [optionsDisabled, setOptionsDisabled] = predefinedUseUrlBoolean(`od-${id}`, false);
-  const [optionsLoading, setOptionsLoading] = predefinedUseUrlBoolean(`ol-${id}`, false);
-  const [optionsShowFilter, setOptionsShowFilter] = predefinedUseUrlBoolean(`sf-${id}`, true);
-  const [optionsShowFooter, setOptionsShowFooter] = predefinedUseUrlBoolean(`sfo-${id}`, true);
-  const [optionsPosition, setOptionsPosition] = predefinedUseUrlString(`op-${id}`, "cover-bottom");
-  const [optionsLabel, setOptionsLabel] = predefinedUseUrlString(`ola-${id}`, "options label");
-
-  const [activeTemplates, setActiveTemplates] = predefinedUseUrlStringArray(`t-${id}`, []);
   const customRenderItem = activeTemplates.includes("item");
   const customRenderList = activeTemplates.includes("list");
-
-  const [optionsRender, setOptionsRender] = predefinedUseUrlString(`or-${id}`, "default");
-  const [optionsCustomEmpty, setOptionsCustomEmpty] = predefinedUseUrlBoolean(`oce-${id}`, false);
-
-  const [optionsMaxHeight, setOptionsMaxHeight] = predefinedUseUrlString(`omh-${id}`, "300px");
 
   const stepMaxHeight = (delta: number) => {
     let current = parseInt(optionsMaxHeight || "") || 0;
     current += delta;
     if (current < 0) current = 0;
-    setOptionsMaxHeight(current + "px");
+    setParam("optionsMaxHeight", current + "px");
   };
-
-  useEffect(() => {
-    console.log("initial", {
-      selectedIds,
-      selectedDisabled,
-      selectedError,
-      selectedLoading,
-      selectedShowInput,
-      selectedLabel,
-      optionsPosition,
-      optionsMaxHeight,
-      optionsCustomEmpty,
-      optionsDisabled,
-      optionsLoading,
-      optionsShowFilter,
-      optionsShowFooter,
-      optionsLabel,
-      activeTemplates,
-      customRenderItem,
-      customRenderList,
-      optionsRender,
-    });
-  }, []);
 
   // Derive selectedItems by rehydrating the selectedIds (scientists and template items)
-  const allScientists = searchNames("", Infinity);
-  const selectedItems = selectedIds
-    .map((idStr) => {
-      // If it contains a dot, it's a template item (e.g. "gmail.png")
-      if (idStr.includes(".")) {
-        let itemColor = "#999";
-        for (const [color, imgs] of Object.entries(imgDataJson)) {
-          if (imgs.includes(idStr)) {
-            itemColor = color;
-            break;
+  const selectedItems = useMemo(() => {
+    return selectedIds
+      .map((idStr) => {
+        if (idStr.includes(".")) {
+          let itemColor = "#999";
+          for (const [color, imgs] of Object.entries(imgDataJson)) {
+            if (imgs.includes(idStr)) {
+              itemColor = color;
+              break;
+            }
           }
+          return {
+            id: idStr,
+            label: idStr.split(".")[0],
+            color: itemColor,
+            img: idStr,
+          } as unknown as CustomItem;
         }
-        return {
-          id: idStr,
-          label: idStr.split(".")[0],
-          color: itemColor,
-          img: idStr,
-        } as unknown as CustomItem;
-      }
-      // Otherwise, it is a scientist
-      return allScientists.find((s) => String(s.id) === idStr);
-    })
-    .filter(Boolean) as CustomItem[];
+        return allScientists.find((s) => String(s.id) === idStr);
+      })
+      .filter(Boolean) as CustomItem[];
+  }, [selectedIds]);
 
-  // console.log("render", {
-  //   allScientists,
-  //   selectedItems,
-  // });
-
-  const setSelectedItems = (items: CustomItem[]) => {
-    const list = items.map((i) => String(i.id));
-    // console.log("list", list);
-    setSelectedIds(list);
-  };
+  const setSelectedItems = useCallback(
+    (items: CustomItem[]) => {
+      setParam(
+        "selectedIds",
+        items.map((i) => String(i.id)),
+      );
+    },
+    [setParam],
+  );
 
   const getManager = () => csRef.current?.getManager();
 
@@ -234,28 +376,31 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     );
   };
 
-  const fetchOptions = async (
-    search: string,
-    currentSelected: CustomItem[] = selectedItems,
-    overrideEmptyList?: boolean,
-  ) => {
-    setOptionsLoading(true);
-    setOptionsDisabled(true);
-    setSelectedLoading(true);
-    setSelectedDisabled(true);
+  const fetchOptions = useCallback(
+    async (search: string, currentSelected: CustomItem[] = selectedItems, overrideEmptyList?: boolean) => {
+      setParams({
+        optionsLoading: true,
+        optionsDisabled: true,
+        selectedLoading: true,
+        selectedDisabled: true,
+      });
 
-    await delay(500);
+      await delay(500);
 
-    const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
-    const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
-    const opts = markSelectedByIds(found, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[];
-    setOptions(sortById(opts) as CustomItem[]);
+      const isCurrentlyEmpty = overrideEmptyList !== undefined ? overrideEmptyList : emptyList;
+      const found = isCurrentlyEmpty ? [] : deduplicateArrayById<CustomItem>(searchNames(search));
+      const opts = markSelectedByIds(found, currentSelected.map((i) => i.id) as unknown as number[]) as CustomItem[];
+      setOptions(sortById(opts) as CustomItem[]);
 
-    setOptionsDisabled(false);
-    setOptionsLoading(false);
-    setSelectedDisabled(false);
-    setSelectedLoading(false);
-  };
+      setParams({
+        optionsDisabled: false,
+        optionsLoading: false,
+        selectedDisabled: false,
+        selectedLoading: false,
+      });
+    },
+    [emptyList, selectedItems, setParams, setOptions],
+  );
 
   const handleFocus = () => {
     setOnFocusCount((prev) => prev + 1);
@@ -270,9 +415,9 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (idStr: string) => {
     setOnDeleteCount((prev) => prev + 1);
-    const newSelected = selectedItems.filter((i) => String(i.id) !== String(id));
+    const newSelected = selectedItems.filter((i) => String(i.id) !== String(idStr));
     setSelectedItems(newSelected);
   };
 
@@ -294,7 +439,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
       if (popupInput === true) {
         setOnChangeCount((prev) => prev + 1);
-        setSelectedValue(search);
+        setParam("selectedValue", search);
       }
 
       if (popupInput === true) {
@@ -316,7 +461,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
 
       if (search === detail.previousValue) return;
 
-      setSelectedValue(search);
+      setParam("selectedValue", search);
       setOnChangeCount((prev) => prev + 1);
 
       await fetchOptions(search, selectedItems);
@@ -328,7 +473,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     if (!confirm("Are you sure?")) return;
 
     setSelectedItems([]);
-    setSelectedValue("");
+    setParam("selectedValue", "");
   };
 
   const handlePick = (item: CustomItem) => {
@@ -341,7 +486,6 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       mgr: mgr.options.getShowFooter(),
     });
     if (mgr.options.getShowFooter()) {
-      // if (optionsShowFooter) {
       const newOptions = options.map((opt) => {
         if (opt.id === item.id) {
           return { ...opt, selected: !opt.selected };
@@ -402,31 +546,69 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
     setShowDeleteSel(true);
   };
 
-  const handleSelectedItemsChanged = (_, reason) => {
-    return;
-    if (reason === "setOptions" || reason === "setSelected") {
+  const handleSelectedItemsChanged = useCallback((_, reason: string) => {
+    const programmaticReasons = [
+      "setSelected",
+      "setOptions",
+      "showFooter",
+      "showFilter",
+      "setDisabled",
+      "setLoading",
+      "setValue",
+      "setMaxHeight",
+      "setRenderItem",
+      "setRenderList",
+      "setRenderEmpty",
+      "setShowDelete",
+      "setError",
+      "setShowInput",
+      "setLabel",
+    ];
+    if (
+      programmaticReasons.includes(reason) ||
+      reason.startsWith("set") ||
+      reason.startsWith("show") ||
+      reason === "onClear" ||
+      reason === "setValue"
+    ) {
       return;
     }
-    console.log("r".repeat(1000), `>${reason}<`);
     setHandleSelectedItemsChangedCount((prev) => prev + 1);
-    const mgr = getManager();
-    if (!mgr) return;
-  };
+  }, []);
 
-  const handleOptionsChanged = (_, reason) => {
-    return;
-    if (reason === "setOptions" || reason === "setSelected") {
+  const handleOptionsChanged = useCallback((_, reason: string) => {
+    const programmaticReasons = [
+      "setSelected",
+      "setOptions",
+      "showFooter",
+      "showFilter",
+      "setDisabled",
+      "setLoading",
+      "setValue",
+      "setMaxHeight",
+      "setRenderItem",
+      "setRenderList",
+      "setRenderEmpty",
+      "setShowDelete",
+      "setError",
+      "setShowInput",
+      "setLabel",
+    ];
+    if (
+      programmaticReasons.includes(reason) ||
+      reason.startsWith("set") ||
+      reason.startsWith("show") ||
+      reason === "onClear" ||
+      reason === "setValue"
+    ) {
       return;
     }
-    console.log("r".repeat(1000), `>${reason}<`);
     setHandleOptionsChangedCount((prev) => prev + 1);
-    const mgr = getManager();
-    if (!mgr) return;
-  };
+  }, []);
 
   const handleEmptyListChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
-    setEmptyList(checked);
+    setParam("emptyList", checked);
   };
 
   // Sync options whenever emptyList changes or on initial mount
@@ -618,7 +800,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
       }}
     >
       <h2 style={{ marginTop: 0 }}>Instance #{id}</h2>
-      <button onClick={onRemove} className="gcp-css" style={{ position: "absolute", top: "20px", right: "20px" }}>
+      <button onClick={() => onRemove(id)} className="gcp-css" style={{ position: "absolute", top: "20px", right: "20px" }}>
         Destroy
       </button>
 
@@ -627,7 +809,6 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           ref={csRef}
           selected-selected={(function (selectedItems) {
             console.log("selectedItems::", selectedItems);
-
             return selectedItems;
           })(selectedItems)}
           selected-value={selectedValue}
@@ -709,7 +890,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <button
           className="gcp-css"
           onClick={() =>
-            setActiveTemplates(activeTemplates.includes("item") ? activeTemplates : [...activeTemplates, "item"])
+            setParam("activeTemplates", activeTemplates.includes("item") ? activeTemplates : [...activeTemplates, "item"])
           }
         >
           Set Custom Render Item
@@ -717,15 +898,16 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <button
           className="gcp-css"
           onClick={() =>
-            setActiveTemplates(activeTemplates.includes("list") ? activeTemplates : [...activeTemplates, "list"])
+            setParam("activeTemplates", activeTemplates.includes("list") ? activeTemplates : [...activeTemplates, "list"])
           }
         >
           Set Custom Render List
         </button>
-        <button className="gcp-css" onClick={() => setActiveTemplates([])}>
+        <button className="gcp-css" onClick={() => setParam("activeTemplates", [])}>
           Reset Templates
         </button>
       </div>
+
       <div style={{ marginTop: "15px", display: "flex", flexDirection: "column", gap: "10px" }}>
         <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
           <span style={{ minWidth: "120px" }}>
@@ -773,7 +955,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
                   id={`maxheight-input-${id}`}
                   placeholder=" "
                   value={optionsMaxHeight || ""}
-                  onChange={(e) => setOptionsMaxHeight(e.target.value)}
+                  onChange={(e) => setParam("optionsMaxHeight", e.target.value)}
                 />
                 <label htmlFor={`maxheight-input-${id}`}>Max height</label>
               </div>
@@ -785,15 +967,15 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
                 ▲
               </button>
             </div>
-            <button className="gcp-css" onClick={() => setOptionsMaxHeight(optionsMaxHeight || "")}>
+            <button className="gcp-css" onClick={() => setParam("optionsMaxHeight", optionsMaxHeight || "")}>
               Set
             </button>
             {["200px", "300px", "400px", "600px"].map((preset) => (
-              <button key={preset} className="gcp-css white" onClick={() => setOptionsMaxHeight(preset)}>
+              <button key={preset} className="gcp-css white" onClick={() => setParam("optionsMaxHeight", preset)}>
                 {preset}
               </button>
             ))}
-            <button className="gcp-css white" onClick={() => setOptionsMaxHeight("")}>
+            <button className="gcp-css white" onClick={() => setParam("optionsMaxHeight", "")}>
               Reset
             </button>
           </div>
@@ -803,29 +985,20 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           <span style={{ minWidth: "120px" }}>
             🎨 <strong>Render</strong>:
           </span>
-          <button className="gcp-css" onClick={() => setOptionsRender("custom")}>
+          <button className="gcp-css" onClick={() => setParam("optionsRender", "custom")}>
             Set Custom Render
           </button>
-          <button className="gcp-css" onClick={() => setOptionsRender("string")}>
+          <button className="gcp-css" onClick={() => setParam("optionsRender", "string")}>
             Set String Render
           </button>
-          <button className="gcp-css" onClick={() => setOptionsRender("default")}>
+          <button className="gcp-css" onClick={() => setParam("optionsRender", "default")}>
             Set Default Render
           </button>
-          <button className="gcp-css" onClick={() => setOptionsCustomEmpty(true)}>
+          <button className="gcp-css" onClick={() => setParam("optionsCustomEmpty", true)}>
             Set Custom Empty
           </button>
-          <button className="gcp-css" onClick={() => setOptionsCustomEmpty(false)}>
+          <button className="gcp-css" onClick={() => setParam("optionsCustomEmpty", false)}>
             Set Default Empty
-          </button>
-        </div>
-
-        <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-          <span style={{ minWidth: "120px" }}>
-            ⌨️ <strong>Focus & Events</strong>:
-          </span>
-          <button className="gcp-css" onClick={() => getManager()?.selected.setFocus()}>
-            Focus
           </button>
         </div>
       </div>
@@ -834,41 +1007,41 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
         <div style={{ flex: 1, minWidth: "300px", borderRight: "1px solid #eee", paddingRight: "20px" }}>
           <h4 style={{ marginTop: 0 }}>SelectedSection (Top)</h4>
           <label>
-            <input type="checkbox" checked={selectedDisabled} onChange={(e) => setSelectedDisabled(e.target.checked)} />
+            <input type="checkbox" checked={selectedDisabled} onChange={(e) => setParam("selectedDisabled", e.target.checked)} />
             Disabled
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={selectedLoading} onChange={(e) => setSelectedLoading(e.target.checked)} />
+            <input type="checkbox" checked={selectedLoading} onChange={(e) => setParam("selectedLoading", e.target.checked)} />
             Loading
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={selectedError} onChange={(e) => setSelectedError(e.target.checked)} /> Error
+            <input type="checkbox" checked={selectedError} onChange={(e) => setParam("selectedError", e.target.checked)} /> Error
           </label>
           <br />
           <label>
             <input
               type="checkbox"
               checked={selectedShowInput}
-              onChange={(e) => setSelectedShowInput(e.target.checked)}
+              onChange={(e) => setParam("selectedShowInput", e.target.checked)}
             />
             Show Input
           </label>
           <br />
           <label>
-            Label: <input value={selectedLabel} onChange={(e) => setSelectedLabel(e.target.value)} />
+            Label: <input value={selectedLabel} onChange={(e) => setParam("selectedLabel", e.target.value)} />
           </label>
         </div>
         <div style={{ flex: 1, minWidth: "300px" }}>
           <h4 style={{ marginTop: 0 }}>OptionsSection (Dropdown)</h4>
           <label>
-            <input type="checkbox" checked={optionsDisabled} onChange={(e) => setOptionsDisabled(e.target.checked)} />
+            <input type="checkbox" checked={optionsDisabled} onChange={(e) => setParam("optionsDisabled", e.target.checked)} />
             Disabled
           </label>
           <br />
           <label>
-            <input type="checkbox" checked={optionsLoading} onChange={(e) => setOptionsLoading(e.target.checked)} />
+            <input type="checkbox" checked={optionsLoading} onChange={(e) => setParam("optionsLoading", e.target.checked)} />
             Loading
           </label>
           <br />
@@ -876,7 +1049,7 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
             <input
               type="checkbox"
               checked={optionsShowFilter}
-              onChange={(e) => setOptionsShowFilter(e.target.checked)}
+              onChange={(e) => setParam("optionsShowFilter", e.target.checked)}
             />
             Show Filter
           </label>
@@ -885,14 +1058,14 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
             <input
               type="checkbox"
               checked={optionsShowFooter}
-              onChange={(e) => setOptionsShowFooter(e.target.checked)}
+              onChange={(e) => setParam("optionsShowFooter", e.target.checked)}
             />
             Show Footer
           </label>
           <br />
           <label>
             Position:
-            <select value={optionsPosition} onChange={(e) => setOptionsPosition(e.target.value)}>
+            <select value={optionsPosition} onChange={(e) => setParam("optionsPosition", e.target.value as PositionType)}>
               <option value="cover-bottom">cover-bottom</option>
               <option value="bottom">bottom</option>
               <option value="top">top</option>
@@ -903,32 +1076,44 @@ function DemoInstance({ id, onRemove }: { id: number; onRemove: () => void }) {
           <br />
           <label>
             Label:
-            <input value={optionsLabel} onChange={(e) => setOptionsLabel(e.target.value)} />
+            <input value={optionsLabel} onChange={(e) => setParam("optionsLabel", e.target.value)} />
           </label>
         </div>
       </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <pre style={{ background: "#f8f8f8", padding: "10px", fontSize: "12px", border: "1px solid #eee" }}>
-          {JSON.stringify(selectedItems, null, 2)}
-        </pre>
-      </div>
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <strong>Selected Items:</strong>
+          <pre
+            style={{
+              background: "#f8f8f8",
+              padding: "10px",
+              fontSize: "12px",
+              border: "1px solid #eee",
+              maxHeight: "300px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(selectedItems, null, 2)}
+          </pre>
+        </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <strong>Options State Dump:</strong>
-        <pre
-          style={{
-            background: "#f8f8f8",
-            padding: "10px",
-            fontSize: "12px",
-            border: "1px solid #eee",
-            maxHeight: "300px",
-            overflow: "auto",
-          }}
-        >
-          {JSON.stringify(options, null, 2)}
-        </pre>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <strong>Options State Dump:</strong>
+          <pre
+            style={{
+              background: "#f8f8f8",
+              padding: "10px",
+              fontSize: "12px",
+              border: "1px solid #eee",
+              maxHeight: "300px",
+              overflow: "auto",
+            }}
+          >
+            {JSON.stringify(options, null, 2)}
+          </pre>
+        </div>
       </div>
     </div>
   );
-}
+});

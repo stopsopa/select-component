@@ -943,15 +943,6 @@ const DemoInstance = memo(function DemoInstance({
             Set Default Empty
           </button>
         </div>
-
-        <div style={{ display: "flex", gap: "5px", alignItems: "center" }}>
-          <span style={{ minWidth: "120px" }}>
-            ⌨️ <strong>Focus & Events</strong>:
-          </span>
-          <button className="gcp-css" onClick={() => getManager()?.selected.setFocus()}>
-            Focus
-          </button>
-        </div>
       </div>
 
       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", marginBottom: "20px", fontSize: "14px" }}>
