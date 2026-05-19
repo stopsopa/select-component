@@ -13,6 +13,9 @@ xx typecheck
 
 # terminal 3
 cd vite-project
-/bin/bash reload_dev.sh
+/bin/bash dev.sh
+  # when any changes done beyond vite-project/ 
+  # then stop and run again /bin/bash dev.sh
+
 
 ```
