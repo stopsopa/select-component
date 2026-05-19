@@ -16,22 +16,22 @@ function Home() {
       <nav>
         <ul>
           <li>
-            <Link to="/composite-select-demo" className="gcp-css">CompositeSelect Manager Demo</Link>
+            <Link to="/composite-select-demo" data-testid="composite-select-demo" className="gcp-css">CompositeSelect Manager Demo</Link>
           </li>
           <li>
-            <Link to="/composite-select-demo-attr" className="gcp-css">CompositeSelect Manager Demo (Attr)</Link>
+            <Link to="/composite-select-demo-attr" data-testid="composite-select-demo-attr" className="gcp-css">CompositeSelect Manager Demo (Attr)</Link>
           </li>
           <li>
-            <Link to="/options-section-demo" className="gcp-css">OptionsSection Section Demo</Link>
+            <Link to="/options-section-demo" data-testid="options-section-demo" className="gcp-css">OptionsSection Section Demo</Link>
           </li>
           <li>
-            <Link to="/selected-section-demo" className="gcp-css">SelectedSection Section Demo</Link>
+            <Link to="/selected-section-demo" data-testid="selected-section-demo" className="gcp-css">SelectedSection Section Demo</Link>
           </li>
           <li>
-            <Link to="/url-serialiser" className="gcp-css">UrlSerialiser Demo</Link>
+            <Link to="/url-serialiser" data-testid="url-serialiser" className="gcp-css">UrlSerialiser Demo</Link>
           </li>
           <li>
-            <Link to="/url-serialiser-mod" className="gcp-css">UrlSerialiser Mod Demo</Link>
+            <Link to="/url-serialiser-mod" data-testid="url-serialiser-mod" className="gcp-css">UrlSerialiser Mod Demo</Link>
           </li>
         </ul>
       </nav>
