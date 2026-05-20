@@ -203,6 +203,10 @@ cat <<EEE
 ENVFILE=.env.playwright /bin/bash pw.sh
 ENVFILE=.env.playwright /bin/bash pw.sh --target docker
 
+npx playwright show-report
+
+./node_modules/.bin/playwright test --headed --forbid-only --project=chromium --workers=1 
+
 EEE
       `,
       description: "Transpile choice.js/select.ts to choice.js/select.js",

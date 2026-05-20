@@ -12,15 +12,16 @@ yarn.lock
 node_modules
 pnpm-lock.yaml
 /vite-project/*
+!/vite-project/index.html
 !/vite-project/src/
 /vite-project/src/*
+!/vite-project/src/App.tsx
 !/vite-project/src/pages/
 /vite-project/src/pages/*
 !/vite-project/src/pages/SelectedSectionDemo.tsx
 !/vite-project/src/pages/CompositeSelectDemo.tsx
 !/vite-project/src/pages/CompositeSelectDemoAttr.tsx
 !/vite-project/src/pages/OptionsSectionDemo.tsx
-!/vite-project/index.html
 !/vite-project/src/pages/useUrlGet.ts
 !/vite-project/src/pages/UrlSerialiser.tsx
 !/vite-project/src/pages/createUseQueryParams.tsx
