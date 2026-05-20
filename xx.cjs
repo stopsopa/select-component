@@ -202,6 +202,7 @@ cat <<EEE
 
 ENVFILE=.env.playwright /bin/bash pw.sh
 ENVFILE=.env.playwright /bin/bash pw.sh --target docker
+/bin/bash playwright.sh -- --debug -- vite-project/src/App.e2e.js
 
 npx playwright show-report
 

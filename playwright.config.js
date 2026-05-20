@@ -46,7 +46,7 @@ buildBASE_URL("playwright.config.js");
  */
 const config = {
   testDir: __dirname,
-  testMatch: process.env.PLAYWRIGHT_TEST_MATCH || "**/*.e2e.js", // https://playwright.dev/docs/test-configuration#testing-options
+  testMatch: process.env.PLAYWRIGHT_TEST_MATCH || "**/*.e2e.{js,ts}", // https://playwright.dev/docs/test-configuration#testing-options
   //testIgnore: [ // https://playwright.dev/docs/api/class-testconfig#test-config-test-ignore
   //  '**/.git/**',
   //   /macro-tests/
