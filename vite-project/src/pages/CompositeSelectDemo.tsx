@@ -756,7 +756,11 @@ const DemoInstance = memo(function DemoInstance({
       }}
     >
       <h2 style={{ marginTop: 0 }}>Instance #{id}</h2>
-      <button onClick={() => onRemove(id)} className="gcp-css" style={{ position: "absolute", top: "20px", right: "20px" }}>
+      <button
+        onClick={() => onRemove(id)}
+        className="gcp-css"
+        style={{ position: "absolute", top: "20px", right: "20px" }}
+      >
         Destroy
       </button>
 
@@ -1034,6 +1038,7 @@ const DemoInstance = memo(function DemoInstance({
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>Selected Items:</strong>
           <pre
+            data-testid="selectedItems"
             style={{
               background: "#f8f8f8",
               padding: "10px",
@@ -1050,6 +1055,7 @@ const DemoInstance = memo(function DemoInstance({
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>Options State Dump:</strong>
           <pre
+            data-testid="optionsStateDump"
             style={{
               background: "#f8f8f8",
               padding: "10px",

@@ -1132,6 +1132,7 @@ const DemoInstance = memo(function DemoInstance({
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>Selected Items:</strong>
           <pre
+            data-testid="selectedItems"
             style={{
               background: "#f8f8f8",
               padding: "10px",
@@ -1148,6 +1149,7 @@ const DemoInstance = memo(function DemoInstance({
         <div style={{ flex: 1, minWidth: 0 }}>
           <strong>Options State Dump:</strong>
           <pre
+            data-testid="optionsStateDump"
             style={{
               background: "#f8f8f8",
               padding: "10px",

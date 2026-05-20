@@ -1,6 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
 
-
 async function softNavigate(page: Page, url: string) {
   await page.evaluate((url) => {
     window.history.pushState({}, "", url);
@@ -8,24 +7,47 @@ async function softNavigate(page: Page, url: string) {
   }, url);
 }
 
-/**
- * /bin/bash playwright.sh vite-project/src/App.e2e.js
- */
-test("has title", async ({ page }) => {
-  await page.goto("/vite-project/dist/");
-
-  const linkLocator = page.locator('[data-testid="composite-select-demo"]');
+async function querySelector(page: Page, selector: string) {
+  const linkLocator = page.locator(selector);
   await expect(linkLocator).toHaveCount(1);
 
+  return linkLocator;
+}
+
+async function prepare(page: Page) {
+  await page.goto("/vite-project/dist/");
+
+  const linkLocator = await querySelector(page, '[data-testid="composite-select-demo"]');
+
   await expect(linkLocator).toHaveText("CompositeSelect Manager Demo");
+}
 
-  // how to then without reloading the page renavigate to 
+/**
+ * /bin/bash playwright.sh vite-project/src/App.e2e.ts
+ * /bin/bash playwright.sh -- vite-project/src/App.e2e.ts
+ * /bin/bash playwright.sh -- --debug -- vite-project/src/App.e2e.ts
+ *
+ */
+test("has title", async ({ page }) => {
+  await prepare(page);
+
+  // how to then without reloading the page renavigate to
   // /vite-project/dist/composite-select-demo?emp-1=1&s-1=%5B"google_keep.png"%2C"chatgpt.png"%2C"claude.png"%5D
-  await softNavigate(page, '/vite-project/dist/composite-select-demo?emp-1=1&s-1=%5B"google_keep.png"%2C"chatgpt.png"%2C"claude.png"%5D');
+  await softNavigate(
+    page,
+    '/vite-project/dist/composite-select-demo?emp-1=1&s-1=%5B"google_keep.png"%2C"chatgpt.png"%2C"claude.png"%5D',
+  );
 
+  const selectedItems = await querySelector(page, '[data-testid="selectedItems"]');
 
-  // await linkLocator.click();
+  // then extract innerHTML and parse as JSON
+  const innerHTML = await selectedItems.innerHTML();
+  const json = JSON.parse(innerHTML);
 
-  
-
+  // and here compare with object
+  expect(json).toEqual([
+    { color: "#4285f4", id: "google_keep.png", img: "google_keep.png", label: "google_keep", selected: true },
+    { color: "#0f9d58", id: "chatgpt.png", img: "chatgpt.png", label: "chatgpt", selected: true },
+    { color: "#0f9d58", id: "claude.png", img: "claude.png", label: "claude", selected: true },
+  ]);
 });
