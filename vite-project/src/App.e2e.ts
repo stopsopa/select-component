@@ -22,6 +22,21 @@ async function prepare(page: Page) {
   await expect(linkLocator).toHaveText("CompositeSelect Manager Demo");
 }
 
+async function compareSelectedItems(page: Page, selector: string, data: any[]) {
+  const selectedItems = await querySelector(page, selector);
+
+  // then extract innerHTML and parse as JSON
+  const innerHTML = await selectedItems.innerHTML();
+  const json = JSON.parse(innerHTML);
+
+  // and here compare with object
+  expect(json).toEqual([
+    { color: "#4285f4", id: "google_keep.png", img: "google_keep.png", label: "google_keep", selected: true },
+    { color: "#0f9d58", id: "chatgpt.png", img: "chatgpt.png", label: "chatgpt", selected: true },
+    { color: "#0f9d58", id: "claude.png", img: "claude.png", label: "claude", selected: true },
+  ]);
+}
+
 /**
  * /bin/bash playwright.sh vite-project/src/App.e2e.ts
  * /bin/bash playwright.sh -- vite-project/src/App.e2e.ts
@@ -31,21 +46,12 @@ async function prepare(page: Page) {
 test("has title", async ({ page }) => {
   await prepare(page);
 
-  // how to then without reloading the page renavigate to
-  // /vite-project/dist/composite-select-demo?emp-1=1&s-1=%5B"google_keep.png"%2C"chatgpt.png"%2C"claude.png"%5D
   await softNavigate(
     page,
     '/vite-project/dist/composite-select-demo?emp-1=1&s-1=%5B"google_keep.png"%2C"chatgpt.png"%2C"claude.png"%5D',
   );
 
-  const selectedItems = await querySelector(page, '[data-testid="selectedItems"]');
-
-  // then extract innerHTML and parse as JSON
-  const innerHTML = await selectedItems.innerHTML();
-  const json = JSON.parse(innerHTML);
-
-  // and here compare with object
-  expect(json).toEqual([
+  await compareSelectedItems(page, '[data-testid="selectedItems"]', [
     { color: "#4285f4", id: "google_keep.png", img: "google_keep.png", label: "google_keep", selected: true },
     { color: "#0f9d58", id: "chatgpt.png", img: "chatgpt.png", label: "chatgpt", selected: true },
     { color: "#0f9d58", id: "claude.png", img: "claude.png", label: "claude", selected: true },
