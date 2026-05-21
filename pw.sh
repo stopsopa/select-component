@@ -1,6 +1,9 @@
 
 # 
+# Runs server then runs playwright tests and then stops server
 # ENVFILE=.env.playwright /bin/bash pw.sh
+#
+# Don't use it if you already have running server and don't want to restart all the time
 # 
 
 set -e

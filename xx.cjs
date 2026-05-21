@@ -200,13 +200,25 @@ npm pack
       command: `
 cat <<EEE
 
-ENVFILE=.env.playwright /bin/bash pw.sh
-ENVFILE=.env.playwright /bin/bash pw.sh --target docker
-/bin/bash playwright.sh -- --debug -- vite-project/src/App.e2e.js
+# run server, then tests then stop server
+  ENVFILE=.env.playwright /bin/bash pw.sh
+  ENVFILE=.env.playwright /bin/bash pw.sh --target docker
 
-npx playwright show-report
+# for continuously running server use  
+  /bin/bash playwright.sh -- --debug -- vite-project/src/App.e2e.js
 
-./node_modules/.bin/playwright test --headed --forbid-only --project=chromium --workers=1 
+  npx playwright show-report
+
+  ./node_modules/.bin/playwright test --headed --forbid-only --project=chromium --workers=1 
+
+  /bin/bash playwright.sh vite-project/src/App.e2e.ts
+  /bin/bash playwright.sh -- vite-project/src/App.e2e.ts
+  /bin/bash playwright.sh -- --debug -- vite-project/src/App.e2e.ts
+
+  ./node_modules/.bin/playwright codegen http://0.0.0.0:5678/vite-project/dist/
+
+  /bin/bash playwright.sh -- vite-project/src/App.e2e.ts -g "build list"
+  /bin/bash playwright.sh -- --debug -g "build list" -- vite-project/src/App.e2e.ts
 
 EEE
       `,
