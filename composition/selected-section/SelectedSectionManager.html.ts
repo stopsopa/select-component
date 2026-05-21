@@ -191,11 +191,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         }
       }
 
-      if (
-        e.key === "Backspace" &&
-        e.target.value === "" &&
-        mgr.getSelected().length > 0
-      ) {
+      if (e.key === "Backspace" && e.target.value === "" && mgr.getSelected().length > 0) {
         const selected = [...mgr.getSelected()];
         selected.pop();
         mgr.setSelected(selected);
@@ -377,3 +373,8 @@ const loadFromUrl = () => {
 
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
+
+var pageDescription = document.querySelector("#page-description");
+pageDescription?.addEventListener("click", () => {
+  pageDescription?.remove();
+});

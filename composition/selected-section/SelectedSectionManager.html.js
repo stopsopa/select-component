@@ -329,3 +329,7 @@ const loadFromUrl = () => {
 };
 window.addEventListener("popstate", loadFromUrl);
 loadFromUrl();
+var pageDescription = document.querySelector("#page-description");
+pageDescription?.addEventListener("click", () => {
+  pageDescription?.remove();
+});
