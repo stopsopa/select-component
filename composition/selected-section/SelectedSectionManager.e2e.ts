@@ -268,3 +268,80 @@ test("clear button", async ({ page }) => {
     "/composition/selected-section/SelectedSectionManager.html?l1=50px&c1=350px&d1=0&o1=0&as1=Select+options&s1=&e1=0&i1=1",
   );
 });
+
+/**
+ * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "set custom render"
+ * /bin/bash playwright.sh -- --debug -g "set custom render" -- composition/selected-section/SelectedSectionManager.e2e.ts
+ */
+test("set custom render", async ({ page }) => {
+  await page.goto("/composition/selected-section/SelectedSectionManager.html");
+
+  await page.getByRole("button", { name: "google_calendar.png" }).click();
+
+  await page.getByRole("button", { name: "ai.png" }).click();
+
+  await compareSelectedItems(page, '[data-role="dump"]', [
+    {
+      id: 1,
+      label: "Initial 1",
+      selected: true,
+    },
+    {
+      id: 2,
+      label: "Initial 2",
+      selected: true,
+    },
+    {
+      color: "blue",
+      id: 223,
+      img: "google_calendar.png",
+      label: "google_calendar",
+      selected: true,
+    },
+    {
+      color: "red",
+      id: 224,
+      img: "ai.png",
+      label: "ai",
+      selected: true,
+    },
+  ]);
+
+  // now we found elements
+  const element = await querySelector(page, '[data-id="224"]');
+
+  // standard template don't add 'style'
+  let style = await element.getAttribute("style");
+  expect(style || "").toBe("");
+
+  // and it doesn't add <img />
+  await expect(element.locator("img")).toHaveCount(0);
+
+  // now we click button for custom render
+  await page.locator('[data-role="opt-render-btn"]').click();
+
+  // and style is set
+  const styleAfter = await element.getAttribute("style");
+  expect(styleAfter).toBe("border: 1px solid red;");
+
+  // and image exist
+  const img = element.locator("img");
+  await expect(img).toHaveCount(1);
+  await expect(img).toHaveAttribute("src", "../img/ai.png");
+
+  const url = await page.evaluate(() => {
+    return window.location.pathname + window.location.search;
+  });
+
+  expect(url).toBe(
+    "/composition/selected-section/SelectedSectionManager.html?l1=50px&c1=350px&d1=0&o1=0&as1=Select+options&s1=&e1=0&i1=1&v1=Initial+1&v1=Initial+2&v1=blue%7Cgoogle_calendar.png%7Cgoogle_calendar&v1=red%7Cai.png%7Cai",
+  );
+
+  // and after another click default template shold work again
+  await page.locator('[data-role="opt-default-render-btn"]').click();
+
+  style = await element.getAttribute("style");
+  expect(style || "").toBe("");
+
+  await expect(element.locator("img")).toHaveCount(0);
+});
