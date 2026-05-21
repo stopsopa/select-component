@@ -19,7 +19,12 @@ trap cleanup EXIT
 
 node --env-file .env --watch server.js --flag "${PROJECT_NAME}" & 
 
-sleep 1
+# sleep 1
+
+(
+  cd vite-project 
+  npm run build
+)
 
 curl http://${HOST}:${PORT}/health
 echo ""

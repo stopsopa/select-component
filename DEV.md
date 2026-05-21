@@ -26,3 +26,15 @@ urls
 http://0.0.0.0:5678/vite-project/dist/
 
 ```
+
+# to run tests
+
+```
+/bin/bash pw.sh
+# that will run server, run build, run playwright tests and stop server
+
+# go see
+xx playwright
+# for more sophisticated ways to run tests
+
+```
