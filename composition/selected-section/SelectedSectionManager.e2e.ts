@@ -345,3 +345,23 @@ test("set custom render", async ({ page }) => {
 
   await expect(element.locator("img")).toHaveCount(0);
 });
+
+/**
+ * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "SelectedSectionManager.setLabel"
+ * /bin/bash playwright.sh -- --debug -g "SelectedSectionManager.setLabel" -- composition/selected-section/SelectedSectionManager.e2e.ts
+ */
+test("SelectedSectionManager.setLabel", async ({ page }) => {
+  await page.goto("/composition/selected-section/SelectedSectionManager.html");
+
+  await page.getByRole("textbox", { name: "Label" }).click();
+
+  await page.getByRole("textbox", { name: "Label" }).press("ControlOrMeta+ArrowRight");
+
+  await page.getByRole("textbox", { name: "Label" }).fill("Select options abc");
+
+  const element = await querySelector(page, ".selected-section .floating-label");
+
+  const text = await element.innerText();
+
+  expect(text).toBe("Select options abc");
+});
