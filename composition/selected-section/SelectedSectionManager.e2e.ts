@@ -63,6 +63,7 @@ test("add 2 manual and one clicked", async ({ page }) => {
 
 /**
  * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "check disabled"
+ * /bin/bash playwright.sh -- --debug -g "check disabled" -- composition/selected-section/SelectedSectionManager.e2e.ts
  */
 test("check disabled", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
@@ -83,6 +84,45 @@ test("check disabled", async ({ page }) => {
 
   expect(url).toBe(
     "/composition/selected-section/SelectedSectionManager.html?v1=Initial+1&v1=Initial+2&l1=50px&c1=350px&d1=1&o1=0&as1=Select+options&s1=&e1=0&i1=1",
+  );
+
+  await compareSelectedItems(page, '[data-role="dump"]', [
+    {
+      id: 1,
+      label: "Initial 1",
+    },
+    {
+      id: 2,
+      label: "Initial 2",
+    },
+  ]);
+});
+
+/**
+ * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "loading state"
+ * /bin/bash playwright.sh -- --debug -g "loading state" -- composition/selected-section/SelectedSectionManager.e2e.ts
+ */
+test("loading state", async ({ page }) => {
+  await page.goto("/composition/selected-section/SelectedSectionManager.html");
+
+  const element = await querySelector(page, ".buttons-container");
+
+  await expect(element.locator(".clear-btn")).toBeVisible();
+  await expect(element.locator(".loader")).not.toBeVisible();
+
+  await page.getByRole("checkbox", { name: "Loading" }).check();
+
+  await expect(element.locator(".clear-btn")).not.toBeVisible();
+  await expect(element.locator(".loader")).toBeVisible();
+
+
+
+  const url = await page.evaluate(() => {
+    return window.location.pathname + window.location.search;
+  });
+
+  expect(url).toBe(
+    "/composition/selected-section/SelectedSectionManager.html?v1=Initial+1&v1=Initial+2&l1=50px&c1=350px&d1=0&o1=1&as1=Select+options&s1=&e1=0&i1=1",
   );
 
   await compareSelectedItems(page, '[data-role="dump"]', [
