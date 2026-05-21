@@ -11,5 +11,5 @@
     "allowJs": false
   },
   "include": ["composition/**/*.ts"],
-  "exclude": ["node_modules", "dist", ".github", "bash", "html", "jest.config.ts"]
+  "exclude": ["node_modules", "dist", ".github", "bash", "html", "jest.config.ts", "**/*.e2e.ts"]
 }
