@@ -99,6 +99,43 @@ test("check disabled", async ({ page }) => {
 });
 
 /**
+ * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "check error"
+ * /bin/bash playwright.sh -- --debug -g "check error" -- composition/selected-section/SelectedSectionManager.e2e.ts
+ */
+test("check error", async ({ page }) => {
+  await page.goto("/composition/selected-section/SelectedSectionManager.html");
+
+  const element = await querySelector(page, ".selected-section");
+
+  // on start it shoulnd't have disabled class
+  await expect(element).not.toHaveClass(/error/);
+
+  await page.getByRole("checkbox", { name: "Error" }).check();
+
+  // and after check it should have disabled class
+  await expect(element).toHaveClass(/error/);
+
+  const url = await page.evaluate(() => {
+    return window.location.pathname + window.location.search;
+  });
+
+  expect(url).toBe(
+    "/composition/selected-section/SelectedSectionManager.html?v1=Initial+1&v1=Initial+2&l1=50px&c1=350px&d1=0&o1=0&as1=Select+options&s1=&e1=1&i1=1",
+  );
+
+  await compareSelectedItems(page, '[data-role="dump"]', [
+    {
+      id: 1,
+      label: "Initial 1",
+    },
+    {
+      id: 2,
+      label: "Initial 2",
+    },
+  ]);
+});
+
+/**
  * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "loading state"
  * /bin/bash playwright.sh -- --debug -g "loading state" -- composition/selected-section/SelectedSectionManager.e2e.ts
  */
