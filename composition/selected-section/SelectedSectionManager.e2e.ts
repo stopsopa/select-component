@@ -15,6 +15,8 @@ import { softNavigate, querySelector, clickSelector, prepare, compareSelectedIte
  */
 test("clear default selection", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
+
   await page.getByPlaceholder(" ").click();
   await page.locator(".flex-list > div:nth-child(2) > div").click();
   await page.locator(".element > div").click();
@@ -23,6 +25,8 @@ test("clear default selection", async ({ page }) => {
 });
 test("add 2 manual and one clicked", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
+  
   await page.getByPlaceholder(" ").click();
   await page.getByPlaceholder(" ").fill("abc");
   await page.getByPlaceholder(" ").press("Enter");
@@ -67,6 +71,7 @@ test("add 2 manual and one clicked", async ({ page }) => {
  */
 test("check disabled", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   const element = await querySelector(page, ".selected-section");
 
@@ -104,6 +109,7 @@ test("check disabled", async ({ page }) => {
  */
 test("check error", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   const element = await querySelector(page, ".selected-section");
 
@@ -141,6 +147,7 @@ test("check error", async ({ page }) => {
  */
 test("loading state", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   const element = await querySelector(page, ".buttons-container");
 
@@ -178,6 +185,7 @@ test("loading state", async ({ page }) => {
  */
 test("show input", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   const element = await querySelector(page, ".flex-list [placeholder]");
 
@@ -224,6 +232,7 @@ test("show input", async ({ page }) => {
  */
 test("clear button", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   await page.getByRole("button", { name: "google_calendar.png" }).click();
 
@@ -275,6 +284,7 @@ test("clear button", async ({ page }) => {
  */
 test("set custom render", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   await page.getByRole("button", { name: "google_calendar.png" }).click();
 
@@ -352,6 +362,7 @@ test("set custom render", async ({ page }) => {
  */
 test("SelectedSectionManager.setLabel", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   let element = await querySelector(page, '[data-role="label-input-opt"]');
 
@@ -374,6 +385,7 @@ test("SelectedSectionManager.setLabel", async ({ page }) => {
  */
 test("SelectedSectionManager.setValue", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
+  await page.locator("#page-description").evaluate((el) => el.remove());
 
   let element = await querySelector(page, '[data-role="value-input-opt"]');
 
