@@ -353,15 +353,39 @@ test("set custom render", async ({ page }) => {
 test("SelectedSectionManager.setLabel", async ({ page }) => {
   await page.goto("/composition/selected-section/SelectedSectionManager.html");
 
-  await page.getByRole("textbox", { name: "Label" }).click();
+  let element = await querySelector(page, '[data-role="label-input-opt"]');
 
-  await page.getByRole("textbox", { name: "Label" }).press("ControlOrMeta+ArrowRight");
+  await element.click();
 
-  await page.getByRole("textbox", { name: "Label" }).fill("Select options abc");
+  await element.press("ControlOrMeta+ArrowRight");
 
-  const element = await querySelector(page, ".selected-section .floating-label");
+  await element.fill("Select options abc");
+
+  element = await querySelector(page, ".selected-section .floating-label");
 
   const text = await element.innerText();
 
   expect(text).toBe("Select options abc");
+});
+
+/**
+ * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "SelectedSectionManager.setValue"
+ * /bin/bash playwright.sh -- --debug -g "SelectedSectionManager.setValue" -- composition/selected-section/SelectedSectionManager.e2e.ts
+ */
+test("SelectedSectionManager.setValue", async ({ page }) => {
+  await page.goto("/composition/selected-section/SelectedSectionManager.html");
+
+  let element = await querySelector(page, '[data-role="value-input-opt"]');
+
+  await element.click();
+
+  await element.press("ControlOrMeta+ArrowRight");
+
+  await element.fill("Select options abc");
+
+  element = await querySelector(page, ".flex-list [placeholder]");
+
+  const value = await element.inputValue();
+
+  expect(value).toBe("Select options abc");
 });
