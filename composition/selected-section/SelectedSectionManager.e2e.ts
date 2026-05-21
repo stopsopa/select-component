@@ -217,3 +217,54 @@ test("show input", async ({ page }) => {
     },
   ]);
 });
+
+/**
+ * /bin/bash playwright.sh -- composition/selected-section/SelectedSectionManager.e2e.ts -g "clear button"
+ * /bin/bash playwright.sh -- --debug -g "clear button" -- composition/selected-section/SelectedSectionManager.e2e.ts
+ */
+test("clear button", async ({ page }) => {
+  await page.goto("/composition/selected-section/SelectedSectionManager.html");
+
+  await page.getByRole("button", { name: "google_calendar.png" }).click();
+
+  await page.getByRole("button", { name: "ai.png" }).click();
+
+  await compareSelectedItems(page, '[data-role="dump"]', [
+    {
+      id: 1,
+      label: "Initial 1",
+      selected: true,
+    },
+    {
+      id: 2,
+      label: "Initial 2",
+      selected: true,
+    },
+    {
+      color: "blue",
+      id: 223,
+      img: "google_calendar.png",
+      label: "google_calendar",
+      selected: true,
+    },
+    {
+      color: "red",
+      id: 224,
+      img: "ai.png",
+      label: "ai",
+      selected: true,
+    },
+  ]);
+
+  await page.getByRole("button", { name: "✕" }).click();
+
+  await compareSelectedItems(page, '[data-role="dump"]', []);
+
+  const url = await page.evaluate(() => {
+    return window.location.pathname + window.location.search;
+  });
+
+  expect(url).toBe(
+    "/composition/selected-section/SelectedSectionManager.html?l1=50px&c1=350px&d1=0&o1=0&as1=Select+options&s1=&e1=0&i1=1",
+  );
+});
