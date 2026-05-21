@@ -1,0 +1,1 @@
+patch node_modules/playwright-core/lib/server/recorder/recorderApp.js diff/recorderApp.patch

@@ -164,10 +164,12 @@ set -e
 S="\\\\"  
 
 CMD="$(cat <<EOF
+rm -rf node_modules
 /bin/bash bash/swap-files-v2.sh \${S}
   package.json package.dev.json \${S}
   package-lock.json package-lock.dev.json \${S}
   -- npm install
+/bin/bash diff/patch.sh
 EOF
 )"
 
