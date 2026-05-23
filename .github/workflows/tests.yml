@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-24.04 # https://github.com/actions/runner-images#available-images
     timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Get Node version from .tool-versions
         id: node-version
@@ -61,15 +61,21 @@ jobs:
       #     ls -la node_modules || true
 
       - name: npm ci
-        run: /bin/bash bash/swap-files-v2.sh package.json package.dev.json package-lock.json package-lock.dev.json -- npm ci
+        run: |
+          /bin/bash bash/swap-files-v2.sh \
+            package.json \
+            package.dev.json \
+            package-lock.json \
+            package-lock.dev.json \
+            -- npm ci
 
       - name: build
         run: /bin/bash build.sh
 
       - name: vite ci
         run: |
-
-          (cd vite-project && npm ci)
+          cd vite-project
+          npm ci
 
       - name: link
         run: /bin/bash links.sh
@@ -87,66 +93,56 @@ jobs:
       #   run: |
       #     /bin/bash .github/pull-docker-image.sh
 
-      - name: pull playwrightdocker image
+      - name: pull playwright docker image
         run: /bin/bash .github/pull-docker-image.sh
 
       - name: playwright tests
         run: /bin/bash pw.sh -t docker
 
-      # - name: UNIT TESTS
-      #   run: |
-      #     set -e
-      #     set -o pipefail
-      #     mkdir -p coverage
-      #     node node_modules/.bin/vitest --config vitest.config.ts --coverage run | tee var/for-coverage-badge.log
-      #     #/bin/bash jest.sh | tee var/for-coverage-badge.log
+      #
+      # GitHub Pages
+      #
 
-      # - name: JASMINE TESTS
-      #   run: |
-      #     NODE_API_PORT=4273 /bin/bash jasmine/test.sh --env .env -- --target docker
+      - name: Prepare Pages artifact
+        if: github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p gh-pages
+          cp -r vite-project/dist/* gh-pages/
 
-      # - name: generate coverage badge
-      #   run: |
-      #     set -e
-      #     set -o pipefail
-      #     cat var/for-coverage-badge.log | node bash/node/coverage-badge.cjs --output coverage/coverage-badge.svg
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: gh-pages
 
-      # - name: build
-      #   run: npm run build
+  github-pages:
+    if: github.ref == 'refs/heads/main'
+    needs: test
 
-      # - name: use cli
-      #   run: |
-      #     TEST_ONE="one" TEST_TWO="two" node dist/cjs/cli.cjs --mask '^TEST_' examples/preprocessed.js --debug --verbose
-      #     TEST_ONE="one" TEST_TWO="two" node dist/esm/cli.js --mask '^TEST_' examples/preprocessed.js --debug --verbose
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-      # - name: Clean before artifact
-      #   run: /bin/bash .github/clean_before_github_pages.sh
+    runs-on: ubuntu-24.04
 
-      # # updated https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/
-      # - name: Upload artifact
-      #   uses: actions/upload-pages-artifact@v3
-      #   with:
-      #     path: .
-
-  # # Deployment job
-  # github-pages:
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   runs-on: ubuntu-24.04
-  #   needs: test
-  #   steps:
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   npm:
     needs: test # https://docs.github.com/en/actions/using-jobs/using-jobs-in-a-workflow#defining-prerequisite-jobs
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04 # https://github.com/actions/runner-images#available-images
+
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
+
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Get Node version from .tool-versions
+        id: node-version
+        run: echo "version=$(grep nodejs .tool-versions | awk '{print $2}')" >> $GITHUB_OUTPUT
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -154,8 +150,14 @@ jobs:
           node-version: ${{ steps.node-version.outputs.version }}
 
       - name: Install semantic-release
-        run: /bin/bash bash/swap-files-v2.sh package.json package.dev.json package-lock.json package-lock.dev.json -- npm install semantic-release conventional-changelog-conventionalcommits
         # it has to be done here beacause otherwise it will crash for node@15 with error>>> error semantic-release@19.0.5: The engine "node" is incompatible with this module. Expected version ">=16 || ^14.17". Got "15.14.0"
+        run: |
+          /bin/bash bash/swap-files-v2.sh \
+            package.json \
+            package.dev.json \
+            package-lock.json \
+            package-lock.dev.json \
+            -- npm install semantic-release conventional-changelog-conventionalcommits
 
       - name: build
         run: /bin/bash build.sh
