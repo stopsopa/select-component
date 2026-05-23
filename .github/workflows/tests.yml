@@ -109,6 +109,9 @@ jobs:
           mkdir -p gh-pages
           cp -r vite-project/dist/* gh-pages/
 
+      - name: Clean before artifact
+        run: /bin/bash .github/clean_before_github_pages.sh
+
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
