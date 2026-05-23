@@ -12,6 +12,7 @@ permissions:
   contents: write # https://github.com/semantic-release/semantic-release/issues/2469#issuecomment-1158013884
   pages: write
   id-token: write
+  
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # provided automatically by github itself https://docs.github.com/en/actions/security-guides/automatic-token-authentication
