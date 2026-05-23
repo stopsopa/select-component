@@ -65,6 +65,8 @@ jobs:
 
       - name: vite ci
         run: |
+
+          (cd vite-project && ls -la)
           (cd vite-project && npm ci)
 
       - name: vite build
