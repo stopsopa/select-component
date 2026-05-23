@@ -63,16 +63,20 @@ jobs:
       - name: npm ci
         run: /bin/bash bash/swap-files-v2.sh package.json package.dev.json package-lock.json package-lock.dev.json -- npm ci
 
+      - name: build
+        run: /bin/bash build.sh
+
       - name: vite ci
         run: |
 
-          (cd vite-project && ls -la)
           (cd vite-project && npm ci)
+
+      - name: link
+        run: /bin/bash links.sh
 
       - name: vite build
         run: |
           (cd vite-project && npm run build)
-
 
       # - uses: actions/cache/save@v3 # https://github.com/actions/cache/blob/main/caching-strategies.md#reusing-primary-key-from-restore-cache-as-input-to-save-action
       #   with:
@@ -82,12 +86,6 @@ jobs:
       # - name: pulling playwright docker image
       #   run: |
       #     /bin/bash .github/pull-docker-image.sh
-
-      - name: build
-        run: /bin/bash build.sh
-
-      - name: link
-        run: /bin/bash links.sh
 
       - name: pull playwrightdocker image
         run: /bin/bash .github/pull-docker-image.sh
