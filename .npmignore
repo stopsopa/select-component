@@ -55,5 +55,5 @@ radio.js
 loader.js
 
 # uncommment for vite testing
-# *.png
-# img.json
+*.png
+img.json
