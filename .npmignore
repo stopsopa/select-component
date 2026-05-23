@@ -66,6 +66,22 @@ commitlint.config.js
 
 
 
+/composition/composite-select/*
+/composition/container/*
+/composition/unbind/*
+/composition/img/*
+/composition/list-up-down-navi/*
+!/composition/list-up-down-navi/ListManager.css
+/composition/options-section/*
+!/composition/options-section/OptionsSectionManager.css
+/composition/react/*
+/composition/selected-section/*
+!/composition/selected-section/SelectedSectionManager.css
+/composition/test/*
+/composition/unbind/*
+
+
+
 
 
 

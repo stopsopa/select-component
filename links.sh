@@ -24,8 +24,6 @@ if [ "${1}" != "" ]; then
   fi
 fi
 
-/bin/bash build.sh
-
 find . -type f -name '*.tgz' -delete
 
 npm pack

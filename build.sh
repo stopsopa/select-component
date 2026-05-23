@@ -33,6 +33,9 @@ EEE
   npx tsc -p tsconfig.just_for_the_time_of_compilation.json 
 }
 
+echo "=== Linking ==="
+/bin/bash links.sh
+
 if [[ -z "${ARG}" ]]; then
   echo "Running full build..."
   rm -rf dist
