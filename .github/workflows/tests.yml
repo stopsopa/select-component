@@ -65,13 +65,11 @@ jobs:
 
       - name: vite ci
         run: |
-          cd vite-project
-          npm ci
+          (cd vite-project && npm ci)
 
       - name: vite build
         run: |
-          cd vite-project
-          npm run build
+          (cd vite-project && npm run build)
 
 
       # - uses: actions/cache/save@v3 # https://github.com/actions/cache/blob/main/caching-strategies.md#reusing-primary-key-from-restore-cache-as-input-to-save-action
