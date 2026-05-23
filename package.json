@@ -1,7 +1,10 @@
 {
   "type": "module",
-  "version": "0.0.0",
   "name": "composite-select",
+  "version": "0.0.0",
+  "author": "Szymon Działowski",
+  "description": "Select dropdown component, vanilla, web components and react",
+  "license": "MIT",
   "main": "./dist/esm/Module.js",
   "types": "./dist/types/Module.d.ts",
   "module": "./dist/esm/Module.js",

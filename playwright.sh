@@ -33,16 +33,6 @@ if [ -f .env.sh ]; then
   source .env.sh
 fi
 
-if command -v pnpm > /dev/null 2>&1 && [ -f "pnpm-lock.yaml" ]; then
-  echo "DETECTION: pnpm command and pnpm-lock.yaml found, using pnpm"
-  PACKAGE="pnpm"
-elif command -v yarn > /dev/null 2>&1 && [ -f "yarn.lock" ]; then
-  echo "DETECTION: yarn command and yarn.lock found, using yarn"
-  PACKAGE="yarn"
-else
-  echo "DETECTION: pnpm/yarn or their lock files not found, using npm"
-  PACKAGE="npm"
-fi
 
 function set_podman {
   DOCKER_BIN="podman"
@@ -101,90 +91,24 @@ function quote {
   echo "$1" | sed -E 's/\"/\\"/g'
 }
 
-function nodeExtractVersion() {
-  NODE_OPTIONS="" node --input-type=module --eval '
-import readline from "readline";
-
-const reg = /(?:^|[^a-zA-Z0-9-])(@playwright\/test|playwright|playwright-core)[@\s]+(\d+\.\d+\.\d+)/;
-
-var rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false,
-});
-
-let versions = [];
-rl.on("line", (line) => {
-  const m = line.match(reg);
-
-  if (m) {
-    versions.push({
-      l: m[1],
-      v: m[2],
-    });
-  }
-});
-
-rl.on("close", () => {
-  let ver;
-
-  versions.forEach(({ v }) => {
-    if (ver === undefined) {
-      ver = v;
-    }
-
-    if (ver !== v) {
-      console.error(`
-playwright.sh error: all playwright libraries in package.json should have the same versions:
-found: ${JSON.stringify(versions, null, 4)}
-`);
-
-      process.exit(1);
-    }
-  });
-
-  if (ver === undefined) {
-    console.error(`
-playwright.sh error: no playwright libraries found in package.json
-add yarn add @playwright/test playwright
-`);
-    process.exit(1);
-  }
-
-  process.stdout.write(ver);
-});
-'
-}
-
 function extractVersion() {
-  local LS_OUTPUT=""
-  if [ "${PACKAGE}" = "npm" ]; then
-    echo "npm ls passed to nodeExtractVersion" >&2
-    LS_OUTPUT="$(NODE_OPTIONS="" npm ls --depth=9999 2>&1)" || true
-  elif [ "${PACKAGE}" = "yarn" ]; then
-    echo "yarn ls passed to nodeExtractVersion" >&2
-    LS_OUTPUT="$(NODE_OPTIONS="" yarn list 2>&1)" || true
-  elif [ "${PACKAGE}" = "pnpm" ]; then
-    echo "pnpm ls passed to nodeExtractVersion" >&2
-    LS_OUTPUT="$(NODE_OPTIONS="" pnpm ls 2>&1)" || true
+  local PW_OUTPUT
+  local PW_EXIT_CODE
+
+  PW_OUTPUT="$(NODE_OPTIONS= ./node_modules/.bin/playwright --version 2>&1)"
+  PW_EXIT_CODE=$?
+
+  if [ "${PW_EXIT_CODE}" != "0" ]; then
+    printf "%s\n" "${PW_OUTPUT}" >&2
+    echo "${0} error: './node_modules/.bin/playwright --version' failed with exit code ${PW_EXIT_CODE}" >&2
+    exit "${PW_EXIT_CODE}"
   fi
 
-  PLAYWRIGHT_VER="$(printf "%s\n" "${LS_OUTPUT}" | nodeExtractVersion)"
-  local EXTRACT_EXIT_CODE=$?
-
-  if [ "${EXTRACT_EXIT_CODE}" != "0" ]; then
-    echo "=== PACKAGE LISTING OUTPUT BEGIN ===" >&2
-    printf "%s\n" "${LS_OUTPUT}" >&2
-    echo "=== PACKAGE LISTING OUTPUT END ===" >&2
-    echo "${0} error: nodeExtractVersion failed to extract playwright version (exit code ${EXTRACT_EXIT_CODE})." >&2
-    exit 1
-  fi
+  PLAYWRIGHT_VER="$(printf "%s" "${PW_OUTPUT}" | sed -n 's/^Version \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$/\1/p')"
 
   if ! [[ "${PLAYWRIGHT_VER}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "=== PACKAGE LISTING OUTPUT BEGIN ===" >&2
-    printf "%s\n" "${LS_OUTPUT}" >&2
-    echo "=== PACKAGE LISTING OUTPUT END ===" >&2
-    echo "${0} error: playwright version '${PLAYWRIGHT_VER}' is not valid" >&2
+    printf "%s\n" "${PW_OUTPUT}" >&2
+    echo "${0} error: could not parse playwright version from output above" >&2
     exit 1
   fi
 }
@@ -198,6 +122,7 @@ _TESTAGAINSTHOST="1"
 _DOCKERDEFAULTS="./playwright-docker-defaults.sh"
 _GENDOCKERDEFAULTS="0"
 _GETPLAYWRIGHTVERSION="0"
+_GETPLAYWRIGHTIMAGE="0"
 ENVFILE=".env"
 
 PARAMS=""
@@ -214,6 +139,10 @@ while (( "$#" )); do
       ;;
     --version)
       _GETPLAYWRIGHTVERSION="1";
+      shift;
+      ;;
+    --image)
+      _GETPLAYWRIGHTIMAGE="1";
       shift;
       ;;
     --headless)
@@ -315,6 +244,18 @@ if [ "${_GETPLAYWRIGHTVERSION}" = "1" ]; then
   extractVersion
 
   printf "${PLAYWRIGHT_VER}"
+
+  exit 0;
+fi
+
+if [ "${_GETPLAYWRIGHTIMAGE}" = "1" ]; then
+  set -e
+
+  extractVersion
+
+  IMAGE="monstersmart/playwright:v${PLAYWRIGHT_VER}-noble-just-chromium"
+
+  printf "${IMAGE}"
 
   exit 0;
 fi
@@ -431,6 +372,22 @@ ${YELLOW}/bin/bash playwright.sh ${BOLD}--project all${RESET}${YELLOW} -- ... op
                 this is the same as 
             /bin/bash playwright.sh ${BOLD}--project firefox${RESET} -- ... optionally other native params for playwright
     # shortcut is ${BOLD}-p${RESET}
+
+${YELLOW}/bin/bash playwright.sh ${BOLD}--version${RESET}
+    # prints the playwright version resolved from the locally installed binary:
+    #   ./node_modules/.bin/playwright --version
+    # exits immediately after printing — does not run any tests
+    # example output:
+    #   1.60.0
+
+${YELLOW}/bin/bash playwright.sh ${BOLD}--image${RESET}
+    # prints the full docker image name that would be used when running in ${BOLD}--target docker${RESET} mode
+    # the version part is resolved exactly the same way as ${BOLD}--version${RESET}
+    # exits immediately after printing — does not run any tests
+    # example output:
+    #   monstersmart/playwright:v1.60.0-noble-just-chromium
+    # useful for scripting, e.g. to pull the image before running tests:
+    ${YELLOW}docker pull "\$(${BOLD}/bin/bash playwright.sh --image${RESET}${YELLOW})"${RESET}
 
 ${GREEN}ALL PARAMS BELOW ARE USED ONLY IF playwright.sh IS SWITCHED TO ${BOLD}--target docker${RESET}${GREEN} mode:${RESET}
 

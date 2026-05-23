@@ -12,7 +12,6 @@ permissions:
   contents: write # https://github.com/semantic-release/semantic-release/issues/2469#issuecomment-1158013884
   pages: write
   id-token: write
-  
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # provided automatically by github itself https://docs.github.com/en/actions/security-guides/automatic-token-authentication
@@ -23,7 +22,6 @@ jobs:
     timeout-minutes: 4
     steps:
       - uses: actions/checkout@v3
-
 
       - name: Get Node version from .tool-versions
         id: node-version
@@ -38,6 +36,7 @@ jobs:
       # https://docs.github.com/en/actions/learn-github-actions/contexts
       - name: Debug github.event
         run: echo '${{ toJson(github.event) }}'
+
       - name: Debug github
         run: echo '${{ toJson(github) }}'
 
@@ -75,6 +74,15 @@ jobs:
 
       - name: build
         run: /bin/bash build.sh
+
+      - name: link
+        run: /bin/bash links.sh
+
+      - name: pull playwrightdocker image
+        run: /bin/bash .github/pull-docker-image.sh
+
+      - name: playwright tests
+        run: /bin/bash pw.sh -t docker
 
       # - name: UNIT TESTS
       #   run: |
@@ -149,4 +157,3 @@ jobs:
       # https://github.com/semantic-release/semantic-release/blob/master/docs/recipes/ci-configurations/github-actions.md
       - name: Release
         run: node node_modules/.bin/semantic-release --debug
-        
