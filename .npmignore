@@ -53,7 +53,21 @@ morph.js
 import-map.js
 radio.js
 loader.js
+*.tar.gz
 
 # uncommment for vite testing
 *.png
 img.json
+release.config.js
+commitlint.config.js
+/test/
+/diff/
+/composition/
+
+
+
+
+
+
+
+
