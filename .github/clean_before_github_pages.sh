@@ -50,7 +50,14 @@ rm -rf README.md
 rm -rf release.config.js
 rm -rf test-results
 rm -rf vite-project/node_modules
-
+rm -rf *.tgz
+rm -rf .agent
+rm -rf diff
+rm -rf es.ts
+rm -rf madooei*
+rm -rf package-*
+rm -rf tsconfig*
+rm -rf xx.cjs
 
 
 echo 'after clean_before_github_pages'
