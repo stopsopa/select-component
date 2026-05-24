@@ -36,6 +36,7 @@ rm -rf .tool-versions
 rm -rf .prettierignore
 rm -rf .vscode
 rm -rf bash
+rm -rf node_modules
 rm -rf commitlint.config.js
 rm -rf package.dev.json
 rm -rf package.json
@@ -47,8 +48,14 @@ rm -rf playwright.sh
 rm -rf prettier.config.cjs
 rm -rf README.md
 rm -rf release.config.js
+rm -rf test-results
+rm -rf vite-project/node_modules
+
 
 
 echo 'after clean_before_github_pages'
 
+echo '========= ls -la ===============' 
 ls -la
+echo '========= ls -la vite-project ===============' 
+ls -la vite-project/
