@@ -1,4 +1,4 @@
-import "../../../js/CenterResizer.js";
+import "../CenterResizer.js";
 import { SelectedSection } from "./selected-section.js";
 import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
