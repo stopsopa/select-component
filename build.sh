@@ -34,6 +34,7 @@ EEE
 }
 
 echo "=== Linking ==="
+npx tsc -p tsconfig.watch.json
 /bin/bash links.sh
 
 if [[ -z "${ARG}" ]]; then

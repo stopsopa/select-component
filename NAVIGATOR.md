@@ -15,3 +15,4 @@
 
 [madooei package](./vite-project/node_modules/@madooei/react-example-package/dist/button.js)
 [type](./vite-project/node_modules/@madooei/react-example-package/dist/index.d.ts)
+[vite-project package](vite-project/node_modules/composite-select/package.json)

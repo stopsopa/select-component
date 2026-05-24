@@ -24,6 +24,8 @@ node --env-file .env --watch server.js --flag "${PROJECT_NAME}" &
 
 # sleep 1
 
+/bin/bash build.sh
+
 (
   cd vite-project 
   npm run build

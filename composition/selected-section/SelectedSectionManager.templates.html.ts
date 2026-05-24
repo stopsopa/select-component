@@ -1,4 +1,4 @@
-import "../../js/CenterResizer.js";
+import "../CenterResizer.js";
 import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import { getSafeFreeOffset } from "../composite-select/namesSource.js";
@@ -192,11 +192,7 @@ const init = (initialSelected: DemoItem[] = [], states: Partial<DemoState> = {})
         }
       }
 
-      if (
-        e.key === "Backspace" &&
-        e.target.value === "" &&
-        mgr.getSelected().length > 0
-      ) {
+      if (e.key === "Backspace" && e.target.value === "" && mgr.getSelected().length > 0) {
         const selected = [...mgr.getSelected()];
         selected.pop();
         mgr.setSelected(selected);
