@@ -1,4 +1,4 @@
-import "../../../js/CenterAndHeightResizer.js";
+import "../../js/CenterAndHeightResizer.js";
 
 import { CompositeManager } from "./CompositeManager.js";
 import { type InputChangeEvent } from "../types.js";

@@ -1,4 +1,4 @@
-import "../../../js/CenterAndHeightResizer.js";
+import "../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
 import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";

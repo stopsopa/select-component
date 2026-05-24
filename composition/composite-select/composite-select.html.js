@@ -1,4 +1,4 @@
-import "../../../js/CenterAndHeightResizer.js";
+import "../../js/CenterAndHeightResizer.js";
 import {} from "../types.js";
 import { CompositeSelect } from "./composite-select.js";
 import { deduplicateArrayById, sortById, togglePresenceOnTheList, markSelectedByIds } from "./helpers.js";

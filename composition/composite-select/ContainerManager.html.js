@@ -1,4 +1,4 @@
-import "../../../js/CenterAndHeightResizer.js";
+import "../../js/CenterAndHeightResizer.js";
 import { CompositeManager } from "./CompositeManager.js";
 import {} from "../types.js";
 import { deduplicateArrayById, sortById, togglePresenceOnTheList, markSelectedByIds } from "./helpers.js";
