@@ -1,4 +1,4 @@
-import "../../../js/CenterResizer.js";
+import "../../js/CenterResizer.js";
 import { SelectedSectionManager } from "./SelectedSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import { getSafeFreeOffset } from "../composite-select/namesSource.js";

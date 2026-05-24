@@ -1,6 +1,5 @@
 import "../../js/CenterAndHeightResizer.js";
 import { OptionsSection } from "./options-section.js";
-import { OptionsSectionManager } from "./OptionsSectionManager.js";
 import { urlStateConfig, getNextId, setNextId } from "./urlManager.js";
 import { getSafeFreeOffset } from "../composite-select/namesSource.js";
 import type { OptionItem, DemoState } from "./urlManager.js";
