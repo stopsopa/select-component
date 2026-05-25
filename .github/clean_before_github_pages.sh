@@ -54,7 +54,6 @@ rm -rf *.tgz
 rm -rf .agent
 rm -rf diff
 rm -rf es.ts
-rm -rf madooei*
 rm -rf package-*
 rm -rf tsconfig*
 rm -rf xx.cjs

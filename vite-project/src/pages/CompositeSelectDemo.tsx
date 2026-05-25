@@ -7,16 +7,6 @@ import modURLSearchParams from "./params/modURLSearchParams.ts";
 
 import { CompositeSelect as CompositeSelectElement } from "composite-select/composite-select/composite-select";
 
-// import { Card, Button } from "@madooei/react-example-package";
-// this will work too thanks to how
-// vite-project/node_modules/@madooei/react-example-package/package.json
-// is configured
-// import { Card } from "@madooei/react-example-package/card";
-// import { Button } from "@madooei/react-example-package/button";
-
-
-
-
 import type { PositionType } from "composite-select/container/ContainerManager";
 
 import "composite-select/floating-label-pattern.css";

@@ -8,7 +8,6 @@
 .prettierrc
 yarn.lock
 
-/madooei.*
 commitlint.config.js
 release.config.js
 /test/

@@ -30,15 +30,6 @@ cat <<EEE
   IMPORTANT:
     for vite setup in vite-project directory
     install in it pnpm install
-    and then run from main directory of this project:
-      /bin/bash madooei.tar.sh
-      that will build directory
-      vite-project/node_modules/@madooei/react-example-package
-      which is what we are testing in 
-        vite-project/src/pages/SelectedSectionDemo.tsx
-      and discussing in details in
-        https://stopsopa.github.io/pages/typescript/index.rendered.html#:~:text=experimenting%20with%20npm%20package%20exports
-          this is from the article: https://madooei.github.io/react-example-package/
 
 EEE
 
