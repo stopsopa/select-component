@@ -1,5 +1,6 @@
 
-This is generally prompt meant to explain to the AI the architecture and composition of this project. To guied it's understanding in order to better assist.
+This is generally prompt meant to explain to the AI the architecture and composition of this project. To guide its understanding in order to better assist.
+
 ---
 <description>
 This is set of classes and generally files meant to build custom select opitons dropdown.
