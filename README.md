@@ -1,6 +1,7 @@
-# npm
+# links
 
-https://www.npmjs.com/package/composite-select
+- [npm](https://www.npmjs.com/package/composite-select)
+- [demo](https://stopsopa.github.io/select-component/)
 
 # Docs and examples
 
