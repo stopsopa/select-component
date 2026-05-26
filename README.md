@@ -3,11 +3,6 @@
 - [npm](https://www.npmjs.com/package/composite-select)
 - [demo](https://stopsopa.github.io/select-component/)
 
-# Docs and examples
-
-- [https://github.com/stopsopa/select-component-sandbox](https://github.com/stopsopa/select-component-sandbox)
-- [https://stopsopa.github.io/select-component/](https://stopsopa.github.io/select-component/)
-- [https://stopsopa.github.io/select-component/docs/api.html](https://stopsopa.github.io/select-component/docs/api.html)
 
 # DEV
 
