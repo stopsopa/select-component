@@ -10,10 +10,10 @@ A custom `<select>` alternative with multi-select, search/filter, and popover-ba
 graph TB
 
   subgraph Vanilla ["🟦 Vanilla JS managers"]
-    SSM["SelectedSectionManager"]
-    OSM["OptionsSectionManager"]
-    CM["ContainerManager"]
-    CmpM["CompositeManager\n(wraps all 3)"]
+    SSM["SelectedSectionManager.ts"]
+    OSM["OptionsSectionManager.ts"]
+    CM["ContainerManager.ts"]
+    CmpM["CompositeManager.ts\n(wraps all 3)"]
     SSM --> CmpM
     OSM --> CmpM
     CM --> CmpM
@@ -47,26 +47,26 @@ graph TB
 
 | Class | Purpose |
 |---|---|
-| `SelectedSectionManager` | Renders the "selected items" widget — the visible pill/tag area with optional text input, clear button, and loading/disabled/error states |
-| `OptionsSectionManager` | Renders the dropdown list — options to pick from, with search/filter input, footer (OK/Cancel), keyboard navigation, and empty-state placeholder |
-| `ContainerManager` | Positions one `<div>` on top of another using the native **Popover API**; provides `show()` / `hide()` control |
-| `CompositeManager` ⭐ | Combines all three above into a single coordinated component — the main vanilla entry point |
+| [SelectedSectionManager.ts](./composition/selected-section/SelectedSectionManager.ts) | Renders the "selected items" widget — the visible pill/tag area with optional text input, clear button, and loading/disabled/error states |
+| [OptionsSectionManager.ts](./composition/options-section/OptionsSectionManager.ts) | Renders the dropdown list — options to pick from, with search/filter input, footer (OK/Cancel), keyboard navigation, and empty-state placeholder |
+| [ContainerManager.ts](./composition/container/ContainerManager.ts) | Positions one `<div>` on top of another using the native **Popover API**; provides `show()` / `hide()` control |
+| [CompositeManager.ts](./composition/composite-select/CompositeManager.ts) ⭐ | Combines all three above into a single coordinated component — the main vanilla entry point |
 
 ### 🟩 Web Components
 
 | File | Purpose |
 |---|---|
-| `selected-section.ts` | Standalone custom element wrapping `SelectedSectionManager`; exposes state as HTML attributes |
-| `options-section.ts` | Standalone custom element wrapping `OptionsSectionManager`; exposes state as HTML attributes |
-| `composite-select.ts` ⭐ | Main web component — wraps `CompositeManager` directly (not the other two WC elements); primary entry point when using this library as a web component |
+| [selected-section.ts](./composition/selected-section/selected-section.ts) | Standalone custom element wrapping `SelectedSectionManager.ts`; exposes state as HTML attributes |
+| [options-section.ts](./composition/options-section/options-section.ts) | Standalone custom element wrapping `OptionsSectionManager.ts`; exposes state as HTML attributes |
+| [composite-select.ts](./composition/composite-select/composite-select.ts) ⭐ | Main web component — wraps `CompositeManager.ts` directly (not the other two WC elements); primary entry point when using this library as a web component |
 
 ### 🟥 React wrappers
 
 | File | Purpose |
 |---|---|
-| `selected-section/react.ts` | React wrapper around the `selected-section` web component |
-| `options-section/react.ts` | React wrapper around the `options-section` web component |
-| `composite-select/react.ts` ⭐ | React wrapper around `composite-select` web component — primary entry point for React usage |
+| [selected-section/react.ts](./composition/selected-section/react.ts) | React wrapper around the `selected-section.ts` web component |
+| [options-section/react.ts](./composition/options-section/react.ts) | React wrapper around the `options-section.ts` web component |
+| [composite-select/react.ts](./composition/composite-select/react.ts) ⭐ | React wrapper around `composite-select.ts` web component — primary entry point for React usage |
 
 > All wrappers accept primitive values (strings, booleans, arrays) as attributes/props. For events and imperative control, access the underlying manager via `element.getManager()`.
 
