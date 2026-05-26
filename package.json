@@ -3,6 +3,7 @@
   "name": "composite-select",
   "version": "0.0.0",
   "author": "Szymon Działowski",
+  "homepage": "https://github.com/stopsopa/select-component",
   "description": "Select dropdown component, vanilla, web components and react",
   "license": "MIT",
   "main": "./dist/esm/Module.js",
