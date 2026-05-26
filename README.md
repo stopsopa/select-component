@@ -106,7 +106,7 @@ React wrappers also expose events as props (`selected-onDelete`, `options-onItem
 
 # testing
 
-Project is mainly tested with playwright end to end tests.
+Project is thoroughly tested with Playwright end-to-end tests.
 
 There was not much benefit in doing unit testing in here, because of the nature of the project.
 
