@@ -104,5 +104,9 @@ csRef.current?.getManager()?.container.hide();
 
 React wrappers also expose events as props (`selected-onDelete`, `options-onItemPick`, etc.) as a convenience — but only one handler per event type this way. For multiple handlers use `mgr.getSubscriber()`.
 
+# testing
 
+Project is mainly tested with playwright end to end tests.
+
+There was not much benefit in doing unit testing in here, because of the nature of the project.
 
