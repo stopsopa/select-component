@@ -7,7 +7,7 @@ A custom `<select>` alternative with multi-select, search/filter, and popover-ba
 3 layers, each wrapping the one below. The **popover API** is used natively for dropdown positioning.
 
 ```mermaid
-graph BT
+graph TB
 
   subgraph Vanilla ["🟦 Vanilla JS managers"]
     SSM["SelectedSectionManager"]
@@ -23,19 +23,20 @@ graph BT
     SS["selected-section.ts\n→ wraps SelectedSectionManager"]
     OS["options-section.ts\n→ wraps OptionsSectionManager"]
     CS["composite-select.ts ⭐\n→ wraps CompositeManager"]
-    SSM --> SS
-    OSM --> OS
-    CmpM --> CS
   end
 
   subgraph React ["🟥 React wrappers"]
     RSS["react.ts\n(SelectedSection)"]
     ROS["react.ts\n(OptionsSection)"]
     RCS["react.ts ⭐\n(CompositeSelect)"]
-    SS --> RSS
-    OS --> ROS
-    CS --> RCS
   end
+
+  SSM --> SS
+  OSM --> OS
+  CmpM --> CS
+  SS --> RSS
+  OS --> ROS
+  CS --> RCS
 ```
 
 > ⭐ = main entry point for each layer
