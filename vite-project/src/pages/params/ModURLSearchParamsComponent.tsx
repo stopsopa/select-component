@@ -148,6 +148,8 @@ export default function ParentComponent() {
       <a href="?t-1=aaa&t-3=cccc" className="gcp-css">
         1, 3 example
       </a>
+      <span style={{ padding: "0 10px" }}>|</span>
+      <a href="https://github.com/stopsopa/select-component/blob/main/vite-project/src/pages/params/ModURLSearchParamsComponent.tsx" className="gcp-css">source</a>
       <hr />
       <button onClick={addComponent}>Add Text Param</button> {list.join(", ")}
       <div>

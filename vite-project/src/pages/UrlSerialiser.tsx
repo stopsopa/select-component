@@ -104,6 +104,8 @@ export default function UrlSerialiser() {
       <a href="./" className="gcp-css">
         up ..
       </a>
+      <span style={{ padding: "0 10px" }}>|</span>
+      <a href="https://github.com/stopsopa/select-component/blob/main/vite-project/src/pages/UrlSerialiser.tsx" className="gcp-css">source</a>
       <hr />
       <div className="url-ser-flex">
         <form className="url-ser-form">

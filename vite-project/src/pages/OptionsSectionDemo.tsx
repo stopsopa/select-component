@@ -32,6 +32,9 @@ export default function OptionsSectionDemo() {
       <button className="gcp-css" onClick={addInstance}>
         Initialize New Instance
       </button>
+      <span style={{ padding: "0 10px" }}>|</span>
+      
+      <a href="https://github.com/stopsopa/select-component/blob/main/vite-project/src/pages/OptionsSectionDemo.tsx" className="gcp-css">source</a>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "30px", marginTop: "20px" }}>
         {instances.map((id) => (
