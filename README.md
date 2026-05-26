@@ -41,6 +41,35 @@ graph TB
 
 > ⭐ = main entry point for each layer
 
+## Components
+
+### 🟦 Vanilla JS managers
+
+| Class | Purpose |
+|---|---|
+| `SelectedSectionManager` | Renders the "selected items" widget — the visible pill/tag area with optional text input, clear button, and loading/disabled/error states |
+| `OptionsSectionManager` | Renders the dropdown list — options to pick from, with search/filter input, footer (OK/Cancel), keyboard navigation, and empty-state placeholder |
+| `ContainerManager` | Positions one `<div>` on top of another using the native **Popover API**; provides `show()` / `hide()` control |
+| `CompositeManager` ⭐ | Combines all three above into a single coordinated component — the main vanilla entry point |
+
+### 🟩 Web Components
+
+| File | Purpose |
+|---|---|
+| `selected-section.ts` | Standalone custom element wrapping `SelectedSectionManager`; exposes state as HTML attributes |
+| `options-section.ts` | Standalone custom element wrapping `OptionsSectionManager`; exposes state as HTML attributes |
+| `composite-select.ts` ⭐ | Main web component — wraps `CompositeManager` directly (not the other two WC elements); primary entry point when using this library as a web component |
+
+### 🟥 React wrappers
+
+| File | Purpose |
+|---|---|
+| `selected-section/react.ts` | React wrapper around the `selected-section` web component |
+| `options-section/react.ts` | React wrapper around the `options-section` web component |
+| `composite-select/react.ts` ⭐ | React wrapper around `composite-select` web component — primary entry point for React usage |
+
+> All wrappers accept primitive values (strings, booleans, arrays) as attributes/props. For events and imperative control, access the underlying manager via `element.getManager()`.
+
 ## State & API
 
 Two core states (arrays of objects):
