@@ -4,7 +4,9 @@ https://www.npmjs.com/package/composite-select
 
 # Docs and examples
 
-[https://stopsopa.github.io/select-component-sandbox/list.html](https://stopsopa.github.io/select-component-sandbox/list.html)
+- [https://stopsopa.github.io/select-component-sandbox/list.html](https://stopsopa.github.io/select-component-sandbox/list.html)
+- [https://stopsopa.github.io/select-component/](https://stopsopa.github.io/select-component/)
+- [https://stopsopa.github.io/select-component/docs/api.html](https://stopsopa.github.io/select-component/docs/api.html)
 
 # DEV
 
