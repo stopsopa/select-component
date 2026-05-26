@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CompositeSelect API Reference</title>
+  <meta name="description" content="Complete API documentation for CompositeSelect web component, CompositeManager, and React wrapper.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --panel: rgba(17, 24, 39, 0.7);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      --row-hover: rgba(255, 255, 255, 0.02);
+      --badge-bg: rgba(59, 130, 246, 0.15);
+      --badge-color: #60a5fa;
+      --badge-event-bg: rgba(167, 139, 250, 0.15);
+      --badge-event-color: #c084fc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: 'Outfit', sans-serif;
+      line-height: 1.6;
+      padding: 2rem 1.5rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1.5rem 1rem;
+      border-bottom: 1px solid var(--border);
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+      margin-top: -2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .card {
+      background: var(--panel);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      overflow-x: auto;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #60a5fa;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text);
+      padding: 1rem;
+      border-bottom: 2px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding: 1.2rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover {
+      background-color: var(--row-hover);
+    }
+
+    code {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      color: #f472b6;
+    }
+
+    .method-signature {
+      color: #34d399;
+      font-weight: 500;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-prop {
+      background: var(--badge-bg);
+      color: var(--badge-color);
+    }
+
+    .badge-event {
+      background: var(--badge-event-bg);
+      color: var(--badge-event-color);
+    }
+
+    .description {
+      margin-top: 0.5rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    .return-info {
+      margin-top: 0.3rem;
+      font-size: 0.82rem;
+      color: #34d399;
+    }
+
+    .arg-info {
+      margin-top: 0.3rem;
+      font-size: 0.82rem;
+      color: #fb7185;
+    }
+
+    /* Tabs Styling */
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.5rem;
+    }
+
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-gradient);
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.35s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>CompositeSelect API Reference</h1>
+      <p>Unified API map connecting CompositeManager, Native Web Component, and React Wrapper.</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="container">ContainerManager</button>
+      <button class="tab-btn" data-tab="selected">SelectedSectionManager</button>
+      <button class="tab-btn" data-tab="options">OptionsSectionManager</button>
+    </div>
+
+    <!-- EVENT REGISTRATION GUIDE -->
+    <div class="card" style="margin-bottom: 2rem; background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2);">
+      <h2 style="color: #60a5fa; border-bottom-color: rgba(59, 130, 246, 0.2); margin-bottom: 1rem;">Event Subscriber API</h2>
+      <p style="margin-bottom: 1rem; color: var(--text-muted);">
+        Managers handle event bindings through a custom <code>createSubscriber()</code> instance. Use <code>getSubscriber()</code> to register or unregister callbacks.
+      </p>
+      <pre style="background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.88rem; color: #a7f3d0;"><span style="color: #60a5fa;">// 1. Get the subscriber and bind an event handler (returns an unbind function)</span>
+const unbind = mgr.selected.getSubscriber().bind(<span style="color: #fb7185;">"onChange"</span>, (selectedItems) => {
+  console.log(<span style="color: #fb7185;">"Selected items changed:"</span>, selectedItems);
+});
+
+<span style="color: #60a5fa;">// 2. Unregister when no longer needed</span>
+unbind();
+
+<span style="color: #60a5fa;">// Alternatively, unregister using the handler reference directly</span>
+mgr.selected.getSubscriber().unbind(<span style="color: #fb7185;">"onChange"</span>, handlerRef);</pre>
+    </div>
+
+    <!-- SECTION: SELECTED SECTION -->
+    <div class="tab-content" id="selected">
+      <div class="card">
+      <h2>SelectedSectionManager (Top Input/Selected Area)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40%;">CompositeManager API / Properties / Events</th>
+            <th style="width: 30%;">Web Component Attributes / Events</th>
+            <th style="width: 30%;">React Wrapper Props</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. selected items -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getSelected()</code><br>
+              <code>mgr.selected.setSelected(items: T[])</code>
+              <div class="description">Gets/sets list of currently selected items.</div>
+              <div class="return-info">Returns: <code>T[]</code></div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-selected</code>
+              <div class="description">JSON array string representing items.</div>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-selected"</code>
+              <div class="description">Accepts <code>T[]</code> or JSON string.</div>
+            </td>
+          </tr>
+
+          <!-- 2. show input -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getShowInput()</code><br>
+              <code>mgr.selected.setShowInput(val: boolean)</code>
+              <div class="description">Controls visibility of search input field.</div>
+              <div class="return-info">Returns: <code>void</code></div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-show-input</code>
+              <div class="description">Boolean attribute (default true).</div>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-show-input"</code>
+              <div class="description">Boolean.</div>
+            </td>
+          </tr>
+
+          <!-- 3. value -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getValue()</code><br>
+              <code>mgr.selected.setValue(val: string)</code>
+              <div class="description">Gets or sets current search text value inside input.</div>
+              <div class="return-info">Returns: <code>string</code></div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-value</code>
+              <div class="description">Directly maps to the search text value.</div>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-value"</code>
+              <div class="description">String.</div>
+            </td>
+          </tr>
+
+          <!-- 4. label -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getLabel()</code><br>
+              <code>mgr.selected.setLabel(val: string)</code>
+              <div class="description">Sets header/top section placeholder/label when empty.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-label</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-label"</code>
+            </td>
+          </tr>
+
+          <!-- 5. disabled -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getDisabled()</code><br>
+              <code>mgr.selected.setDisabled(val: boolean)</code>
+              <div class="description">Disables interactions on top section.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-disabled</code>
+              <div class="description">Boolean flag.</div>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-disabled"</code>
+            </td>
+          </tr>
+
+          <!-- 6. error -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getError()</code><br>
+              <code>mgr.selected.setError(val: boolean)</code>
+              <div class="description">Puts top section into error boundary state.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-error</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-error"</code>
+            </td>
+          </tr>
+
+          <!-- 7. loading -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getLoading()</code><br>
+              <code>mgr.selected.setLoading(val: boolean)</code>
+              <div class="description">Displays loading status spinner.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-loading</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-loading"</code>
+            </td>
+          </tr>
+
+          <!-- 8. show delete -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.selected.getShowDelete()</code><br>
+              <code>mgr.selected.setShowDelete(val: boolean)</code>
+              <div class="description">Shows or hides clear/delete buttons.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>selected-show-delete</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-show-delete"</code>
+            </td>
+          </tr>
+
+          <!-- 9. Focus -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.selected.setFocus()</code>
+              <div class="description">Programmatically focuses selected section input.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- 10. custom render item -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.selected.setRenderItem(fn?: (item: T) => HTMLElement | string)</code>
+              <div class="description">Customizes rendering of an individual selected tag.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- 11. custom render list -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.selected.setRenderList(fn?: (selected: T[], defaultRender: Function) => HTMLElement[])</code>
+              <div class="description">Customizes list layout wrapper for selected tags.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- EVENTS -->
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.selected.propOptions.onFocus</code>
+              <div class="description">Triggers when input focused.</div>
+              <div class="arg-info">Arguments: <code>e: FocusEvent</code></div>
+            </td>
+            <td>
+              Via JavaScript listener or property mapping.
+            </td>
+            <td>
+              Prop:<br>
+              <code>"selected-onFocus"</code>
+              <div class="arg-info">Event: <code>{ originalEvent: FocusEvent }</code></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.selected.propOptions.onInputChange</code>
+              <div class="description">Triggers on input keypress / search query change.</div>
+              <div class="arg-info">Arguments: <code>e: Event, prev: string</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"selected-onInputChange"</code>
+              <div class="arg-info">Event: <code>{ originalEvent, value, key, previousValue }</code></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.selected.propOptions.onDelete</code>
+              <div class="description">Triggers when single item delete button clicked.</div>
+              <div class="arg-info">Arguments: <code>id: string</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"selected-onDelete"</code>
+              <div class="arg-info">Callback: <code>(id: string) => void</code></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.selected.propOptions.onClear</code>
+              <div class="description">Triggers when global clear button clicked.</div>
+              <div class="arg-info">Arguments: none</div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"selected-onClear"</code>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.selected.propOptions.onChange</code>
+              <div class="description">Triggers whenever selected list array modified.</div>
+              <div class="arg-info">Arguments: <code>selected: T[]</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"selected-onChange"</code>
+              <div class="arg-info">Callback: <code>(selected: T[]) => void</code></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.selected.propOptions.onComponentChange</code>
+              <div class="description">Internal component synchronization.</div>
+              <div class="arg-info">Arguments: <code>options, reason: string</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"selected-onComponentChange"</code>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    </div> <!-- end #selected -->
+
+    <!-- SECTION: OPTIONS SECTION -->
+    <div class="tab-content" id="options">
+      <div class="card">
+      <h2>OptionsSectionManager (Dropdown Menu Options Area)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40%;">CompositeManager API / Properties / Events</th>
+            <th style="width: 30%;">Web Component Attributes / Events</th>
+            <th style="width: 30%;">React Wrapper Props</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. options items -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getOptions()</code><br>
+              <code>mgr.options.setOptions(items: T[])</code>
+              <div class="description">Sets the database/source options shown inside dropdown.</div>
+              <div class="return-info">Returns: <code>T[]</code></div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-options</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-options"</code>
+            </td>
+          </tr>
+
+          <!-- 2. loading -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getLoading()</code><br>
+              <code>mgr.options.setLoading(val: boolean)</code>
+              <div class="description">Dropdown menu loading state toggle.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-loading</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-loading"</code>
+            </td>
+          </tr>
+
+          <!-- 3. value -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getValue()</code><br>
+              <code>mgr.options.setValue(val: string)</code>
+              <div class="description">Gets/sets dropdown inner filter input value.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-value</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-value"</code>
+            </td>
+          </tr>
+
+          <!-- 4. label -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getLabel()</code><br>
+              <code>mgr.options.setLabel(val: string)</code>
+              <div class="description">Sets custom empty/search placeholder.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-label</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-label"</code>
+            </td>
+          </tr>
+
+          <!-- 5. disabled -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getDisabled()</code><br>
+              <code>mgr.options.setDisabled(val: boolean)</code>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-disabled</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-disabled"</code>
+            </td>
+          </tr>
+
+          <!-- 6. max height -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getMaxHeight()</code><br>
+              <code>mgr.options.setMaxHeight(val: string)</code>
+              <div class="description">Defines dropdown's maximum height limit.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-max-height</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-max-height"</code>
+            </td>
+          </tr>
+
+          <!-- 7. show footer -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getShowFooter()</code><br>
+              <code>mgr.options.setShowFooter(val: boolean)</code>
+              <div class="description">Displays OK/Cancel selection action buttons.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-show-footer</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-show-footer"</code>
+            </td>
+          </tr>
+
+          <!-- 8. show filter -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.options.getShowFilter()</code><br>
+              <code>mgr.options.setShowFilter(val: boolean)</code>
+              <div class="description">Displays search text box inside dropdown popover.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>options-show-filter</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"options-show-filter"</code>
+            </td>
+          </tr>
+
+          <!-- 9. Focus options input -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.options.setFocus()</code>
+              <div class="description">Programmatically focuses the inner option dropdown input.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- 10. custom render item -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.options.setRenderItem(fn?: (item: T) => HTMLElement | string)</code>
+              <div class="description">Custom renders a select option row item.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- 11. custom render empty -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.options.setRenderEmpty(fn?: () => HTMLElement | string)</code>
+              <div class="description">Custom renders fallback when no options exist.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- EVENTS -->
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onItemPick</code>
+              <div class="description">Triggers when option item is clicked.</div>
+              <div class="arg-info">Arguments: <code>item: T</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onItemPick"</code>
+              <div class="arg-info">Callback: <code>(item: T) => void</code></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onInputChange</code>
+              <div class="description">Dropdown filter input changed.</div>
+              <div class="arg-info">Arguments: <code>e: Event, prev: string</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onInputChange"</code>
+              <div class="arg-info">Event: <code>{ originalEvent, value, previousValue }</code></div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onCancel</code>
+              <div class="description">Footer Cancel clicked.</div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onCancel"</code>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onOk</code>
+              <div class="description">Footer OK clicked.</div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onOk"</code>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onHighlightChange</code>
+              <div class="description">Triggers on keyboard hover index navigation changes.</div>
+              <div class="arg-info">Arguments: <code>id: string | number | null</code></div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onHighlightChange"</code>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onClear</code>
+              <div class="description">Dropdown level input clear action clicked.</div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onClear"</code>
+            </td>
+          </tr>
+
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.options.propOptions.onComponentChange</code>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"options-onComponentChange"</code>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+    </div> <!-- end #options -->
+
+    <!-- SECTION: CONTAINER SECTION -->
+    <div class="tab-content active" id="container">
+      <div class="card">
+      <h2>ContainerManager (Dropdown Popover & Alignment)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40%;">CompositeManager API / Properties / Events</th>
+            <th style="width: 30%;">Web Component Attributes / Events</th>
+            <th style="width: 30%;">React Wrapper Props</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- 1. Position -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.container.getPosition()</code><br>
+              <code>mgr.container.setPosition(val: 'cover-bottom' | 'bottom' | 'top' | 'left' | 'right')</code>
+              <div class="description">Sets popover physical alignment mode.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>container-position</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"container-position"</code>
+            </td>
+          </tr>
+
+          <!-- 2. Offset -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Property & Method</span><br>
+              <code>mgr.container.setOffset(val: string)</code>
+              <div class="description">Sets custom pixel spacing layout offset.</div>
+            </td>
+            <td>
+              Attribute:<br>
+              <code>container-offset</code>
+            </td>
+            <td>
+              Prop:<br>
+              <code>"container-offset"</code>
+            </td>
+          </tr>
+
+          <!-- 3. Visibility -->
+          <tr>
+            <td>
+              <span class="badge badge-prop">Method</span><br>
+              <code>mgr.container.show()</code><br>
+              <code>mgr.container.hide()</code>
+              <div class="description">Direct controls showing or hiding the overlay.</div>
+            </td>
+            <td>-</td>
+            <td>-</td>
+          </tr>
+
+          <!-- EVENTS -->
+          <tr>
+            <td>
+              <span class="badge badge-event">Event Subscriber</span><br>
+              <code>mgr.container.propOptions.onClose</code>
+              <div class="description">Triggers when popover is closed (clicked outside / close action).</div>
+            </td>
+            <td>-</td>
+            <td>
+              Prop:<br>
+              <code>"container-onClose"</code>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    </div> <!-- end #container -->
+
+  </div>
+
+  <script>
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+
+        tab.classList.add('active');
+        const target = tab.getAttribute('data-tab');
+        document.getElementById(target).classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
