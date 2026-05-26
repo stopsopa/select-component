@@ -1,3 +1,11 @@
+
+## Links
+
+- [npm](https://www.npmjs.com/package/composite-select)
+- [demo](https://stopsopa.github.io/select-component/)
+- [DEV.md](./DEV.md)
+- [Architecture](./composition/Architecture.md)
+
 # composite-select
 
 A custom `<select>` alternative with multi-select, search/filter, and popover-based dropdown — usable as **vanilla JS**, **Web Component**, or **React** component.
@@ -96,11 +104,5 @@ csRef.current?.getManager()?.container.hide();
 
 React wrappers also expose events as props (`selected-onDelete`, `options-onItemPick`, etc.) as a convenience — but only one handler per event type this way. For multiple handlers use `mgr.getSubscriber()`.
 
-## Links
-
-- [npm](https://www.npmjs.com/package/composite-select)
-- [demo](https://stopsopa.github.io/select-component/)
-- [DEV.md](./DEV.md)
-- [Architecture](./composition/Architecture.md)
 
 
