@@ -242,24 +242,7 @@
       <button class="tab-btn active" data-tab="container">ContainerManager</button>
       <button class="tab-btn" data-tab="selected">SelectedSectionManager</button>
       <button class="tab-btn" data-tab="options">OptionsSectionManager</button>
-    </div>
-
-    <!-- EVENT REGISTRATION GUIDE -->
-    <div class="card" style="margin-bottom: 2rem; background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2);">
-      <h2 style="color: #60a5fa; border-bottom-color: rgba(59, 130, 246, 0.2); margin-bottom: 1rem;">Event Subscriber API</h2>
-      <p style="margin-bottom: 1rem; color: var(--text-muted);">
-        Managers handle event bindings through a custom <code>createSubscriber()</code> instance. Use <code>getSubscriber()</code> to register or unregister callbacks.
-      </p>
-      <pre style="background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.88rem; color: #a7f3d0;"><span style="color: #60a5fa;">// 1. Get the subscriber and bind an event handler (returns an unbind function)</span>
-const unbind = mgr.selected.getSubscriber().bind(<span style="color: #fb7185;">"onChange"</span>, (selectedItems) => {
-  console.log(<span style="color: #fb7185;">"Selected items changed:"</span>, selectedItems);
-});
-
-<span style="color: #60a5fa;">// 2. Unregister when no longer needed</span>
-unbind();
-
-<span style="color: #60a5fa;">// Alternatively, unregister using the handler reference directly</span>
-mgr.selected.getSubscriber().unbind(<span style="color: #fb7185;">"onChange"</span>, handlerRef);</pre>
+      <button class="tab-btn" data-tab="guide">Guide & Setup</button>
     </div>
 
     <!-- SECTION: SELECTED SECTION -->
@@ -926,6 +909,125 @@ mgr.selected.getSubscriber().unbind(<span style="color: #fb7185;">"onChange"</sp
       </table>
     </div>
     </div> <!-- end #container -->
+
+    <!-- SECTION: GUIDE & SETUP SECTION -->
+    <div class="tab-content" id="guide">
+      <div class="card" style="background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2); padding: 2rem;">
+        <h2 style="color: #60a5fa; border-bottom: 1px solid rgba(59, 130, 246, 0.2); padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Guide & Setup</h2>
+
+        <h3 style="color: #34d399; margin-bottom: 0.5rem; font-size: 1.2rem;">1. Event Subscriber API</h3>
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          Managers handle event bindings through a custom <code>createSubscriber()</code> instance. Use <code>getSubscriber()</code> to register or unregister callbacks.
+        </p>
+        <pre style="background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.88rem; color: #a7f3d0; margin-bottom: 2rem;"><span style="color: #60a5fa;">// Register an event listener (returns an unbind function)</span>
+const unbind = mgr.selected.getSubscriber().bind(<span style="color: #fb7185;">"onChange"</span>, (selectedItems) => {
+  console.log(<span style="color: #fb7185;">"Selected items changed:"</span>, selectedItems);
+});
+
+<span style="color: #60a5fa;">// Unregister when no longer needed</span>
+unbind();
+
+<span style="color: #60a5fa;">// Or unregister using the handler reference directly</span>
+mgr.selected.getSubscriber().unbind(<span style="color: #fb7185;">"onChange"</span>, handlerRef);</pre>
+
+        <h3 style="color: #34d399; margin-bottom: 0.5rem; font-size: 1.2rem;">2. Loading React Wrapper & CSS Bundle Mode</h3>
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          In bundle mode, import the unified CSS stylesheet directly in your React entrypoint or page alongside the component.
+        </p>
+        <pre style="background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.88rem; color: #a7f3d0; margin-bottom: 2rem;"><span style="color: #60a5fa;">// Import React component wrapper</span>
+import { CompositeSelect } from <span style="color: #fb7185;">"composite-select/composite-select/react"</span>;
+
+<span style="color: #60a5fa;">// Import the unified bundled CSS stylesheet</span>
+import <span style="color: #fb7185;">"composite-select/dist/style.css"</span>;
+
+export default function MySelect() {
+  return (
+    <span style="color: #f472b6;">&lt;</span><span style="color: #34d399;">CompositeSelect</span> 
+      <span style="color: #60a5fa;">selected-label</span>=<span style="color: #fb7185;">"Select users..."</span>
+      <span style="color: #60a5fa;">options-show-filter</span>
+    <span style="color: #f472b6;">/&gt;</span>
+  );
+}</pre>
+
+        <h3 style="color: #34d399; margin-bottom: 0.5rem; font-size: 1.2rem;">3. Loading React Wrapper & Separate CSS Requests Mode</h3>
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          Load CSS files individually, enabling modular styling or loading CSS via individual static <code>&lt;link&gt;</code> requests.
+        </p>
+        <pre style="background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.88rem; color: #a7f3d0;"><span style="color: #60a5fa;">// Import React component wrapper</span>
+import { CompositeSelect } from <span style="color: #fb7185;">"composite-select/composite-select/react"</span>;
+
+<span style="color: #60a5fa;">// Import modular CSS files for separate HTTP bundling / compilation</span>
+import <span style="color: #fb7185;">"composite-select/floating-label-pattern.css"</span>;
+import <span style="color: #fb7185;">"composite-select/composition/selected-section/SelectedSectionManager.css"</span>;
+import <span style="color: #fb7185;">"composite-select/composition/options-section/OptionsSectionManager.css"</span>;
+
+export default function MySelect() {
+  return (
+    <span style="color: #f472b6;">&lt;</span><span style="color: #34d399;">CompositeSelect</span> 
+      <span style="color: #60a5fa;">selected-label</span>=<span style="color: #fb7185;">"Select users..."</span>
+      <span style="color: #60a5fa;">options-show-filter</span>
+    <span style="color: #f472b6;">/&gt;</span>
+  );
+}</pre>
+
+        <h3 style="color: #34d399; margin-bottom: 0.5rem; font-size: 1.2rem; margin-top: 2rem;">4. Using <code style="color: #34d399;">ref</code> to Access the Manager in React</h3>
+        <p style="margin-bottom: 1rem; color: var(--text-muted);">
+          The React wrapper is a <code>forwardRef</code> component that forwards the ref to the underlying
+          <code>&lt;composite-select&gt;</code> element. The element exposes a <code>getManager()</code> method
+          that returns the live <code>CompositeManager</code> instance — giving you imperative access to
+          <code>mgr.selected</code>, <code>mgr.options</code>, and <code>mgr.container</code>.
+        </p>
+        <pre style="background: rgba(0, 0, 0, 0.4); padding: 1rem; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.88rem; color: #a7f3d0; margin-bottom: 1.5rem;"><span style="color: #60a5fa;">// 1. Import the element class so the ref type is correct</span>
+import { CompositeSelect } from <span style="color: #fb7185;">"composite-select/composite-select/react"</span>;
+import { CompositeSelect as CompositeSelectElement } from <span style="color: #fb7185;">"composite-select/composite-select/composite-select"</span>;
+import type { CompositeManager } from <span style="color: #fb7185;">"composite-select"</span>;
+import type { Item } from <span style="color: #fb7185;">"composite-select/types"</span>;
+
+<span style="color: #60a5fa;">// 2. Define your custom item shape (optional)</span>
+type <span style="color: #34d399;">MyItem</span> = <span style="color: #34d399;">Item</span> & { extra: string };
+
+export default function <span style="color: #34d399;">MySelect</span>() {
+  <span style="color: #60a5fa;">// 3. Type the ref with the element class, parameterised with your item type</span>
+  const csRef = useRef<span style="color: #34d399;">&lt;CompositeSelectElement&lt;MyItem&gt;&gt;</span>(null);
+
+  <span style="color: #60a5fa;">// 4. Helper — safe getter, returns null before mount</span>
+  const getManager = (): <span style="color: #34d399;">CompositeManager&lt;MyItem&gt;</span> | null =>
+    csRef.current?.getManager<span style="color: #34d399;">&lt;MyItem&gt;</span>() ?? null;
+
+  useEffect(() => {
+    const mgr = getManager();
+    if (!mgr) return;
+
+    <span style="color: #60a5fa;">// 5. Imperatively call manager methods</span>
+    mgr.selected.setValue(<span style="color: #fb7185;">"hello"</span>);
+    mgr.options.setOptions([{ id: 1, label: <span style="color: #fb7185;">"One"</span> }]);
+    mgr.container.setPosition(<span style="color: #fb7185;">"bottom"</span>);
+
+    <span style="color: #60a5fa;">// 6. Subscribe to events imperatively</span>
+    const unsub = mgr.selected.getSubscriber().bind(<span style="color: #fb7185;">"onChange"</span>, (items) => {
+      console.log(<span style="color: #fb7185;">"selected:"</span>, items);
+    });
+
+    return () => unsub(); <span style="color: #60a5fa;">// cleanup on unmount</span>
+  }, []);
+
+  return (
+    <span style="color: #f472b6;">&lt;</span><span style="color: #34d399;">CompositeSelect</span><span style="color: #f472b6;">&lt;MyItem&gt;</span> ref={csRef} <span style="color: #60a5fa;">selected-label</span>=<span style="color: #fb7185;">"Pick..."</span> <span style="color: #f472b6;">/&gt;</span>
+  );
+}</pre>
+
+        <p style="margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+          <strong style="color: var(--text);">Key points:</strong>
+        </p>
+        <ul style="color: var(--text-muted); font-size: 0.9rem; padding-left: 1.5rem; line-height: 2;">
+          <li>Ref type is <code>CompositeSelectElement&lt;T&gt;</code> (the raw custom element class), not the React wrapper.</li>
+          <li><code>csRef.current?.getManager()</code> returns <code>CompositeManager&lt;T&gt; | null</code> — null before mount.</li>
+          <li>Always guard with <code>if (!mgr) return;</code> — manager is created during <code>connectedCallback</code>, so it may not exist synchronously.</li>
+          <li>Use <code>useLayoutEffect</code> (instead of <code>useEffect</code>) when you need to bind events before the first paint, as the React wrapper itself does internally.</li>
+          <li>Always return the <code>unsub()</code> call from your effect to prevent memory leaks.</li>
+        </ul>
+      </div>
+    </div>
 
   </div>
 
