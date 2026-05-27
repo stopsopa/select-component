@@ -8,7 +8,26 @@
 
 # composite-select
 
-A custom `<select>` alternative with multi-select, search/filter, and popover-based dropdown — usable as **vanilla JS**, **Web Component**, or **React** component.
+A lightweight, headless **custom `<select>` replacement** that supports **multi-select, search/filtering, and popover-based dropdown rendering**, designed to be framework-agnostic and highly customisable.
+
+It provides a minimal, object-oriented core that focuses purely on allowing user to control any UI aspect of these internal components like:
+
+- Enable or disable this or that.
+- Get the value of that with that method.
+- Attach event triggerd when user user chnage this.
+- Methods to change list here or value there.
+
+On top of this core, there are thin wrappers that expose the same functionality as:
+
+- **Vanilla JavaScript component**
+- **Web Component**
+- **React component**
+
+The goal is to provide UI primitives and allow use to decide what exactly (granularly) select dropdown should do.
+
+Also provide reasonable examples demonstrating it's capabilities.
+
+TODO: At some point I would like to build some function wrappers that would encapsulate common scenarios to choose from. But when more control is needed, the user should always be able to step down from the abstraction and have control over the exact behaviour.
 
 ## Architecture
 
