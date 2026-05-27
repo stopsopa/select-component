@@ -14,8 +14,8 @@ It provides a minimal, object-oriented core that focuses purely on allowing user
 
 - Enable or disable this or that.
 - Get the value of that with that method.
-- Attach event triggerd when user user chnage this.
-- Methods to change list here or value there.
+- Attach event triggerd when user change this.
+- Methods to change list state here or value there.
 
 On top of this core, there are thin wrappers that expose the same functionality as:
 
@@ -27,7 +27,7 @@ The goal is to provide UI primitives and allow use to decide what exactly (granu
 
 Also provide reasonable examples demonstrating it's capabilities.
 
-TODO: At some point I would like to build some function wrappers that would encapsulate common scenarios to choose from. But when more control is needed, the user should always be able to step down from the abstraction and have control over the exact behaviour.
+TODO: At some point I would like to build some function wrappers or react component wrappers to encapsulate common use cases. Like dropdown with dynamic fetch search or for single element selection. Or for allowing user dynamically create but also select from existing. But when more control is needed, the user should always be able to step down from the abstraction and have control over the exact behaviour. I just need more time to think about it, but foundation is ready and tested here.
 
 ## Architecture
 
