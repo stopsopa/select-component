@@ -1,3 +1,5 @@
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6?logo=typescript&logoColor=white)](https://www.npmjs.com/package/composite-select)
+
 
 ## Links
 
