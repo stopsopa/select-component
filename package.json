@@ -29,7 +29,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stopsopa/select-component.git"
+    "url": "git+https://github.com/stopsopa/select-component.git"
   },
   "bugs": {
     "url": "https://github.com/stopsopa/select-component/issues"
